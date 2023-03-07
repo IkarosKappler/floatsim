@@ -21,6 +21,7 @@ export class SceneContainer {
      * @version 1.0.0
      **/
 
+    console.log("THREE.Scene", THREE);
     // Create new scene
     this.scene = new THREE.Scene();
 

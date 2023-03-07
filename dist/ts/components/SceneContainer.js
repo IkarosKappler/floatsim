@@ -40,6 +40,7 @@ class SceneContainer {
          * @date    2015-11-09
          * @version 1.0.0
          **/
+        console.log("THREE.Scene", THREE);
         // Create new scene
         this.scene = new THREE.Scene();
         // Create a camera to look through

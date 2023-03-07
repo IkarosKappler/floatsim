@@ -1,0 +1,1 @@
+{"version":3,"file":"main.js","mappings":"AAECA,WAA2B,OAAI,IAAIC,KAClCC,QAAQC,IAAI,SAAUF,EAAK","sources":["webpack://floatsim/./src/index.tsx"],"sourcesContent":["// index.tsx\n\n(globalThis as any)[\"define\"] = (...args: any) => {\n  console.log(\"DEFINE\", args);\n};\n"],"names":["globalThis","args","console","log"],"sourceRoot":""}

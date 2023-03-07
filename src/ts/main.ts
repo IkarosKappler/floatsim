@@ -6,6 +6,7 @@
 
 import { SceneContainer } from "./components/SceneContainer";
 
+console.log("Main script starting ...");
 globalThis.addEventListener("load", () => {
   console.log("Initializing");
 

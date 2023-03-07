@@ -1,14 +1,19 @@
+<!DOCTYPE html>
 <html> 
 <head> 
 <title>My basic THREE.js scene setup</title> 
 <style>
 canvas { width: 100%; height: 100% }
+body{ background: grey; }
 </style> 
 </head>
 
 <body> 
 <script language="Javascript" type="text/javascript" src="lib/three/build/three.150.min.js"></script>
-<script language="Javascript" type="text/javascript" src="lib/three/examples/jsm/controls/OrbitControls.js"></script>
+<script>globalThis.three = THREE;</script>
+<script language="Javascript" type="text/javascript" src="lib/three/examples/umd/controls/OrbitControls.js"></script>
+<script src="module.js"></script>
+<script src="ts/components/SceneContainer.js"></script> 
 <script src="ts/main.js"></script> 
 <script src="index.js"></script> 
 </body> 

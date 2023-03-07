@@ -6,6 +6,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const SceneContainer_1 = require("./components/SceneContainer");
+console.log("Main script starting ...");
 globalThis.addEventListener("load", () => {
     console.log("Initializing");
     new SceneContainer_1.SceneContainer();
