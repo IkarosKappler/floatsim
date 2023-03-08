@@ -10,7 +10,12 @@
     "webpack": "webpack --config webpack.config.js",
     "webpack-dev": "webpack --config webpack-dev.config.js",
     "rollup-nodejs-cjs": "npx rollup dist/lib/three/examples/jsm/controls/OrbitControls.js --file dist/lib/three/examples/cjs/controls/OrbitControls.js --format cjs",
-    "rollup-browser-umd": "npx rollup dist/lib/three/examples/jsm/controls/OrbitControls.js --file dist/lib/three/examples/umd/controls/OrbitControls.js --format umd --name \"OrbitControls\"",
+    "rollup-browser-umd": "npm run rollup-browser-umd-orbitcontrols && npm run rollup-browser-umd-imporovednoise && npm run rollup-browser-umd-sceneutils && npm run rollup-browser-umd-buffergeometryutils && npm run rollup-browser-umd-firstpersoncontrols",
+    "rollup-browser-umd-orbitcontrols": "npx rollup dist/lib/three/examples/jsm/controls/OrbitControls.js --file dist/lib/three/examples/umd/controls/OrbitControls.js --format umd --name \"OrbitControls\"",
+    "rollup-browser-umd-firstpersoncontrols": "npx rollup dist/lib/three/examples/jsm/controls/FirstPersonControls.js --file dist/lib/three/examples/umd/controls/FirstPersonControls.js --format umd --name \"FirstPersonControls\"",
+    "rollup-browser-umd-imporovednoise": "npx rollup dist/lib/three/examples/jsm/math/ImprovedNoise.js --file dist/lib/three/examples/umd/math/ImprovedNoise.js --format umd --name \"ImprovedNoise\"",
+    "rollup-browser-umd-buffergeometryutils": "npx rollup dist/lib/three/examples/jsm/utils/BufferGeometryUtils.js --file dist/lib/three/examples/umd/utils/BufferGeometryUtils.js --format umd --name \"BufferGeometryUtils\"",
+    "rollup-browser-umd-sceneutils": "npx rollup dist/lib/three/examples/jsm/utils/SceneUtils.js --file dist/lib/three/examples/umd/utils/SceneUtils.js --format umd --name \"SceneUtils\"",
     "start-ts": "webpack-dev-server --hot --port 3000 --open",
     "start-wp": "webpack --config webpack.config.js --watch",
     "serve": "python3 -m http.server 8000",
@@ -35,7 +40,9 @@
   },
   "dependencies": {
     "@types/three": "^0.149.0",
+    "perlin": "^1.0.0",
     "three": "^0.150.1",
+    "three-geometry-hellfix": "^1.1.0",
     "webpack-dev-server": "^4.11.1"
   }
 }

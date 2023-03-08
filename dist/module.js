@@ -18,10 +18,15 @@ var require = (globalThis.require = function (...args) {
   var itemName = args[0];
   var itemNameStart = itemName.lastIndexOf("/");
   var itemNameEnd = itemName.lastIndexOf(".");
-  if (itemNameStart !== -1 && itemNameEnd > itemNameStart + 1) {
-    itemName = itemName.substring(itemNameStart + 1, itemNameEnd);
-    console.log("itemName", itemName);
+  if (itemNameStart !== -1) {
+    if (itemNameEnd < itemNameStart) {
+      itemNameEnd = itemName.length;
+    }
+    if (itemNameEnd > itemNameStart + 1) {
+      itemName = itemName.substring(itemNameStart + 1, itemNameEnd);
+    }
   }
+  console.log("itemName", itemName);
   if (["three", "OrbitControls"].indexOf(itemName) !== -1) {
     return globalThis[itemName]; // [args[0]];
   } else {
