@@ -5,6 +5,7 @@
  */
 
 import * as THREE from "three";
+// import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 // import * as SceneUtils from "three/examples/jsm/utils/SceneUtils.js";
@@ -14,19 +15,14 @@ import { PerlinTerrain } from "./PerlinTerrain";
 
 export class SceneContainer {
   scene: THREE.Scene;
-  camera: THREE.Camera;
+  camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
+  controls: OrbitControls | FirstPersonControls;
 
   constructor() {
-    /**
-     * Example for a basic THREE.js scene setup.
-     *
-     * @author  Ikaros Kappler
-     * @date    2015-11-09
-     * @version 1.0.0
-     **/
+    const clock = new THREE.Clock();
 
-    console.log("THREE.Scene", THREE);
+    // console.log("THREE.Scene", THREE);
     // Create new scene
     this.scene = new THREE.Scene();
 
@@ -43,7 +39,7 @@ export class SceneContainer {
     this.scene.background = new THREE.Color(0x021a38);
     this.scene.fog = new THREE.FogExp2(0x021a38, 0.0021);
 
-    const zStartOffset = 200.0;
+    const zStartOffset = 300.0;
     // ... and append it to the DOM
     document.body.appendChild(this.renderer.domElement);
 
@@ -66,7 +62,7 @@ export class SceneContainer {
 
     // set its position
     pointLight.position.x = 10;
-    pointLight.position.y = 50 + 200;
+    pointLight.position.y = 50 + zStartOffset;
     pointLight.position.z = 130;
 
     // add to the scene
@@ -80,11 +76,11 @@ export class SceneContainer {
     // Add an axes helper
     var ah = new THREE.AxesHelper(50);
     ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
-    ah.position.y += 200;
+    ah.position.y += zStartOffset;
     this.scene.add(ah);
 
     // Set the camera position
-    this.camera.position.set(75, 75 + 200, 75);
+    this.camera.position.set(75, 75 + zStartOffset, 75);
     // And look at the cube again
     this.camera.lookAt(cube.position);
 
@@ -94,6 +90,7 @@ export class SceneContainer {
 
     // TODO: Use FirstPersonControls!
 
+    /*
     const orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
     // Always move the point light with the camera. Looks much better ;)
     orbitControls.addEventListener("change", () => {
@@ -103,18 +100,28 @@ export class SceneContainer {
     orbitControls.dampingFactor = 1.0;
     orbitControls.enableZoom = true;
     orbitControls.target.copy(cube.position);
+*/
 
-    /*
-    const controls = new FirstPersonControls(this.camera, this.renderer.domElement);
-    controls.movementSpeed = 150;
-    controls.lookSpeed = 0.1;
-    */
+    const firstPersonControls = new FirstPersonControls(this.camera, this.renderer.domElement);
+    firstPersonControls.movementSpeed = 50;
+    firstPersonControls.lookSpeed = 0.05;
+    // firstPersonControls.noFly = true;
+    firstPersonControls.lookVertical = true;
+    firstPersonControls.constrainVertical = true;
+    firstPersonControls.verticalMin = Math.PI * 0.25; // 0.0;
+    firstPersonControls.verticalMax = Math.PI * 0.75; // 2.0;
+    // firstPersonControls.lon = -150;
+    // firstPersonControls.lat = 120;
+
+    this.controls = firstPersonControls;
 
     // This is the basic render function. It will be called perpetual, again and again,
     // depending on your machines possible frame rate.
     const _render = () => {
       // Pass the render function itself
       requestAnimationFrame(_render);
+
+      firstPersonControls.update(clock.getDelta());
 
       // Let's animate the cube: a rotation.
       cube.rotation.x += 0.05;
@@ -159,8 +166,35 @@ export class SceneContainer {
     //   }
     // }
 
+    const worldWidth = 256;
+    const worldDepth = 256;
     console.log("PerlinTerrain", PerlinTerrain);
-    var terrain = new PerlinTerrain().makeTerrain();
-    this.scene.add(terrain);
+    const terrainData: Uint8Array = PerlinTerrain.generatePerlinHeight(worldWidth, worldWidth);
+    var terrain = new PerlinTerrain(terrainData, worldWidth, worldDepth); // .makeTerrain();
+    this.scene.add(terrain.mesh);
+
+    // var mouseEnabled = true;
+    window.addEventListener("resize", () => {
+      _self.onWindowResize();
+    });
+    // Enable and disable mouse controls when mouse leaves/re-enters the screen.
+    this.renderer.domElement.addEventListener("mouseleave", () => {
+      console.log("leave");
+      _self.controls.enabled = false;
+    });
+    this.renderer.domElement.addEventListener("mouseenter", () => {
+      _self.controls.enabled = true;
+    });
+  }
+
+  onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    if (this.controls.hasOwnProperty("handleResize")) {
+      (this.controls as FirstPersonControls).handleResize();
+    }
   }
 }

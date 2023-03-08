@@ -30,22 +30,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SceneContainer = void 0;
 var THREE = __importStar(require("three"));
-var OrbitControls_js_1 = require("three/examples/jsm/controls/OrbitControls.js");
+var FirstPersonControls_js_1 = require("three/examples/jsm/controls/FirstPersonControls.js");
 // import * as SceneUtils from "three/examples/jsm/utils/SceneUtils.js";
 var PerlinTerrain_1 = require("./PerlinTerrain");
 // import * as perlin from "perlin-noise/index.js";
 // import { noise } from "../utils/perlin";
 var SceneContainer = /** @class */ (function () {
     function SceneContainer() {
-        /**
-         * Example for a basic THREE.js scene setup.
-         *
-         * @author  Ikaros Kappler
-         * @date    2015-11-09
-         * @version 1.0.0
-         **/
         var _this = this;
-        console.log("THREE.Scene", THREE);
+        var clock = new THREE.Clock();
+        // console.log("THREE.Scene", THREE);
         // Create new scene
         this.scene = new THREE.Scene();
         // Create a camera to look through
@@ -57,7 +51,7 @@ var SceneContainer = /** @class */ (function () {
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
         this.scene.background = new THREE.Color(0x021a38);
         this.scene.fog = new THREE.FogExp2(0x021a38, 0.0021);
-        var zStartOffset = 200.0;
+        var zStartOffset = 300.0;
         // ... and append it to the DOM
         document.body.appendChild(this.renderer.domElement);
         // Create a geometry conaining the logical 3D information (here: a cube)
@@ -74,7 +68,7 @@ var SceneContainer = /** @class */ (function () {
         //this.pointLight = new THREE.AmbientLight(0xFFFFFF);
         // set its position
         pointLight.position.x = 10;
-        pointLight.position.y = 50 + 200;
+        pointLight.position.y = 50 + zStartOffset;
         pointLight.position.z = 130;
         // add to the scene
         this.scene.add(pointLight);
@@ -85,35 +79,44 @@ var SceneContainer = /** @class */ (function () {
         // Add an axes helper
         var ah = new THREE.AxesHelper(50);
         ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
-        ah.position.y += 200;
+        ah.position.y += zStartOffset;
         this.scene.add(ah);
         // Set the camera position
-        this.camera.position.set(75, 75 + 200, 75);
+        this.camera.position.set(75, 75 + zStartOffset, 75);
         // And look at the cube again
         this.camera.lookAt(cube.position);
         // Finally we want to be able to rotate the whole scene with the mouse:
         // add an orbit control helper.
         var _self = this;
         // TODO: Use FirstPersonControls!
-        var orbitControls = new OrbitControls_js_1.OrbitControls(this.camera, this.renderer.domElement);
+        /*
+        const orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         // Always move the point light with the camera. Looks much better ;)
-        orbitControls.addEventListener("change", function () {
-            pointLight.position.copy(_self.camera.position);
+        orbitControls.addEventListener("change", () => {
+          pointLight.position.copy(_self.camera.position);
         });
         orbitControls.enableDamping = true;
         orbitControls.dampingFactor = 1.0;
         orbitControls.enableZoom = true;
         orbitControls.target.copy(cube.position);
-        /*
-        const controls = new FirstPersonControls(this.camera, this.renderer.domElement);
-        controls.movementSpeed = 150;
-        controls.lookSpeed = 0.1;
-        */
+    */
+        var firstPersonControls = new FirstPersonControls_js_1.FirstPersonControls(this.camera, this.renderer.domElement);
+        firstPersonControls.movementSpeed = 50;
+        firstPersonControls.lookSpeed = 0.05;
+        // firstPersonControls.noFly = true;
+        firstPersonControls.lookVertical = true;
+        firstPersonControls.constrainVertical = true;
+        firstPersonControls.verticalMin = Math.PI * 0.25; // 0.0;
+        firstPersonControls.verticalMax = Math.PI * 0.75; // 2.0;
+        // firstPersonControls.lon = -150;
+        // firstPersonControls.lat = 120;
+        this.controls = firstPersonControls;
         // This is the basic render function. It will be called perpetual, again and again,
         // depending on your machines possible frame rate.
         var _render = function () {
             // Pass the render function itself
             requestAnimationFrame(_render);
+            firstPersonControls.update(clock.getDelta());
             // Let's animate the cube: a rotation.
             cube.rotation.x += 0.05;
             cube.rotation.y += 0.04;
@@ -154,10 +157,33 @@ var SceneContainer = /** @class */ (function () {
         //       2;
         //   }
         // }
+        var worldWidth = 256;
+        var worldDepth = 256;
         console.log("PerlinTerrain", PerlinTerrain_1.PerlinTerrain);
-        var terrain = new PerlinTerrain_1.PerlinTerrain().makeTerrain();
-        this.scene.add(terrain);
+        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidth, worldWidth);
+        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, worldWidth, worldDepth); // .makeTerrain();
+        this.scene.add(terrain.mesh);
+        // var mouseEnabled = true;
+        window.addEventListener("resize", function () {
+            _self.onWindowResize();
+        });
+        // Enable and disable mouse controls when mouse leaves/re-enters the screen.
+        this.renderer.domElement.addEventListener("mouseleave", function () {
+            console.log("leave");
+            _self.controls.enabled = false;
+        });
+        this.renderer.domElement.addEventListener("mouseenter", function () {
+            _self.controls.enabled = true;
+        });
     }
+    SceneContainer.prototype.onWindowResize = function () {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        if (this.controls.hasOwnProperty("handleResize")) {
+            this.controls.handleResize();
+        }
+    };
     return SceneContainer;
 }());
 exports.SceneContainer = SceneContainer;

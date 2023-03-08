@@ -10,5 +10,6 @@ console.log("Main script starting ...");
 globalThis.addEventListener("load", () => {
   console.log("Initializing");
 
+  console.log("SceneContainer", SceneContainer);
   new SceneContainer();
 });

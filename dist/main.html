@@ -8,16 +8,18 @@
 <body> 
 <script src="lib/three/build/three.150.min.js"></script>
 <script>globalThis.three = THREE;</script>
+<script src="module.js"></script>
 <script src="lib/three/examples/umd/controls/OrbitControls.js"></script>
 <script src="lib/three/examples/umd/controls/FirstPersonControls.js"></script>
+<script>console.log("[DOC] FirstPersonControls", exports.FirstPersonControls);</script>
 <script src="lib/three/examples/umd/math/ImprovedNoise.js"></script>
 <script src="lib/three/examples/umd/utils/BufferGeometryUtils.js"></script>
 <script src="lib/three/examples/umd/utils/SceneUtils.js"></script>
-<script src="module.js"></script>
-<script src="ts/components/PerlinTerrain.js"></script> 
-<script src="ts/components/SceneContainer.js"></script> 
-<script src="ts/utils/perlin.js"></script> 
-<script src="ts/main.js"></script> 
+<script src="components/PerlinTerrain.js"></script> 
+<script src="components/SceneContainer.js"></script> 
+<script>console.log("[DOC] SceneContainer", exports.SceneContainer);</script>
+<script src="utils/perlin.js"></script> 
+<script src="main.js"></script> 
 <script src="index.js"></script> 
 </body> 
 </html>

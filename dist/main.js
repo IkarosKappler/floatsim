@@ -1,2 +1,15 @@
-globalThis.define=function(){for(var o=[],l=0;l<arguments.length;l++)o[l]=arguments[l];console.log("DEFINE",o)};
+"use strict";
+/**
+ * @author  Ikaros Kappler
+ * @date    2023-03-07
+ * @version 1.0.0
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+var SceneContainer_1 = require("./components/SceneContainer");
+console.log("Main script starting ...");
+globalThis.addEventListener("load", function () {
+    console.log("Initializing");
+    console.log("SceneContainer", SceneContainer_1.SceneContainer);
+    new SceneContainer_1.SceneContainer();
+});
 //# sourceMappingURL=main.js.map

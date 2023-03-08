@@ -44,6 +44,6 @@ module.exports = {
   //   }
 
   externals: {
-    "three": "THREE"
+    "THREE": "three"
   }
 };
