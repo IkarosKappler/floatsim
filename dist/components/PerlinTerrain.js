@@ -103,10 +103,6 @@ var PerlinTerrain = /** @class */ (function () {
     PerlinTerrain.generatePerlinHeight = function (width, height) {
         var useCustomNoise = true;
         var seed = Math.PI / 4;
-        // window.Math.random = function () {
-        //   const x = Math.sin(seed++) * 10000;
-        //   return x - Math.floor(x);
-        // };
         var size = width * height, data = new Uint8Array(size);
         if (useCustomNoise) {
             var z = this.customRandom(seed) * 100;
@@ -115,7 +111,6 @@ var PerlinTerrain = /** @class */ (function () {
             for (var j = 0; j < 5; j++) {
                 for (var i = 0; i < size; i++) {
                     var x = i % width, y = ~~(i / width);
-                    // data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * 1.75);
                     data[i] += Math.abs(perlin_1.noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
                 }
                 quality *= 5;
@@ -132,7 +127,6 @@ var PerlinTerrain = /** @class */ (function () {
                 for (var i = 0; i < size; i++) {
                     var x = i % width, y = ~~(i / width);
                     data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * depthFactor);
-                    // data[i] += Math.abs(noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
                 }
                 quality *= 5;
             }

@@ -27,14 +27,6 @@ export class CockpitPlane {
     cockpitAlpahMap.wrapS = THREE.ClampToEdgeWrapping;
     cockpitAlpahMap.wrapT = THREE.ClampToEdgeWrapping;
 
-    // Create a geometry conaining the logical 3D information (here: a cube)
-    // var cubegeometry = new THREE.BoxGeometry(2, 2, 2);
-    // // Pick a material, something like MeshBasicMaterial, PhongMaterial,
-    // var cubematerial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-    // // Create the cube from the geometry and the material ...
-    // var cube = new THREE.Mesh(cubegeometry, cubematerial);
-    // cube.position.set(0, 0, -12);
-
     var geometryco = new THREE.PlaneGeometry(1, 1, 10, 10);
     geometryco.rotateX(-Math.PI / 4);
     geometryco.translate(0, 0, -12);

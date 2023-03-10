@@ -119,11 +119,6 @@ export class PerlinTerrain {
   static generatePerlinHeight(width: number, height: number) {
     const useCustomNoise = true;
     let seed = Math.PI / 4;
-    // window.Math.random = function () {
-    //   const x = Math.sin(seed++) * 10000;
-    //   return x - Math.floor(x);
-    // };
-
     const size = width * height,
       data = new Uint8Array(size);
     if (useCustomNoise) {
@@ -136,8 +131,6 @@ export class PerlinTerrain {
         for (let i = 0; i < size; i++) {
           const x = i % width,
             y = ~~(i / width);
-          // data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * 1.75);
-
           data[i] += Math.abs(noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
         }
 
@@ -157,8 +150,6 @@ export class PerlinTerrain {
           const x = i % width,
             y = ~~(i / width);
           data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * depthFactor);
-
-          // data[i] += Math.abs(noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
         }
 
         quality *= 5;
