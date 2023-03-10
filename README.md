@@ -59,3 +59,4 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 ## Credits
 
 - Ken Perlin for the improved Perlin noise https://cs.nyu.edu/~perlin/noise/
+- jaamo for the HUD howto (https://codepen.io/sjcobb/pen/XWjMdXb)
