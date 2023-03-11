@@ -40,6 +40,7 @@ var PerlinTerrain_1 = require("./PerlinTerrain");
 var CockpitPlane_1 = require("./CockpitPlane");
 var HudComponent_1 = require("./HudComponent");
 var FogHandler_1 = require("./FogHandler");
+var PhysicsHandler_1 = require("./PhysicsHandler");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer() {
         var _this = this;
@@ -166,6 +167,9 @@ var SceneContainer = /** @class */ (function () {
         this.renderer.domElement.addEventListener("mouseenter", function () {
             _self.controls.enabled = true;
         });
+        // Initialize physics
+        var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this);
+        physicsHandler.start();
         // Call the rendering function. This will cause and infinite recursion (we want
         // that here, because the animation shall run forever).
         this.onWindowResize();

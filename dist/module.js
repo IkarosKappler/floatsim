@@ -33,3 +33,6 @@ var require = (globalThis.require = function (...args) {
     return globalThis;
   }
 });
+
+console.log("module.js typeof module", typeof module);
+console.log("module.js typeof exports", typeof exports);

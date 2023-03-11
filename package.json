@@ -41,6 +41,9 @@
   },
   "dependencies": {
     "@types/three": "^0.149.0",
+    "ammojs-typed": "^1.0.6",
+    "install": "^0.13.0",
+    "npm": "^9.6.1",
     "perlin": "^1.0.0",
     "three": "^0.150.1",
     "three-geometry-hellfix": "^1.1.0",

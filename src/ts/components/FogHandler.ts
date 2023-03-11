@@ -55,7 +55,7 @@ export class FogHandler {
 
   private applyFogColor(curValue: number, range: MinMax, minColor: THREE.Color, maxColor: THREE.Color) {
     let pct = (THREE.MathUtils.clamp(curValue, range.min, range.max) - range.min) / (range.max - range.min);
-    console.log("[upper] pct", pct, "curOffset", curValue);
+    // console.log("[upper] pct", pct, "curOffset", curValue);
     this.sceneContainer.scene.fog.color.lerpColors(minColor, maxColor, pct);
     (this.sceneContainer.scene.background as THREE.Color).set(this.sceneContainer.scene.fog.color);
   }

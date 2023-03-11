@@ -15,6 +15,7 @@ import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
 import { SceneData } from "./interfaces";
 import { FogHandler } from "./FogHandler";
+import { PhysicsHandler } from "./PhysicsHandler";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -186,6 +187,10 @@ export class SceneContainer {
     this.renderer.domElement.addEventListener("mouseenter", () => {
       _self.controls.enabled = true;
     });
+
+    // Initialize physics
+    const physicsHandler = new PhysicsHandler(this);
+    physicsHandler.start();
 
     // Call the rendering function. This will cause and infinite recursion (we want
     // that here, because the animation shall run forever).

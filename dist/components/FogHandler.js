@@ -69,7 +69,7 @@ var FogHandler = /** @class */ (function () {
     };
     FogHandler.prototype.applyFogColor = function (curValue, range, minColor, maxColor) {
         var pct = (THREE.MathUtils.clamp(curValue, range.min, range.max) - range.min) / (range.max - range.min);
-        console.log("[upper] pct", pct, "curOffset", curValue);
+        // console.log("[upper] pct", pct, "curOffset", curValue);
         this.sceneContainer.scene.fog.color.lerpColors(minColor, maxColor, pct);
         this.sceneContainer.scene.background.set(this.sceneContainer.scene.fog.color);
     };
