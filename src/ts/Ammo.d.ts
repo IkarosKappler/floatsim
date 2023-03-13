@@ -1,2 +1,6 @@
+export declare class Ammo {
+  constructor();
+  btDefaultCollisionConfiguration();
+}
 
-export def 
+export default function AmmoConstr(): Ammo;

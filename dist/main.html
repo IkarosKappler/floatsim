@@ -6,14 +6,17 @@
     <link rel="stylesheet" href="styles.css" />
     <script src="lib/three/build/three.150.min.js"></script>
     <script>globalThis.three = THREE;</script>
-    <script src="module.js"></script>
-    <script src="lib/ammojs/ammo.wasm.js"></script>
+    <!-- <script src="module.js"></script> -->
+    <!-- <script src="lib/ammojs/ammo.wasm.js"></script> -->
+    <script src="lib/ammojs/ammo.js"></script>
+    <!-- <script src="lib/ammo.wasm-downloaded.js"></script> -->
     <script>
         /*  globalThis.Ammo = Ammo;
         exports.Ammo = Ammo;  */
         console.log("[Ammojs]", Ammo);
         console.log("exports after Ammo", exports)
     </script>
+    <script src="module.js"></script>
     <script src="lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script src="lib/three/examples/umd/controls/FirstPersonControls.js"></script>
     <!-- <script>console.log("[DOC] FirstPersonControls", exports.FirstPersonControls);</script> -->
