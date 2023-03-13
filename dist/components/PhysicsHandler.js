@@ -30,6 +30,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PhysicsHandler = void 0;
 var THREE = __importStar(require("three"));
+// import { Ammo, Ammo as AmmoImport } from "../Ammo";
 var Ammo_1 = require("../Ammo");
 // Heightfield parameters
 var terrainWidthExtents = 100;
@@ -132,13 +133,13 @@ var PhysicsHandler = /** @class */ (function () {
                 var bodies = [];
                 for (var i = 0; i < mesh.count; i++) {
                     var index = i * 16;
-                    var transform = new AmmoLib.btTransform();
+                    var transform = new ammo.btTransform();
                     transform.setFromOpenGLMatrix(array.slice(index, index + 16));
-                    var motionState = new AmmoLib.btDefaultMotionState(transform);
-                    var localInertia = new AmmoLib.btVector3(0, 0, 0);
+                    var motionState = new ammo.btDefaultMotionState(transform);
+                    var localInertia = new ammo.btVector3(0, 0, 0);
                     shape.calculateLocalInertia(mass, localInertia);
-                    var rbInfo = new AmmoLib.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-                    var body = new AmmoLib.btRigidBody(rbInfo);
+                    var rbInfo = new ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+                    var body = new ammo.btRigidBody(rbInfo);
                     physicsWorld.addRigidBody(body);
                     bodies.push(body);
                 }
@@ -154,13 +155,13 @@ var PhysicsHandler = /** @class */ (function () {
                     var sx = parameters.width !== undefined ? parameters.width / 2 : 0.5;
                     var sy = parameters.height !== undefined ? parameters.height / 2 : 0.5;
                     var sz = parameters.depth !== undefined ? parameters.depth / 2 : 0.5;
-                    var shape = new AmmoLib.btBoxShape(new AmmoLib.btVector3(sx, sy, sz));
+                    var shape = new ammo.btBoxShape(new ammo.btVector3(sx, sy, sz));
                     shape.setMargin(0.05);
                     return shape;
                 }
                 else if (geometry.type === "SphereGeometry" || geometry.type === "IcosahedronGeometry") {
                     var radius = parameters.radius !== undefined ? parameters.radius : 1;
-                    var shape = new AmmoLib.btSphereShape(radius);
+                    var shape = new ammo.btSphereShape(radius);
                     shape.setMargin(0.05);
                     return shape;
                 }
@@ -251,18 +252,18 @@ var PhysicsHandler = /** @class */ (function () {
                 if (mesh.isInstancedMesh) {
                     var bodies = meshMap.get(mesh);
                     var body = bodies[index];
-                    body.setAngularVelocity(new AmmoLib.btVector3(0, 0, 0));
-                    body.setLinearVelocity(new AmmoLib.btVector3(0, 0, 0));
+                    body.setAngularVelocity(new ammo.btVector3(0, 0, 0));
+                    body.setLinearVelocity(new ammo.btVector3(0, 0, 0));
                     worldTransform.setIdentity();
-                    worldTransform.setOrigin(new AmmoLib.btVector3(position.x, position.y, position.z));
+                    worldTransform.setOrigin(new ammo.btVector3(position.x, position.y, position.z));
                     body.setWorldTransform(worldTransform);
                 }
                 else if (mesh.isMesh) {
                     var body = meshMap.get(mesh);
-                    body.setAngularVelocity(new AmmoLib.btVector3(0, 0, 0));
-                    body.setLinearVelocity(new AmmoLib.btVector3(0, 0, 0));
+                    body.setAngularVelocity(new ammo.btVector3(0, 0, 0));
+                    body.setLinearVelocity(new ammo.btVector3(0, 0, 0));
                     worldTransform.setIdentity();
-                    worldTransform.setOrigin(new AmmoLib.btVector3(position.x, position.y, position.z));
+                    worldTransform.setOrigin(new ammo.btVector3(position.x, position.y, position.z));
                     body.setWorldTransform(worldTransform);
                 }
             }
@@ -369,8 +370,8 @@ var PhysicsHandler = /** @class */ (function () {
         time += deltaTime;
     };
     PhysicsHandler.prototype.updatePhysics = function (deltaTime) {
-        console.log("[updatePhysics] physicsWorld", physicsWorld);
         if (!this.ammoIsReady) {
+            console.log("[updatePhysics] physicsWorld not yet initialized", physicsWorld);
             return;
         }
         physicsWorld.stepSimulation(deltaTime, 10);
