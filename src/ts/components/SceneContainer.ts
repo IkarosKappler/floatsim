@@ -16,6 +16,7 @@ import { HudComponent } from "./HudComponent";
 import { SceneData } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
+import { Params } from "../utils/Params";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -33,12 +34,12 @@ export class SceneContainer {
   // Example cube
   cube: THREE.Mesh;
 
-  constructor() {
+  constructor(params: Params) {
     this.clock = new THREE.Clock();
     this.scene = new THREE.Scene();
 
     this.sceneData = {
-      initialDepth: -898.0,
+      initialDepth: params.getNumber("initialDepth", -898.0), // -898.0,
       deepFogDepth: {
         max: -1200,
         min: -2000
@@ -164,6 +165,8 @@ export class SceneContainer {
       this.renderer.render(this.scene, this.camera);
       this.hud.renderHud(this.renderer, { depth: this.camera.position.y });
 
+      physicsHandler.render();
+
       requestAnimationFrame(_render);
     };
 
@@ -189,7 +192,7 @@ export class SceneContainer {
     });
 
     // Initialize physics
-    const physicsHandler = new PhysicsHandler(this);
+    const physicsHandler = new PhysicsHandler(this, terrain);
     physicsHandler.start();
 
     // Call the rendering function. This will cause and infinite recursion (we want

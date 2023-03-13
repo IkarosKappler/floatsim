@@ -11,6 +11,7 @@ import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
 import { SceneData } from "./interfaces";
 import { FogHandler } from "./FogHandler";
+import { Params } from "../utils/Params";
 export declare class SceneContainer {
     readonly scene: THREE.Scene;
     readonly camera: THREE.PerspectiveCamera;
@@ -23,6 +24,6 @@ export declare class SceneContainer {
     readonly fogHandler: FogHandler;
     readonly sceneData: SceneData;
     cube: THREE.Mesh;
-    constructor();
+    constructor(params: Params);
     onWindowResize(): void;
 }

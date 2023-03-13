@@ -46,6 +46,7 @@ var PerlinTerrain = /** @class */ (function () {
         this.material = PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth);
         this.geometry.rotateX(-Math.PI / 2);
         this.worldWidth = worldWidth;
+        this.worldDepth = worldDepth;
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;

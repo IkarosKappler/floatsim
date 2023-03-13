@@ -32,6 +32,7 @@ export class PerlinTerrain {
     this.material = PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth);
     this.geometry.rotateX(-Math.PI / 2);
     this.worldWidth = worldWidth;
+    this.worldDepth = worldDepth;
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 

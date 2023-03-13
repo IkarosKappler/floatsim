@@ -42,12 +42,12 @@ var HudComponent_1 = require("./HudComponent");
 var FogHandler_1 = require("./FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
 var SceneContainer = /** @class */ (function () {
-    function SceneContainer() {
+    function SceneContainer(params) {
         var _this = this;
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         this.sceneData = {
-            initialDepth: -898.0,
+            initialDepth: params.getNumber("initialDepth", -898.0),
             deepFogDepth: {
                 max: -1200,
                 min: -2000
@@ -146,6 +146,7 @@ var SceneContainer = /** @class */ (function () {
             _this.cube.rotation.y += 0.04;
             _this.renderer.render(_this.scene, _this.camera);
             _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y });
+            physicsHandler.render();
             requestAnimationFrame(_render);
         };
         // const zStartOffset = 800.0; // for ImprovedNoise
@@ -168,7 +169,7 @@ var SceneContainer = /** @class */ (function () {
             _self.controls.enabled = true;
         });
         // Initialize physics
-        var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this);
+        var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
         physicsHandler.start();
         // Call the rendering function. This will cause and infinite recursion (we want
         // that here, because the animation shall run forever).
