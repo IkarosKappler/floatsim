@@ -4,6 +4,8 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Stats = {}));
 })(this, (function (exports) { 'use strict';
 
+  // Modified by Ika 2023-03-08
+
   var Stats = function () {
     var mode = 0;
 
@@ -162,8 +164,9 @@
     };
   };
 
+  // export default Stats;
+
   exports.Stats = Stats;
-  exports["default"] = Stats;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

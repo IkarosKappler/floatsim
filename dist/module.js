@@ -11,7 +11,7 @@
  *
  * @date 2020-04-01
  **/
-globalThis.module = globalThis;
+// globalThis.module = globalThis;
 globalThis.exports = globalThis.export = globalThis;
 var require = (globalThis.require = function (...args) {
   console.log(args[0], args);

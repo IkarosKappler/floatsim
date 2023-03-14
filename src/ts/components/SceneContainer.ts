@@ -8,7 +8,9 @@ import * as THREE from "three";
 // import { clamp } from ""
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
-import Stats from "three/examples/jsm/libs/stats.module.js";
+// import Stats from "three/examples/jsm/libs/stats.module.js";
+// import { Stats } from "../Stats.js";
+import { Stats } from "../Stats";
 // import * as SceneUtils from "three/examples/jsm/utils/SceneUtils.js";
 import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
@@ -145,8 +147,8 @@ export class SceneContainer {
 
     this.controls = firstPersonControls;
 
-    // console.log("Stats", Stats);
-    this.stats = new (Stats as any)();
+    console.log("Stats", Stats);
+    this.stats = new (Stats as any).Stats();
     document.querySelector("body").appendChild(this.stats.domElement);
 
     // // This is the basic render function. It will be called perpetual, again and again,

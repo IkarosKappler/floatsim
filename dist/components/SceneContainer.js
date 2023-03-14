@@ -27,14 +27,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SceneContainer = void 0;
 var THREE = __importStar(require("three"));
 var FirstPersonControls_js_1 = require("three/examples/jsm/controls/FirstPersonControls.js");
-var stats_module_js_1 = __importDefault(require("three/examples/jsm/libs/stats.module.js"));
+// import Stats from "three/examples/jsm/libs/stats.module.js";
+// import { Stats } from "../Stats.js";
+var Stats_1 = require("../Stats");
 // import * as SceneUtils from "three/examples/jsm/utils/SceneUtils.js";
 var PerlinTerrain_1 = require("./PerlinTerrain");
 var CockpitPlane_1 = require("./CockpitPlane");
@@ -131,8 +130,8 @@ var SceneContainer = /** @class */ (function () {
         // firstPersonControls.lon = -150;
         // firstPersonControls.lat = 120;
         this.controls = firstPersonControls;
-        // console.log("Stats", Stats);
-        this.stats = new stats_module_js_1.default();
+        console.log("Stats", Stats_1.Stats);
+        this.stats = new Stats_1.Stats.Stats();
         document.querySelector("body").appendChild(this.stats.domElement);
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.

@@ -158,4 +158,4 @@ Stats.Panel = function (name, fg, bg) {
   };
 };
 
-export default Stats;
+// export default Stats;

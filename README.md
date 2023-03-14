@@ -55,7 +55,8 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Add add compass HUD.
 - Add water plants.
 - Add a sonar HUD.
-- Let initial settings being passed by GET parameters.
+- [DONE] Let initial settings being passed by GET parameters.
+- Tinker with THREE VolumetricLight.
 
 ## Credits
 

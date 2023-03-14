@@ -13,6 +13,10 @@ export declare class PhysicsHandler {
     constructor(sceneContainer: SceneContainer, terrain: PerlinTerrain);
     start(): void;
     initTestGraphics(): void;
+    /**
+     * This function must be called on each main render cycle. It
+     * will calculate the next frame in the physics simulation.
+     */
     render(): void;
-    updatePhysics(deltaTime: any): void;
+    private updatePhysics;
 }
