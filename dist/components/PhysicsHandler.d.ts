@@ -31,6 +31,6 @@ export declare class PhysicsHandler {
      */
     render(): void;
     private updatePhysics;
-    initPhysics(): void;
+    private initPhysics;
 }
 export {};
