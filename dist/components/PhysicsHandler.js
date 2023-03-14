@@ -39,24 +39,32 @@ var terrainMaxHeight = 8;
 var terrainMinHeight = -2;
 var time = 0;
 var objectTimePeriod = 3;
-var timeNextSpawn = time + objectTimePeriod;
+var timeNextSpawn = time + 0.5; // objectTimePeriod; // Span first object after one half second
 var maxNumObjects = 30;
 // interns
-var heightData = null;
-var ammoHeightData = null;
-var physicsWorld = null;
-var dynamicObjects = [];
-var worldTransform;
-var collisionConfiguration = null;
-var dispatcher = null;
-var broadphase = null;
-var solver = null;
+// let heightData: Float32Array = null;
+// let ammoHeightData: number = null;
+// let physicsWorld: Ammo.btDiscreteDynamicsWorld = null;
+// const dynamicObjects: Array<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>> = [];
+// let worldTransform: Ammo.btTransform;
+// var collisionConfiguration: Ammo.btDefaultCollisionConfiguration = null;
+// var dispatcher: Ammo.btCollisionDispatcher = null;
+// var broadphase: Ammo.btDbvtBroadphase = null;
+// var solver: Ammo.btSequentialImpulseConstraintSolver = null;
 var PhysicsHandler = /** @class */ (function () {
     function PhysicsHandler(sceneContainer, terrain) {
         this.ammoIsReady = false;
+        this.heightData = null;
+        this.ammoHeightData = null;
+        this.physicsWorld = null;
+        this.dynamicObjects = [];
+        this.collisionConfiguration = null;
+        this.dispatcher = null;
+        this.broadphase = null;
+        this.solver = null;
         this.sceneContainer = sceneContainer;
         this.terrain = terrain;
-        heightData = generateHeight(terrainWidthSegmentCount, terrainDepthSegmentCount, terrainMinHeight, terrainMaxHeight);
+        this.heightData = generateHeight(terrainWidthSegmentCount, terrainDepthSegmentCount, terrainMinHeight, terrainMaxHeight);
         this.initTestGraphics();
     }
     PhysicsHandler.prototype.start = function () {
@@ -66,18 +74,21 @@ var PhysicsHandler = /** @class */ (function () {
         // Sorry, this is really dirty, but I didn't find a more elegant solution
         // to import this weird module, yet.
         var AmmoLib = globalThis["Ammo"]();
-        AmmoLib.then(function (ammo) {
-            // console.log("THEN", ammo);
-            _this.ammo = ammo;
-            _this.ammoIsReady = true;
-            collisionConfiguration = new ammo.btDefaultCollisionConfiguration();
-            dispatcher = new ammo.btCollisionDispatcher(collisionConfiguration);
-            broadphase = new ammo.btDbvtBroadphase();
-            solver = new ammo.btSequentialImpulseConstraintSolver();
-            physicsWorld = new ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-            physicsWorld.setGravity(new ammo.btVector3(0, -9.8, 0));
-            worldTransform = new ammo.btTransform();
-            initPhysics(ammo);
+        return new Promise(function (accept, _reject) {
+            AmmoLib.then(function (ammo) {
+                // console.log("THEN", ammo);
+                _this.ammo = ammo;
+                _this.ammoIsReady = true;
+                _self.collisionConfiguration = new ammo.btDefaultCollisionConfiguration();
+                _self.dispatcher = new ammo.btCollisionDispatcher(_self.collisionConfiguration);
+                _self.broadphase = new ammo.btDbvtBroadphase();
+                _self.solver = new ammo.btSequentialImpulseConstraintSolver();
+                _self.physicsWorld = new ammo.btDiscreteDynamicsWorld(_self.dispatcher, _self.broadphase, _self.solver, _self.collisionConfiguration);
+                _self.physicsWorld.setGravity(new ammo.btVector3(0, -9.8, 0));
+                _self.worldTransform = new ammo.btTransform();
+                _this.initPhysics(); //, ammo);
+                accept(true);
+            });
         });
     };
     /*
@@ -364,7 +375,7 @@ var PhysicsHandler = /** @class */ (function () {
         var vertices = geometry.attributes.position.array;
         for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
             // j + 1 because it is the y component that we modify
-            vertices[j + 1] = heightData[i];
+            vertices[j + 1] = this.heightData[i];
             // vertices[j + 1] = this.terrain.data[i]; // heightData[i];
         }
         geometry.computeVertexNormals();
@@ -380,8 +391,9 @@ var PhysicsHandler = /** @class */ (function () {
      */
     PhysicsHandler.prototype.render = function () {
         var deltaTime = this.sceneContainer.clock.getDelta();
-        if (dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
-            generateObject(this.ammo, this.sceneContainer.scene);
+        // console.log("time", time, "timeNextSpawn", timeNextSpawn);
+        if (this.dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
+            generateObject(this); //, this.ammo, this.sceneContainer.scene);
             timeNextSpawn = time + objectTimePeriod;
         }
         this.updatePhysics(deltaTime);
@@ -389,23 +401,37 @@ var PhysicsHandler = /** @class */ (function () {
     };
     PhysicsHandler.prototype.updatePhysics = function (deltaTime) {
         if (!this.ammoIsReady) {
-            console.log("[updatePhysics] physicsWorld not yet initialized", physicsWorld);
+            console.log("[updatePhysics] physicsWorld not yet initialized", this.physicsWorld);
             return;
         }
-        physicsWorld.stepSimulation(deltaTime, 10);
+        this.physicsWorld.stepSimulation(deltaTime, 10);
         // Update objects
-        for (var i = 0, il = dynamicObjects.length; i < il; i++) {
-            var objThree = dynamicObjects[i];
+        for (var i = 0, il = this.dynamicObjects.length; i < il; i++) {
+            var objThree = this.dynamicObjects[i];
             var objPhys = objThree.userData.physicsBody;
             var ms = objPhys.getMotionState();
             if (ms) {
-                ms.getWorldTransform(worldTransform);
-                var p = worldTransform.getOrigin();
-                var q = worldTransform.getRotation();
+                ms.getWorldTransform(this.worldTransform);
+                var p = this.worldTransform.getOrigin();
+                var q = this.worldTransform.getRotation();
                 objThree.position.set(p.x(), p.y(), p.z());
                 objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
             }
         }
+    }; // END updatePhsics
+    PhysicsHandler.prototype.initPhysics = function () {
+        // Physics configuration
+        var groundShape = createTerrainShape(this); // }, this.ammo);
+        var groundTransform = new this.ammo.btTransform();
+        groundTransform.setIdentity();
+        // Shifts the terrain, since bullet re-centers it on its bounding box.
+        groundTransform.setOrigin(new this.ammo.btVector3(0, (terrainMaxHeight + terrainMinHeight) / 2, 0));
+        var groundMass = 0;
+        var groundLocalInertia = new this.ammo.btVector3(0, 0, 0);
+        var groundMotionState = new this.ammo.btDefaultMotionState(groundTransform);
+        var groundBody = new this.ammo.btRigidBody(new this.ammo.btRigidBodyConstructionInfo(groundMass, groundMotionState, groundShape, groundLocalInertia));
+        this.physicsWorld.addRigidBody(groundBody);
+        this.worldTransform = new this.ammo.btTransform();
     };
     return PhysicsHandler;
 }()); // END Class
@@ -429,21 +455,24 @@ function generateHeight(width, depth, minHeight, maxHeight) {
     }
     return data;
 }
-function initPhysics(ammo) {
-    // Physics configuration
-    var groundShape = createTerrainShape(ammo);
-    var groundTransform = new ammo.btTransform();
-    groundTransform.setIdentity();
-    // Shifts the terrain, since bullet re-centers it on its bounding box.
-    groundTransform.setOrigin(new ammo.btVector3(0, (terrainMaxHeight + terrainMinHeight) / 2, 0));
-    var groundMass = 0;
-    var groundLocalInertia = new ammo.btVector3(0, 0, 0);
-    var groundMotionState = new ammo.btDefaultMotionState(groundTransform);
-    var groundBody = new ammo.btRigidBody(new ammo.btRigidBodyConstructionInfo(groundMass, groundMotionState, groundShape, groundLocalInertia));
-    physicsWorld.addRigidBody(groundBody);
-    worldTransform = new ammo.btTransform();
-}
-function generateObject(ammo, scene) {
+// function initPhysics(physicsHandler: PhysicsHandler, ammo: TAmmo) {
+//   // Physics configuration
+//   const groundShape = createTerrainShape(physicsHandler, ammo);
+//   const groundTransform = new ammo.btTransform();
+//   groundTransform.setIdentity();
+//   // Shifts the terrain, since bullet re-centers it on its bounding box.
+//   groundTransform.setOrigin(new ammo.btVector3(0, (terrainMaxHeight + terrainMinHeight) / 2, 0));
+//   const groundMass = 0;
+//   const groundLocalInertia = new ammo.btVector3(0, 0, 0);
+//   const groundMotionState = new ammo.btDefaultMotionState(groundTransform);
+//   const groundBody = new ammo.btRigidBody(
+//     new ammo.btRigidBodyConstructionInfo(groundMass, groundMotionState, groundShape, groundLocalInertia)
+//   );
+//   physicsHandler.physicsWorld.addRigidBody(groundBody);
+//   worldTransform = new ammo.btTransform();
+// }
+var generateObject = function (physicsHandler) {
+    // }, ammo: TAmmo, scene: THREE.Scene) => {
     var numTypes = 4;
     var objectType = Math.ceil(Math.random() * numTypes);
     var threeObject = null;
@@ -456,7 +485,7 @@ function generateObject(ammo, scene) {
             // Sphere
             radius = 1 + Math.random() * objectSize;
             threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), createObjectMaterial());
-            shape = new ammo.btSphereShape(radius);
+            shape = new physicsHandler.ammo.btSphereShape(radius);
             shape.setMargin(margin);
             break;
         case 2:
@@ -465,7 +494,7 @@ function generateObject(ammo, scene) {
             var sy = 1 + Math.random() * objectSize;
             var sz = 1 + Math.random() * objectSize;
             threeObject = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1), createObjectMaterial());
-            shape = new ammo.btBoxShape(new ammo.btVector3(sx * 0.5, sy * 0.5, sz * 0.5));
+            shape = new physicsHandler.ammo.btBoxShape(new physicsHandler.ammo.btVector3(sx * 0.5, sy * 0.5, sz * 0.5));
             shape.setMargin(margin);
             break;
         case 3:
@@ -473,7 +502,7 @@ function generateObject(ammo, scene) {
             radius = 1 + Math.random() * objectSize;
             height = 1 + Math.random() * objectSize;
             threeObject = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 20, 1), createObjectMaterial());
-            shape = new ammo.btCylinderShape(new ammo.btVector3(radius, height * 0.5, radius));
+            shape = new physicsHandler.ammo.btCylinderShape(new physicsHandler.ammo.btVector3(radius, height * 0.5, radius));
             shape.setMargin(margin);
             break;
         default:
@@ -481,32 +510,32 @@ function generateObject(ammo, scene) {
             radius = 1 + Math.random() * objectSize;
             height = 2 + Math.random() * objectSize;
             threeObject = new THREE.Mesh(new THREE.ConeGeometry(radius, height, 20, 2), createObjectMaterial());
-            shape = new ammo.btConeShape(radius, height);
+            shape = new physicsHandler.ammo.btConeShape(radius, height);
             break;
     }
     threeObject.position.set((Math.random() - 0.5) * terrainWidthSegmentCount * 0.6, terrainMaxHeight + objectSize + 2, (Math.random() - 0.5) * terrainDepthSegmentCount * 0.6);
     var mass = objectSize * 5;
-    var localInertia = new ammo.btVector3(0, 0, 0);
+    var localInertia = new physicsHandler.ammo.btVector3(0, 0, 0);
     shape.calculateLocalInertia(mass, localInertia);
-    var transform = new ammo.btTransform();
+    var transform = new physicsHandler.ammo.btTransform();
     transform.setIdentity();
     var pos = threeObject.position;
-    transform.setOrigin(new ammo.btVector3(pos.x, pos.y, pos.z));
-    var motionState = new ammo.btDefaultMotionState(transform);
-    var rbInfo = new ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-    var body = new ammo.btRigidBody(rbInfo);
+    transform.setOrigin(new physicsHandler.ammo.btVector3(pos.x, pos.y, pos.z));
+    var motionState = new physicsHandler.ammo.btDefaultMotionState(transform);
+    var rbInfo = new physicsHandler.ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+    var body = new physicsHandler.ammo.btRigidBody(rbInfo);
     threeObject.userData.physicsBody = body;
     threeObject.receiveShadow = true;
     threeObject.castShadow = true;
-    scene.add(threeObject);
-    dynamicObjects.push(threeObject);
-    physicsWorld.addRigidBody(body);
-}
+    physicsHandler.sceneContainer.scene.add(threeObject);
+    physicsHandler.dynamicObjects.push(threeObject);
+    physicsHandler.physicsWorld.addRigidBody(body);
+};
 function createObjectMaterial() {
     var c = Math.floor(Math.random() * (1 << 24));
     return new THREE.MeshPhongMaterial({ color: c });
 }
-function createTerrainShape(ammo) {
+function createTerrainShape(physicsHandler) {
     // This parameter is not really used, since we are using PHY_FLOAT height data type and hence it is ignored
     var heightScale = 1;
     // Up axis = 0 for X, 1 for Y, 2 for Z. Normally 1 = Y is used.
@@ -516,25 +545,25 @@ function createTerrainShape(ammo) {
     // Set this to your needs (inverts the triangles)
     var flipQuadEdges = false;
     // Creates height data buffer in Ammo heap
-    ammoHeightData = ammo._malloc(4 * terrainWidthSegmentCount * terrainDepthSegmentCount);
+    physicsHandler.ammoHeightData = physicsHandler.ammo._malloc(4 * terrainWidthSegmentCount * terrainDepthSegmentCount);
     // Copy the javascript height data array to the Ammo one.
     var p = 0;
     var p2 = 0;
     for (var j = 0; j < terrainDepthSegmentCount; j++) {
         for (var i = 0; i < terrainWidthSegmentCount; i++) {
             // write 32-bit float data to memory
-            ammo.HEAPF32[(ammoHeightData + p2) >> 2] = heightData[p];
+            physicsHandler.ammo.HEAPF32[(physicsHandler.ammoHeightData + p2) >> 2] = physicsHandler.heightData[p];
             p++;
             // 4 bytes/float
             p2 += 4;
         }
     }
     // Creates the heightfield physics shape
-    var heightFieldShape = new ammo.btHeightfieldTerrainShape(terrainWidthSegmentCount, terrainDepthSegmentCount, ammoHeightData, heightScale, terrainMinHeight, terrainMaxHeight, upAxis, hdt, flipQuadEdges);
+    var heightFieldShape = new physicsHandler.ammo.btHeightfieldTerrainShape(terrainWidthSegmentCount, terrainDepthSegmentCount, physicsHandler.ammoHeightData, heightScale, terrainMinHeight, terrainMaxHeight, upAxis, hdt, flipQuadEdges);
     // Set horizontal scale
     var scaleX = terrainWidthExtents / (terrainWidthSegmentCount - 1);
     var scaleZ = terrainDepthExtents / (terrainDepthSegmentCount - 1);
-    heightFieldShape.setLocalScaling(new ammo.btVector3(scaleX, 1, scaleZ));
+    heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, 1, scaleZ));
     heightFieldShape.setMargin(0.05);
     return heightFieldShape;
 }

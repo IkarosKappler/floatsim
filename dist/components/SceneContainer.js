@@ -61,6 +61,7 @@ var SceneContainer = /** @class */ (function () {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         // this.renderer.setClearColor(0xffffff, 0);
         this.renderer.autoClear = false;
+        this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
         this.fogHandler = new FogHandler_1.FogHandler(this);
@@ -80,12 +81,25 @@ var SceneContainer = /** @class */ (function () {
         // Add some light
         var pointLight = new THREE.PointLight(0xffffff);
         // var pointLight = new THREE.AmbientLight(0xffffff);
-        // set its position
         pointLight.position.x = 10;
         pointLight.position.y = 50 + this.sceneData.initialDepth;
         pointLight.position.z = 130;
-        // add to the scene
         this.scene.add(pointLight);
+        // Add a directional light (for shadows)
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(100, 100, 50);
+        directionalLight.castShadow = true;
+        var dLight = 200;
+        var sLight = dLight * 0.25;
+        directionalLight.shadow.camera.left = -sLight;
+        directionalLight.shadow.camera.right = sLight;
+        directionalLight.shadow.camera.top = sLight;
+        directionalLight.shadow.camera.bottom = -sLight;
+        directionalLight.shadow.camera.near = dLight / 30;
+        directionalLight.shadow.camera.far = dLight;
+        directionalLight.shadow.mapSize.x = 1024 * 2;
+        directionalLight.shadow.mapSize.y = 1024 * 2;
+        this.scene.add(directionalLight);
         // Add grid helper
         var gridHelper = new THREE.GridHelper(90, 9, 0xff0000, 0xe8e8e8);
         gridHelper.position.y += this.sceneData.initialDepth;
@@ -130,7 +144,7 @@ var SceneContainer = /** @class */ (function () {
         // firstPersonControls.lon = -150;
         // firstPersonControls.lat = 120;
         this.controls = firstPersonControls;
-        console.log("Stats", Stats_1.Stats);
+        // console.log("Stats", Stats);
         this.stats = new Stats_1.Stats.Stats();
         document.querySelector("body").appendChild(this.stats.domElement);
         // // This is the basic render function. It will be called perpetual, again and again,
@@ -167,13 +181,13 @@ var SceneContainer = /** @class */ (function () {
         this.renderer.domElement.addEventListener("mouseenter", function () {
             _self.controls.enabled = true;
         });
-        // Initialize physics
-        var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
-        physicsHandler.start();
         // Call the rendering function. This will cause and infinite recursion (we want
         // that here, because the animation shall run forever).
         this.onWindowResize();
-        _render();
+        // Initialize physics
+        var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
+        physicsHandler.start().then(_render);
+        // _render();
     }
     SceneContainer.prototype.onWindowResize = function () {
         this.camera.aspect = window.innerWidth / window.innerHeight;

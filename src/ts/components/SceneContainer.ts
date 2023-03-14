@@ -57,6 +57,7 @@ export class SceneContainer {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     // this.renderer.setClearColor(0xffffff, 0);
     this.renderer.autoClear = false;
+    this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
@@ -84,14 +85,28 @@ export class SceneContainer {
     // Add some light
     var pointLight = new THREE.PointLight(0xffffff);
     // var pointLight = new THREE.AmbientLight(0xffffff);
-
-    // set its position
     pointLight.position.x = 10;
     pointLight.position.y = 50 + this.sceneData.initialDepth;
     pointLight.position.z = 130;
-
-    // add to the scene
     this.scene.add(pointLight);
+
+    // Add a directional light (for shadows)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(100, 100, 50);
+    directionalLight.castShadow = true;
+    const dLight = 200;
+    const sLight = dLight * 0.25;
+    directionalLight.shadow.camera.left = -sLight;
+    directionalLight.shadow.camera.right = sLight;
+    directionalLight.shadow.camera.top = sLight;
+    directionalLight.shadow.camera.bottom = -sLight;
+
+    directionalLight.shadow.camera.near = dLight / 30;
+    directionalLight.shadow.camera.far = dLight;
+
+    directionalLight.shadow.mapSize.x = 1024 * 2;
+    directionalLight.shadow.mapSize.y = 1024 * 2;
+    this.scene.add(directionalLight);
 
     // Add grid helper
     var gridHelper = new THREE.GridHelper(90, 9, 0xff0000, 0xe8e8e8);
@@ -147,7 +162,7 @@ export class SceneContainer {
 
     this.controls = firstPersonControls;
 
-    console.log("Stats", Stats);
+    // console.log("Stats", Stats);
     this.stats = new (Stats as any).Stats();
     document.querySelector("body").appendChild(this.stats.domElement);
 
@@ -193,14 +208,14 @@ export class SceneContainer {
       _self.controls.enabled = true;
     });
 
-    // Initialize physics
-    const physicsHandler = new PhysicsHandler(this, terrain);
-    physicsHandler.start();
-
     // Call the rendering function. This will cause and infinite recursion (we want
     // that here, because the animation shall run forever).
     this.onWindowResize();
-    _render();
+
+    // Initialize physics
+    const physicsHandler = new PhysicsHandler(this, terrain);
+    physicsHandler.start().then(_render);
+    // _render();
   }
 
   onWindowResize() {

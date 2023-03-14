@@ -34,6 +34,13 @@ export class Params {
     if (typeof value === "undefined" || !value || (value = value.trim()).length === 0) {
       return fallback;
     }
-    return Boolean(value);
+    value = value.toLocaleLowerCase();
+    if (value === "1" || value === "on" || value === "yes" || value === "y" || value === "hi" || value == "high") {
+      return true;
+    } else if (value === "0" || value === "off" || value === "no" || value === "n" || value === "lo" || value == "low") {
+      return false;
+    } else {
+      return Boolean(value);
+    }
   }
 }
