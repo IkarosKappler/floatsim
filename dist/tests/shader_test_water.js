@@ -43,12 +43,12 @@ globalThis.addEventListener("load", function () {
   //   uniform float speed = .8;
   //   uniform float bright = 63.0; // 3f;
   var uniforms = {
-    data: {
-      zoom: { type: "f", value: 0.5 }, // 127.0 },
-      speed: { type: "f", value: 0.8 },
-      bright: { type: "f", value: 0.25 }, // 63.0 },
-      u_time: { type: "f", value: this.clock.getDelta() }
-    }
+    // data: {
+    zoom: { type: "f", value: 0.5 }, // 127.0 },
+    speed: { type: "f", value: 0.8 },
+    bright: { type: "f", value: 0.25 }, // 63.0 },
+    u_time: { type: "f", value: this.clock.getDelta() }
+    // }
   };
   var waterMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -86,15 +86,26 @@ globalThis.addEventListener("load", function () {
   this.stats = new Stats.Stats();
   document.querySelector("body").appendChild(this.stats.domElement);
 
+  var loopNumber = 0;
   var _render = function () {
     _self.stats.update();
     // Let's animate the cube: a rotation.
-    _self.cube.rotation.x += 0.02;
-    _self.cube.rotation.y += 0.01;
+    // _self.cube.rotation.x += 0.02;
+    // _self.cube.rotation.y += 0.01;
     _self.renderer.render(_self.scene, _self.camera);
 
-    waterMaterial.uniforms.data["u_time"].value = _self.clock.getDelta();
+    // waterMaterial.uniforms.data["u_time"].value = _self.clock.getDelta();
+    // waterMaterial.uniforms.data["u_time"].value = _self.clock.getElapsedTime();
+    waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
+    _self.cube.material.uniforms.u_time.value = _self.clock.getElapsedTime();
+    if (loopNumber < 10) {
+      console.log("waterMaterial.uniforms", loopNumber, waterMaterial.uniforms.u_time.value);
+    }
+    waterMaterial.uniformsNeedUpdate = true;
+    // cubeGeometry.verticesNeedUpdate = true;
+    _self.cube.material.uniformsNeedUpdate = true;
 
+    loopNumber++;
     requestAnimationFrame(_render);
   };
   _render();
