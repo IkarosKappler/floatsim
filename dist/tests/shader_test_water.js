@@ -46,7 +46,7 @@ globalThis.addEventListener("load", function () {
     // data: {
     zoom: { type: "f", value: 0.5 }, // 127.0 },
     speed: { type: "f", value: 0.8 },
-    bright: { type: "f", value: 0.25 }, // 63.0 },
+    bright: { type: "f", value: 32.0 },
     u_time: { type: "f", value: this.clock.getDelta() }
     // }
   };
