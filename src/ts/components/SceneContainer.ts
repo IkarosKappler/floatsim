@@ -15,7 +15,7 @@ import { Stats } from "../Stats";
 import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { SceneData } from "./interfaces";
+import { PerlinHeightMap, SceneData, Size3Immutable } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
@@ -189,10 +189,22 @@ export class SceneContainer {
 
     // const zStartOffset = 800.0; // for ImprovedNoise
     const zStartOffset = 300.0; // for Custom noise
-    const worldWidth = 256;
-    const worldDepth = 256;
-    const terrainData: Uint8Array = PerlinTerrain.generatePerlinHeight(worldWidth, worldWidth);
-    var terrain = new PerlinTerrain(terrainData, worldWidth, worldDepth); // .makeTerrain();
+    const worldWidthSegments = 256;
+    const worldDepthSegments = 256;
+    const perlinOptions = { iterations: 5, quality: 1.5 };
+    const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
+      worldWidthSegments,
+      worldWidthSegments,
+      perlinOptions
+    );
+    // for (var i = 0; i < terrainData.data.length; i++) {
+    //   if (isNaN(terrainData.data[i])) {
+    //     console.log("ERRR", i);
+    //   }
+    // }
+    const terrainSize: Size3Immutable = { width: 7500, depth: 7500, height: 0 };
+    var terrain = new PerlinTerrain(terrainData, terrainSize, worldWidthSegments, worldDepthSegments); // .makeTerrain();
+    console.log("terrainData", terrainData);
     terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
     this.scene.add(terrain.mesh);
 

@@ -164,10 +164,18 @@ var SceneContainer = /** @class */ (function () {
         };
         // const zStartOffset = 800.0; // for ImprovedNoise
         var zStartOffset = 300.0; // for Custom noise
-        var worldWidth = 256;
-        var worldDepth = 256;
-        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidth, worldWidth);
-        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, worldWidth, worldDepth); // .makeTerrain();
+        var worldWidthSegments = 256;
+        var worldDepthSegments = 256;
+        var perlinOptions = { iterations: 5, quality: 1.5 };
+        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldWidthSegments, perlinOptions);
+        // for (var i = 0; i < terrainData.data.length; i++) {
+        //   if (isNaN(terrainData.data[i])) {
+        //     console.log("ERRR", i);
+        //   }
+        // }
+        var terrainSize = { width: 7500, depth: 7500, height: 0 };
+        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize, worldWidthSegments, worldDepthSegments); // .makeTerrain();
+        console.log("terrainData", terrainData);
         terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
         this.scene.add(terrain.mesh);
         window.addEventListener("resize", function () {

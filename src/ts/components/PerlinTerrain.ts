@@ -5,18 +5,25 @@ import * as THREE from "three";
 // import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
 import { noise } from "../utils/perlin";
+import { PerlinHeightMap, Size3Immutable } from "./interfaces";
 
 export class PerlinTerrain {
   // extends THREE.Mesh<THREE.PlaneGeometry> {
-  readonly data: Uint8Array;
-  readonly worldWidth: number;
-  readonly worldDepth: number;
+  readonly heightMap: PerlinHeightMap;
+  // readonly worldWidth
+  // readonly worldWidth: number;
+  // readonly worldDepth: number;
+
+  // The size of a terrain segment is not intended to be changed. Use scale
+  readonly worldSize: Size3Immutable;
+  readonly worldWidthSegments: number;
+  readonly worldDepthSegments: number;
   readonly texture: THREE.CanvasTexture;
   readonly geometry: THREE.PlaneGeometry;
   readonly material: THREE.Material;
   readonly mesh: THREE.Mesh;
 
-  constructor(data: Uint8Array, worldWidth: number, worldDepth: number) {
+  constructor(heightMap: PerlinHeightMap, size: Size3Immutable, worldWidthSegments: number, worldDepthSegments: number) {
     // TODO: solve subclassing problem with ES5
     // super(
     //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
@@ -27,20 +34,26 @@ export class PerlinTerrain {
     //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
     //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
     // );
-    this.data = data;
-    this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1);
-    this.material = PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth);
+    this.heightMap = heightMap;
+    this.worldSize = size;
+    // this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidthSegments - 1, worldDepthSegments - 1);
+    console.log("size", size);
+    this.geometry = new THREE.PlaneGeometry(size.width, size.depth, worldWidthSegments - 1, worldDepthSegments - 1);
+
+    this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, worldWidthSegments, worldDepthSegments);
     this.geometry.rotateX(-Math.PI / 2);
-    this.worldWidth = worldWidth;
-    this.worldDepth = worldDepth;
+    this.worldSize = size;
+    this.worldWidthSegments = worldWidthSegments;
+    this.worldDepthSegments = worldDepthSegments;
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
     // !!! TODO: check this
     const vertices = (this.geometry.attributes.position as any).array;
+    console.log("vertices.length", vertices.length);
 
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-      vertices[j + 1] = this.data[i] * 10;
+      vertices[j + 1] = this.heightMap.data[i] * 10;
     }
   }
 
@@ -117,21 +130,39 @@ export class PerlinTerrain {
     return new THREE.MeshBasicMaterial({ map: texture });
   };
 
-  static generatePerlinHeight(width: number, height: number) {
+  /**
+   * Create the raw perlin terrain data.
+   *
+   * @param widthSegments
+   * @param depthSegments
+   * @param options
+   * @returns PerlinHeightMap
+   */
+  static generatePerlinHeight(
+    widthSegments: number,
+    depthSegments: number,
+    options?: { iterations?: number; quality?: number }
+  ): PerlinHeightMap {
+    const iterations = options?.iterations ?? 5;
+    const initialQuality: number = options?.quality ?? 1.5;
+    console.log("iterations", iterations, "initialQuality", initialQuality);
     const useCustomNoise = true;
     let seed = Math.PI / 4;
-    const size = width * height,
-      data = new Uint8Array(size);
+    const size = widthSegments * depthSegments;
+    const data = new Uint8Array(size);
+    // Todo: keep track of the height data and find min/max
+    let minHeightValue = Number.MAX_VALUE;
+    let maxHeightvalue = Number.MIN_VALUE;
     if (useCustomNoise) {
       const z = this.customRandom(seed) * 100;
 
-      let quality = 1.5;
+      let quality = initialQuality; // 1.5;
       const depthFactor = 0.15;
 
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < iterations; j++) {
         for (let i = 0; i < size; i++) {
-          const x = i % width,
-            y = ~~(i / width);
+          const x = i % widthSegments,
+            y = ~~(i / widthSegments);
           data[i] += Math.abs(noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
         }
 
@@ -143,13 +174,13 @@ export class PerlinTerrain {
       //   z = Math.random() * 100;
       const z = this.customRandom(seed) * 100;
 
-      let quality = 1.5;
+      let quality = initialQuality; //1.5;
       const depthFactor = 0.25;
 
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < iterations; j++) {
         for (let i = 0; i < size; i++) {
-          const x = i % width,
-            y = ~~(i / width);
+          const x = i % widthSegments,
+            y = ~~(i / widthSegments);
           data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * depthFactor);
         }
 
@@ -157,6 +188,6 @@ export class PerlinTerrain {
       }
     }
 
-    return data;
+    return { data, widthSegments, depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
   }
 }

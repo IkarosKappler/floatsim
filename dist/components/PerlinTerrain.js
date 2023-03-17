@@ -30,7 +30,7 @@ var THREE = __importStar(require("three"));
 var ImprovedNoise_js_1 = require("three/examples/jsm/math/ImprovedNoise.js");
 var perlin_1 = require("../utils/perlin");
 var PerlinTerrain = /** @class */ (function () {
-    function PerlinTerrain(data, worldWidth, worldDepth) {
+    function PerlinTerrain(heightMap, size, worldWidthSegments, worldDepthSegments) {
         // TODO: solve subclassing problem with ES5
         // super(
         //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
@@ -41,17 +41,22 @@ var PerlinTerrain = /** @class */ (function () {
         //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
         //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
         // );
-        this.data = data;
-        this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1);
-        this.material = PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth);
+        this.heightMap = heightMap;
+        this.worldSize = size;
+        // this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidthSegments - 1, worldDepthSegments - 1);
+        console.log("size", size);
+        this.geometry = new THREE.PlaneGeometry(size.width, size.depth, worldWidthSegments - 1, worldDepthSegments - 1);
+        this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, worldWidthSegments, worldDepthSegments);
         this.geometry.rotateX(-Math.PI / 2);
-        this.worldWidth = worldWidth;
-        this.worldDepth = worldDepth;
+        this.worldSize = size;
+        this.worldWidthSegments = worldWidthSegments;
+        this.worldDepthSegments = worldDepthSegments;
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;
+        console.log("vertices.length", vertices.length);
         for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-            vertices[j + 1] = this.data[i] * 10;
+            vertices[j + 1] = this.heightMap.data[i] * 10;
         }
     }
     PerlinTerrain.generateTexture = function (data, width, height) {
@@ -101,17 +106,33 @@ var PerlinTerrain = /** @class */ (function () {
         var x = Math.sin(seed++) * 10000;
         return x - Math.floor(x);
     };
-    PerlinTerrain.generatePerlinHeight = function (width, height) {
+    /**
+     * Create the raw perlin terrain data.
+     *
+     * @param widthSegments
+     * @param depthSegments
+     * @param options
+     * @returns PerlinHeightMap
+     */
+    PerlinTerrain.generatePerlinHeight = function (widthSegments, depthSegments, options) {
+        var _a, _b;
+        var iterations = (_a = options === null || options === void 0 ? void 0 : options.iterations) !== null && _a !== void 0 ? _a : 5;
+        var initialQuality = (_b = options === null || options === void 0 ? void 0 : options.quality) !== null && _b !== void 0 ? _b : 1.5;
+        console.log("iterations", iterations, "initialQuality", initialQuality);
         var useCustomNoise = true;
         var seed = Math.PI / 4;
-        var size = width * height, data = new Uint8Array(size);
+        var size = widthSegments * depthSegments;
+        var data = new Uint8Array(size);
+        // Todo: keep track of the height data and find min/max
+        var minHeightValue = Number.MAX_VALUE;
+        var maxHeightvalue = Number.MIN_VALUE;
         if (useCustomNoise) {
             var z = this.customRandom(seed) * 100;
-            var quality = 1.5;
+            var quality = initialQuality; // 1.5;
             var depthFactor = 0.15;
-            for (var j = 0; j < 5; j++) {
+            for (var j = 0; j < iterations; j++) {
                 for (var i = 0; i < size; i++) {
-                    var x = i % width, y = ~~(i / width);
+                    var x = i % widthSegments, y = ~~(i / widthSegments);
                     data[i] += Math.abs(perlin_1.noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
                 }
                 quality *= 5;
@@ -122,17 +143,17 @@ var PerlinTerrain = /** @class */ (function () {
             var perlin = new ImprovedNoise_js_1.ImprovedNoise();
             //   z = Math.random() * 100;
             var z = this.customRandom(seed) * 100;
-            var quality = 1.5;
+            var quality = initialQuality; //1.5;
             var depthFactor = 0.25;
-            for (var j = 0; j < 5; j++) {
+            for (var j = 0; j < iterations; j++) {
                 for (var i = 0; i < size; i++) {
-                    var x = i % width, y = ~~(i / width);
+                    var x = i % widthSegments, y = ~~(i / widthSegments);
                     data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * depthFactor);
                 }
                 quality *= 5;
             }
         }
-        return data;
+        return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
     };
     PerlinTerrain.generateMeshMaterial = function (data, worldWidth, worldDepth) {
         var texture = new THREE.CanvasTexture(PerlinTerrain.generateTexture(data, worldWidth, worldDepth));
