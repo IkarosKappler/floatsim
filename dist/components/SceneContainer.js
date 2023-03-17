@@ -167,7 +167,7 @@ var SceneContainer = /** @class */ (function () {
         var worldWidthSegments = 256;
         var worldDepthSegments = 256;
         var perlinOptions = { iterations: 5, quality: 1.5 };
-        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldWidthSegments, perlinOptions);
+        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
         // for (var i = 0; i < terrainData.data.length; i++) {
         //   if (isNaN(terrainData.data[i])) {
         //     console.log("ERRR", i);

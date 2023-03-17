@@ -194,7 +194,7 @@ export class SceneContainer {
     const perlinOptions = { iterations: 5, quality: 1.5 };
     const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
       worldWidthSegments,
-      worldWidthSegments,
+      worldDepthSegments,
       perlinOptions
     );
     // for (var i = 0; i < terrainData.data.length; i++) {
