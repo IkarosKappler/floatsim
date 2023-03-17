@@ -124,7 +124,7 @@ globalThis.addEventListener("load", function () {
     _self.renderer.render(_self.scene, _self.camera);
 
     // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
-    // _self.cube.material.uniforms.u_time.value = _self.clock.getElapsedTime();
+    _self.cube.material.uniforms.u_time.value = _self.clock.getElapsedTime();
     waterMaterial.uniforms.u_texture.texture = dTex;
     _self.cube.material.uniforms.u_texture.texture = dTex;
     if (loopNumber < 10) {
