@@ -174,7 +174,7 @@ var SceneContainer = /** @class */ (function () {
         //   }
         // }
         var terrainSize = { width: 7500, depth: 7500, height: 0 };
-        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize, worldWidthSegments, worldDepthSegments); // .makeTerrain();
+        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
         console.log("terrainData", terrainData);
         terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
         this.scene.add(terrain.mesh);

@@ -30,7 +30,8 @@ var THREE = __importStar(require("three"));
 var ImprovedNoise_js_1 = require("three/examples/jsm/math/ImprovedNoise.js");
 var perlin_1 = require("../utils/perlin");
 var PerlinTerrain = /** @class */ (function () {
-    function PerlinTerrain(heightMap, size, worldWidthSegments, worldDepthSegments) {
+    function PerlinTerrain(heightMap, worldSize) {
+        // }, worldWidthSegments: number, worldDepthSegments: number) {
         // TODO: solve subclassing problem with ES5
         // super(
         //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
@@ -42,19 +43,17 @@ var PerlinTerrain = /** @class */ (function () {
         //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
         // );
         this.heightMap = heightMap;
-        this.worldSize = size;
+        this.worldSize = worldSize;
+        // this.worldWidthSegments = worldWidthSegments;
+        // this.worldDepthSegments = worldDepthSegments;
         // this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidthSegments - 1, worldDepthSegments - 1);
-        console.log("size", size);
-        this.geometry = new THREE.PlaneGeometry(size.width, size.depth, worldWidthSegments - 1, worldDepthSegments - 1);
-        this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, worldWidthSegments, worldDepthSegments);
+        console.log("size", worldSize);
+        this.geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1); // worldWidthSegments - 1, worldDepthSegments - 1);
+        this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments); // worldWidthSegments, worldDepthSegments);
         this.geometry.rotateX(-Math.PI / 2);
-        this.worldSize = size;
-        this.worldWidthSegments = worldWidthSegments;
-        this.worldDepthSegments = worldDepthSegments;
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;
-        console.log("vertices.length", vertices.length);
         for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
             vertices[j + 1] = this.heightMap.data[i] * 10;
         }

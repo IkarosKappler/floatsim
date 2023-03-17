@@ -203,7 +203,7 @@ export class SceneContainer {
     //   }
     // }
     const terrainSize: Size3Immutable = { width: 7500, depth: 7500, height: 0 };
-    var terrain = new PerlinTerrain(terrainData, terrainSize, worldWidthSegments, worldDepthSegments); // .makeTerrain();
+    var terrain = new PerlinTerrain(terrainData, terrainSize); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
     console.log("terrainData", terrainData);
     terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
     this.scene.add(terrain.mesh);

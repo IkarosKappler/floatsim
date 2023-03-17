@@ -104,7 +104,7 @@ globalThis.addEventListener("load", function () {
   var perlinOptions = { iterations: 5, quality: 1.5 };
   var terrainData = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldWidthSegments, perlinOptions);
   var terrainSize = { width: 7500, depth: 7500, height: 0 };
-  var terrain = new PerlinTerrain(terrainData, terrainSize, worldWidthSegments, worldDepthSegments); // .makeTerrain();
+  var terrain = new PerlinTerrain(terrainData, terrainSize); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
   console.log("terrainData", terrainData);
   terrain.mesh.position.y = -zStartOffset;
   terrain.mesh.scale.set(0.1, 0.1, 0.1);

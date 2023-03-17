@@ -16,14 +16,15 @@ export class PerlinTerrain {
 
   // The size of a terrain segment is not intended to be changed. Use scale
   readonly worldSize: Size3Immutable;
-  readonly worldWidthSegments: number;
-  readonly worldDepthSegments: number;
+  // readonly worldWidthSegments: number;
+  // readonly worldDepthSegments: number;
   readonly texture: THREE.CanvasTexture;
   readonly geometry: THREE.PlaneGeometry;
   readonly material: THREE.Material;
   readonly mesh: THREE.Mesh;
 
-  constructor(heightMap: PerlinHeightMap, size: Size3Immutable, worldWidthSegments: number, worldDepthSegments: number) {
+  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable) {
+    // }, worldWidthSegments: number, worldDepthSegments: number) {
     // TODO: solve subclassing problem with ES5
     // super(
     //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
@@ -35,22 +36,25 @@ export class PerlinTerrain {
     //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
     // );
     this.heightMap = heightMap;
-    this.worldSize = size;
+    this.worldSize = worldSize;
+    // this.worldWidthSegments = worldWidthSegments;
+    // this.worldDepthSegments = worldDepthSegments;
     // this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidthSegments - 1, worldDepthSegments - 1);
-    console.log("size", size);
-    this.geometry = new THREE.PlaneGeometry(size.width, size.depth, worldWidthSegments - 1, worldDepthSegments - 1);
+    console.log("size", worldSize);
+    this.geometry = new THREE.PlaneGeometry(
+      worldSize.width,
+      worldSize.depth,
+      heightMap.widthSegments - 1,
+      heightMap.depthSegments - 1
+    ); // worldWidthSegments - 1, worldDepthSegments - 1);
 
-    this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, worldWidthSegments, worldDepthSegments);
+    this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments); // worldWidthSegments, worldDepthSegments);
     this.geometry.rotateX(-Math.PI / 2);
-    this.worldSize = size;
-    this.worldWidthSegments = worldWidthSegments;
-    this.worldDepthSegments = worldDepthSegments;
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
     // !!! TODO: check this
-    const vertices = (this.geometry.attributes.position as any).array;
-    console.log("vertices.length", vertices.length);
+    const vertices: Array<number> = (this.geometry.attributes.position as any).array;
 
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
       vertices[j + 1] = this.heightMap.data[i] * 10;
