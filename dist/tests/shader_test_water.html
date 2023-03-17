@@ -47,7 +47,7 @@
         void main()
         {
             // uncoment when using real texture
-            vec4 texture_color = texture2D(u_texture, vUv);
+            vec4 texture_color = texture2D(u_texture, vUv.yx);
             // vec4 texture_color = vec4(0.192156862745098/2., 0.6627450980392157/2., 0.9333333333333333/2., 1.0);
 
             vec4 k = vec4(u_time)*speed;

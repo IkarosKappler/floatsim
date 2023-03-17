@@ -64,8 +64,8 @@ globalThis.addEventListener("load", function () {
   for (var i = 0; i < binary.length; i++) {
     binary[i] = imageData.data[i];
   }
-  //   var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-  var dTex = new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+  //   var dTex = new THREE.DataTexture(binary, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+  var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
   dTex.needsUpdate = true;
 
   //   uniform float zoom = 127.0; // 7f;
@@ -119,8 +119,8 @@ globalThis.addEventListener("load", function () {
   var _render = function () {
     _self.stats.update();
     // Let's animate the cube: a rotation.
-    _self.cube.rotation.x += 0.01;
-    _self.cube.rotation.y += 0.005;
+    // _self.cube.rotation.x += 0.01;
+    // _self.cube.rotation.y += 0.005;
     _self.renderer.render(_self.scene, _self.camera);
 
     // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
