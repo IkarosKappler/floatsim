@@ -40,6 +40,7 @@ var CockpitPlane_1 = require("./CockpitPlane");
 var HudComponent_1 = require("./HudComponent");
 var FogHandler_1 = require("./FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
+var PerlinTexture_1 = require("./PerlinTexture");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -169,12 +170,13 @@ var SceneContainer = /** @class */ (function () {
         var perlinOptions = { iterations: 5, quality: 1.5 };
         var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
         var terrainSize = { width: 7500, depth: 7500, height: 0 };
-        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
+        var terrainTexture = new PerlinTexture_1.PerlinTexture(terrainData, terrainSize);
+        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize, terrainTexture); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
         console.log("terrainData", terrainData);
         terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
         this.scene.add(terrain.mesh);
-        var baseTexture = PerlinTerrain_1.PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
-        var imageData = baseTexture.imageData;
+        // var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+        var imageData = terrainTexture.imageData;
         var buffer = imageData.data.buffer; // ArrayBuffer
         var arrayBuffer = new ArrayBuffer(imageData.data.length);
         var binary = new Uint8Array(arrayBuffer);

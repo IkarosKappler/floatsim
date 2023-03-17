@@ -25,3 +25,8 @@ export interface PerlinHeightMap {
     maxHeightValue: number;
     data: Uint8Array;
 }
+export interface TextureData {
+    readonly imageData: ImageData;
+    readonly imageDataArray: Uint8ClampedArray;
+    readonly imageCanvas: HTMLCanvasElement;
+}

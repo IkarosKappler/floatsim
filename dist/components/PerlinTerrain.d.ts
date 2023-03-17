@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { PerlinHeightMap, Size3Immutable } from "./interfaces";
+import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
 export declare class PerlinTerrain {
     readonly heightMap: PerlinHeightMap;
     readonly worldSize: Size3Immutable;
@@ -7,14 +7,8 @@ export declare class PerlinTerrain {
     readonly geometry: THREE.PlaneGeometry;
     readonly material: THREE.Material;
     readonly mesh: THREE.Mesh;
-    constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable);
-    static generateTexture(data: Uint8Array, width: number, height: number): {
-        imageData: ImageData;
-        imageDataArray: Uint8ClampedArray;
-        imageCanvas: HTMLCanvasElement;
-    };
+    constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, texture: TextureData);
     private static customRandom;
-    private static generateMeshMaterial;
     /**
      * Create the raw perlin terrain data.
      *

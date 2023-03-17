@@ -15,6 +15,7 @@
     <script src="../lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script>globalThis.three = THREE;</script>
     <script src="../lib/three/examples/umd/math/ImprovedNoise.js"></script>
+    <script src="../components/PerlinTexture.js"></script> 
     <script src="../components/PerlinTerrain.js"></script> 
     <script src="../utils/perlin.js"></script> 
     <script src="shader_test_water.js"></script> 
@@ -47,7 +48,7 @@
         void main()
         {
             // uncoment when using real texture
-            vec4 texture_color = texture2D(u_texture, vUv.yx);
+            vec4 texture_color = texture2D(u_texture, vUv.xy);
             // vec4 texture_color = vec4(0.192156862745098/2., 0.6627450980392157/2., 0.9333333333333333/2., 1.0);
 
             vec4 k = vec4(u_time)*speed;

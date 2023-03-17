@@ -46,7 +46,10 @@ globalThis.addEventListener("load", function () {
   var perlinOptions = { iterations: 5, quality: 1.5 };
   var terrainData = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
   var terrainSize = { width: 7500, depth: 7500, height: 0 };
-  var terrain = new PerlinTerrain(terrainData, terrainSize);
+  console.log("PerlinTexture", PerlinTexture);
+  var baseTexture = new PerlinTexture(terrainData, terrainSize); //  worldWidthSegments, worldDepthSegments);
+
+  var terrain = new PerlinTerrain(terrainData, terrainSize, baseTexture);
   terrain.mesh.position.y = -zStartOffset;
   terrain.mesh.scale.set(0.1, 0.1, 0.1);
   this.scene.add(terrain.mesh);
@@ -56,7 +59,9 @@ globalThis.addEventListener("load", function () {
   //   var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
   //   dTex.needsUpdate = true;
 
-  var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+  //   var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+  //   var baseTexture = new PerlinTexure(terrainData, terrainSize); //  worldWidthSegments, worldDepthSegments);
+
   var imageData = baseTexture.imageData;
   var buffer = imageData.data.buffer; // ArrayBuffer
   var arrayBuffer = new ArrayBuffer(imageData.data.length);
@@ -96,6 +101,9 @@ globalThis.addEventListener("load", function () {
   this.cube.position.set(12, 12, 12);
   // ... and add it to your scene.
   this.scene.add(this.cube);
+
+  // THIS IS DIRTY
+  //   terrain.mesh.material = waterMaterial;
 
   // Finally we want to be able to rotate the whole scene with the mouse:
   // add an orbit control helper.

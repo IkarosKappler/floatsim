@@ -19,6 +19,7 @@ import { PerlinHeightMap, SceneData, Size3Immutable } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
+import { PerlinTexture } from "./PerlinTexture";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -198,13 +199,14 @@ export class SceneContainer {
       perlinOptions
     );
     const terrainSize: Size3Immutable = { width: 7500, depth: 7500, height: 0 };
-    var terrain = new PerlinTerrain(terrainData, terrainSize); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
+    const terrainTexture = new PerlinTexture(terrainData, terrainSize);
+    const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
     console.log("terrainData", terrainData);
     terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
     this.scene.add(terrain.mesh);
 
-    var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
-    var imageData = baseTexture.imageData;
+    // var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+    var imageData = terrainTexture.imageData;
     var buffer = imageData.data.buffer; // ArrayBuffer
     var arrayBuffer = new ArrayBuffer(imageData.data.length);
     var binary = new Uint8Array(arrayBuffer);

@@ -1,64 +1,56 @@
 import * as THREE from "three";
 
-// import Stats from 'three/addons/libs/stats.module.js';
+// import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
+// import { noise } from "../utils/perlin";
+import { TextureData, PerlinHeightMap, Size3Immutable } from "./interfaces";
 
-// import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
-import { noise } from "../utils/perlin";
-import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
-
-export class PerlinTerrain {
-  // extends THREE.Mesh<THREE.PlaneGeometry> {
-  readonly heightMap: PerlinHeightMap;
-  // The size of a terrain segment is not intended to be changed. Use scale
-  readonly worldSize: Size3Immutable;
-  readonly texture: THREE.CanvasTexture;
-  readonly geometry: THREE.PlaneGeometry;
+export class PerlinTexture implements TextureData {
+  //   readonly heightMap: PerlinHeightMap;
+  //   // The size of a terrain segment is not intended to be changed. Use scale
+  //   readonly worldSize: Size3Immutable;
+  //   readonly texture: THREE.CanvasTexture;
+  //   readonly geometry: THREE.PlaneGeometry;
   readonly material: THREE.Material;
-  readonly mesh: THREE.Mesh;
+  readonly imageData: ImageData;
+  readonly imageDataArray: Uint8ClampedArray;
+  readonly imageCanvas: HTMLCanvasElement;
+  //   readonly mesh: THREE.Mesh;
 
-  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, texture: TextureData) {
-    // }, worldWidthSegments: number, worldDepthSegments: number) {
-    // TODO: solve subclassing problem with ES5
-    // super(
-    //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
-    //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
+  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable) {
+    // this.heightMap = heightMap;
+    // this.worldSize = worldSize;
+    // this.geometry = new THREE.PlaneGeometry(
+    //   worldSize.width,
+    //   worldSize.depth,
+    //   heightMap.widthSegments - 1,
+    //   heightMap.depthSegments - 1
     // );
-    // THREE.Mesh.call(
-    //   this,
-    //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
-    //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
-    // );
-    this.heightMap = heightMap;
-    this.worldSize = worldSize;
-    this.geometry = new THREE.PlaneGeometry(
-      worldSize.width,
-      worldSize.depth,
-      heightMap.widthSegments - 1,
-      heightMap.depthSegments - 1
-    );
 
-    // this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
-    this.geometry.rotateX(-Math.PI / 2);
+    const textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
+    this.imageCanvas = textureData.imageCanvas;
+    this.imageData = textureData.imageData;
+    this.imageDataArray = textureData.imageDataArray;
+
+    // this.material = PerlinTexture.generateMeshMaterial(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
+
+    // const textureData = PerlinTerrain.generateTexture(data, worldWidth, worldDepth);
+    const texture = new THREE.CanvasTexture(textureData.imageCanvas);
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    this.material = new THREE.MeshBasicMaterial({ map: texture });
+
+    // this.geometry.rotateX(-Math.PI / 2);
 
     // this.mesh = new THREE.Mesh(this.geometry, this.material);
-    const canvasTexture = new THREE.CanvasTexture(texture.imageCanvas);
-    this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-    // !!! TODO: check this
-    const vertices: Array<number> = (this.geometry.attributes.position as any).array;
-    for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-      vertices[j + 1] = this.heightMap.data[i] * 10;
-    }
+    // // !!! TODO: check this
+    // const vertices: Array<number> = (this.geometry.attributes.position as any).array;
+    // for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
+    //   vertices[j + 1] = this.heightMap.data[i] * 10;
+    // }
   }
 
-  /*
-  public static generateTexture(
-    data: Uint8Array,
-    width: number,
-    height: number
-  ): { imageData: ImageData; imageDataArray: Uint8ClampedArray; imageCanvas: HTMLCanvasElement } {
+  public static generateTexture(data: Uint8Array, width: number, height: number): TextureData {
     let context: CanvasRenderingContext2D;
     let imageData: ImageData;
     let imageDataArray: Uint8ClampedArray;
@@ -123,19 +115,18 @@ export class PerlinTerrain {
     return { imageData, imageDataArray, imageCanvas: canvasScaled };
   }
 
-  private static generateMeshMaterial = (data: Uint8Array, worldWidth: number, worldDepth: number) => {
-    const textureData = PerlinTerrain.generateTexture(data, worldWidth, worldDepth);
-    const texture = new THREE.CanvasTexture(textureData.imageCanvas);
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    return new THREE.MeshBasicMaterial({ map: texture });
-  };
-  */
+  //   private static customRandom(seed: number) {
+  //     const x = Math.sin(seed++) * 10000;
+  //     return x - Math.floor(x);
+  //   }
 
-  private static customRandom(seed: number) {
-    const x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  }
+  //   private static generateMeshMaterial = (data: Uint8Array, worldWidth: number, worldDepth: number) => {
+  //     const textureData = PerlinTerrain.generateTexture(data, worldWidth, worldDepth);
+  //     const texture = new THREE.CanvasTexture(textureData.imageCanvas);
+  //     texture.wrapS = THREE.ClampToEdgeWrapping;
+  //     texture.wrapT = THREE.ClampToEdgeWrapping;
+  //     return new THREE.MeshBasicMaterial({ map: texture });
+  //   };
 
   /**
    * Create the raw perlin terrain data.
@@ -145,6 +136,7 @@ export class PerlinTerrain {
    * @param options
    * @returns PerlinHeightMap
    */
+  /*
   static generatePerlinHeight(
     widthSegments: number,
     depthSegments: number,
@@ -197,4 +189,5 @@ export class PerlinTerrain {
 
     return { data, widthSegments, depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
   }
+  */
 }
