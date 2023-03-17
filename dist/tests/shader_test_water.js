@@ -44,9 +44,10 @@ globalThis.addEventListener("load", function () {
   //   uniform float bright = 63.0; // 3f;
   var uniforms = {
     data: {
-      zoom: { type: "f", value: 127.0 },
+      zoom: { type: "f", value: 0.5 }, // 127.0 },
       speed: { type: "f", value: 0.8 },
-      bright: { type: "f", value: 63.0 }
+      bright: { type: "f", value: 0.25 }, // 63.0 },
+      u_time: { type: "f", value: this.clock.getDelta() }
     }
   };
   var waterMaterial = new THREE.ShaderMaterial({
@@ -54,6 +55,7 @@ globalThis.addEventListener("load", function () {
     vertexShader: vertShader,
     fragmentShader: fragShader
   });
+  waterMaterial.defines = { "USE_UV": "" };
   //--- END--- Create Water Shader (TEST)
 
   // Create a geometry conaining the logical 3D information (here: a cube)
@@ -90,6 +92,8 @@ globalThis.addEventListener("load", function () {
     _self.cube.rotation.x += 0.02;
     _self.cube.rotation.y += 0.01;
     _self.renderer.render(_self.scene, _self.camera);
+
+    waterMaterial.uniforms.data["u_time"].value = _self.clock.getDelta();
 
     requestAnimationFrame(_render);
   };
