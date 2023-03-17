@@ -39,16 +39,45 @@ globalThis.addEventListener("load", function () {
   var vertShader = document.getElementById("vertexShader").innerHTML;
   var fragShader = document.getElementById("fragmentShader").innerHTML;
 
+  //---BEGIN--- Terrain Generation
+  var zStartOffset = 80.0; // for Custom noise, different for Improved noise
+  var worldWidthSegments = 256;
+  var worldDepthSegments = 256;
+  var perlinOptions = { iterations: 5, quality: 1.5 };
+  var terrainData = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
+  var terrainSize = { width: 7500, depth: 7500, height: 0 };
+  var terrain = new PerlinTerrain(terrainData, terrainSize);
+  terrain.mesh.position.y = -zStartOffset;
+  terrain.mesh.scale.set(0.1, 0.1, 0.1);
+  this.scene.add(terrain.mesh);
+  //---END--- Terrain Generation
+
+  //   var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+  //   var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+  //   dTex.needsUpdate = true;
+
+  var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+  var imageData = baseTexture.imageData;
+  var buffer = imageData.data.buffer; // ArrayBuffer
+  var arrayBuffer = new ArrayBuffer(imageData.data.length);
+  var binary = new Uint8Array(arrayBuffer);
+  for (var i = 0; i < binary.length; i++) {
+    binary[i] = imageData.data[i];
+  }
+  //   var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+  var dTex = new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+  dTex.needsUpdate = true;
+
   //   uniform float zoom = 127.0; // 7f;
   //   uniform float speed = .8;
   //   uniform float bright = 63.0; // 3f;
   var uniforms = {
-    // data: {
     zoom: { type: "f", value: 0.5 }, // 127.0 },
     speed: { type: "f", value: 0.8 },
     bright: { type: "f", value: 32.0 },
-    u_time: { type: "f", value: this.clock.getDelta() }
-    // }
+    u_time: { type: "f", value: this.clock.getDelta() },
+    // u_texture: { type: "t", value: 0, texture: THREE.ImageUtils.loadTexture( 'texture.jpg' ) }
+    u_texture: { type: "t", value: dTex } // , texture: dTex }
   };
   var waterMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -90,36 +119,24 @@ globalThis.addEventListener("load", function () {
   var _render = function () {
     _self.stats.update();
     // Let's animate the cube: a rotation.
-    // _self.cube.rotation.x += 0.02;
-    // _self.cube.rotation.y += 0.01;
+    _self.cube.rotation.x += 0.01;
+    _self.cube.rotation.y += 0.005;
     _self.renderer.render(_self.scene, _self.camera);
 
-    // waterMaterial.uniforms.data["u_time"].value = _self.clock.getDelta();
-    // waterMaterial.uniforms.data["u_time"].value = _self.clock.getElapsedTime();
-    waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
-    _self.cube.material.uniforms.u_time.value = _self.clock.getElapsedTime();
+    // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
+    // _self.cube.material.uniforms.u_time.value = _self.clock.getElapsedTime();
+    waterMaterial.uniforms.u_texture.texture = dTex;
+    _self.cube.material.uniforms.u_texture.texture = dTex;
     if (loopNumber < 10) {
       console.log("waterMaterial.uniforms", loopNumber, waterMaterial.uniforms.u_time.value);
     }
-    waterMaterial.uniformsNeedUpdate = true;
-    // cubeGeometry.verticesNeedUpdate = true;
+    // waterMaterial.uniformsNeedUpdate = true;
     _self.cube.material.uniformsNeedUpdate = true;
 
     loopNumber++;
     requestAnimationFrame(_render);
   };
   _render();
-
-  var zStartOffset = 80.0; // for Custom noise, different for Improved noise
-  var worldWidthSegments = 256;
-  var worldDepthSegments = 256;
-  var perlinOptions = { iterations: 5, quality: 1.5 };
-  var terrainData = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
-  var terrainSize = { width: 7500, depth: 7500, height: 0 };
-  var terrain = new PerlinTerrain(terrainData, terrainSize);
-  terrain.mesh.position.y = -zStartOffset;
-  terrain.mesh.scale.set(0.1, 0.1, 0.1);
-  this.scene.add(terrain.mesh);
 
   function onWindowResize() {
     _self.camera.aspect = window.innerWidth / window.innerHeight;

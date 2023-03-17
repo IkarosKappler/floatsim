@@ -10,14 +10,8 @@ import { PerlinHeightMap, Size3Immutable } from "./interfaces";
 export class PerlinTerrain {
   // extends THREE.Mesh<THREE.PlaneGeometry> {
   readonly heightMap: PerlinHeightMap;
-  // readonly worldWidth
-  // readonly worldWidth: number;
-  // readonly worldDepth: number;
-
   // The size of a terrain segment is not intended to be changed. Use scale
   readonly worldSize: Size3Immutable;
-  // readonly worldWidthSegments: number;
-  // readonly worldDepthSegments: number;
   readonly texture: THREE.CanvasTexture;
   readonly geometry: THREE.PlaneGeometry;
   readonly material: THREE.Material;
@@ -37,34 +31,36 @@ export class PerlinTerrain {
     // );
     this.heightMap = heightMap;
     this.worldSize = worldSize;
-    // this.worldWidthSegments = worldWidthSegments;
-    // this.worldDepthSegments = worldDepthSegments;
-    // this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidthSegments - 1, worldDepthSegments - 1);
-    console.log("size", worldSize);
     this.geometry = new THREE.PlaneGeometry(
       worldSize.width,
       worldSize.depth,
       heightMap.widthSegments - 1,
       heightMap.depthSegments - 1
-    ); // worldWidthSegments - 1, worldDepthSegments - 1);
+    );
 
-    this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments); // worldWidthSegments, worldDepthSegments);
+    this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
     this.geometry.rotateX(-Math.PI / 2);
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
     // !!! TODO: check this
     const vertices: Array<number> = (this.geometry.attributes.position as any).array;
-
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
       vertices[j + 1] = this.heightMap.data[i] * 10;
     }
   }
 
-  private static generateTexture(data: Uint8Array, width: number, height: number) {
-    let context, image, imageData, shade;
+  public static generateTexture(
+    data: Uint8Array,
+    width: number,
+    height: number
+  ): { imageData: ImageData; imageDataArray: Uint8ClampedArray; imageCanvas: HTMLCanvasElement } {
+    let context: CanvasRenderingContext2D;
+    let imageData: ImageData;
+    let imageDataArray: Uint8ClampedArray;
+    let shade: number;
 
-    const vector3 = new THREE.Vector3(0, 0, 0);
+    const vector3: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
 
     const sun = new THREE.Vector3(1, 1, 1);
     sun.normalize();
@@ -77,11 +73,11 @@ export class PerlinTerrain {
     context.fillStyle = "#000";
     context.fillRect(0, 0, width, height);
 
-    image = context.getImageData(0, 0, canvas.width, canvas.height);
+    imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     // !!! TODO Check
-    imageData = image.data; //  as any as Array<number>;
+    imageDataArray = imageData.data; //  as any as Array<number>;
 
-    for (let i = 0, j = 0, l = imageData.length; i < l; i += 4, j++) {
+    for (let i = 0, j = 0, l = imageDataArray.length; i < l; i += 4, j++) {
       vector3.x = data[j - 2] - data[j + 2];
       vector3.y = 2;
       vector3.z = data[j - width * 2] - data[j + width * 2];
@@ -89,12 +85,13 @@ export class PerlinTerrain {
 
       shade = vector3.dot(sun);
 
-      imageData[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
-      imageData[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
-      imageData[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+      imageDataArray[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
+      imageDataArray[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
+      imageDataArray[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+      imageDataArray[i + 3] = 255;
     }
 
-    context.putImageData(image, 0, 0);
+    context.putImageData(imageData, 0, 0);
 
     // Scaled 4x
 
@@ -106,20 +103,20 @@ export class PerlinTerrain {
     context.scale(4, 4);
     context.drawImage(canvas, 0, 0);
 
-    image = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
-    imageData = image.data;
+    imageData = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
+    imageDataArray = imageData.data;
 
-    for (let i = 0, l = imageData.length; i < l; i += 4) {
+    for (let i = 0, l = imageDataArray.length; i < l; i += 4) {
       const v = ~~(Math.random() * 5);
 
-      imageData[i] += v;
-      imageData[i + 1] += v;
-      imageData[i + 2] += v;
+      imageDataArray[i] += v;
+      imageDataArray[i + 1] += v;
+      imageDataArray[i + 2] += v;
     }
 
-    context.putImageData(image, 0, 0);
+    context.putImageData(imageData, 0, 0);
 
-    return canvasScaled;
+    return { imageData, imageDataArray, imageCanvas: canvasScaled };
   }
 
   private static customRandom(seed: number) {
@@ -128,7 +125,8 @@ export class PerlinTerrain {
   }
 
   private static generateMeshMaterial = (data: Uint8Array, worldWidth: number, worldDepth: number) => {
-    const texture = new THREE.CanvasTexture(PerlinTerrain.generateTexture(data, worldWidth, worldDepth));
+    const textureData = PerlinTerrain.generateTexture(data, worldWidth, worldDepth);
+    const texture = new THREE.CanvasTexture(textureData.imageCanvas);
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     return new THREE.MeshBasicMaterial({ map: texture });

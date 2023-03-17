@@ -168,16 +168,22 @@ var SceneContainer = /** @class */ (function () {
         var worldDepthSegments = 256;
         var perlinOptions = { iterations: 5, quality: 1.5 };
         var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
-        // for (var i = 0; i < terrainData.data.length; i++) {
-        //   if (isNaN(terrainData.data[i])) {
-        //     console.log("ERRR", i);
-        //   }
-        // }
         var terrainSize = { width: 7500, depth: 7500, height: 0 };
         var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
         console.log("terrainData", terrainData);
         terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
         this.scene.add(terrain.mesh);
+        var baseTexture = PerlinTerrain_1.PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
+        var imageData = baseTexture.imageData;
+        var buffer = imageData.data.buffer; // ArrayBuffer
+        var arrayBuffer = new ArrayBuffer(imageData.data.length);
+        var binary = new Uint8Array(arrayBuffer);
+        for (var i = 0; i < binary.length; i++) {
+            binary[i] = imageData.data[i];
+        }
+        var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+        //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+        dTex.needsUpdate = true;
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });

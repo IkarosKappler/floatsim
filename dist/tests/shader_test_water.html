@@ -19,12 +19,14 @@
     <script src="../utils/perlin.js"></script> 
     <script src="shader_test_water.js"></script> 
     <script id="vertexShader" type="x-shader/x-vertex">
-        varying vec3 vUv; 
+        varying vec2 vUv; 
+        varying vec3 vposition;
 
         void main() {
-            // vUv = uv; // position; 
-            // vUv = vec3(uv,0.0);
-            vUv = position;
+            // This is just the local position.
+            vUv = uv; // position;
+            // This is the global position in the world.
+            vposition = (modelMatrix * vec4(position, 1.0)).xyz;
 
             vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
             // gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
@@ -33,26 +35,28 @@
     </script>
 
     <script id="fragmentShader" type="x-shader/x-fragment">
-        // shader_type canvas_item;
-
-        uniform float zoom; // = 127.0; // 7f;
-        uniform float speed; // = .8;
-        uniform float bright; // = 63.0; // 3f;
+        uniform float zoom;
+        uniform float speed;
+        uniform float bright;
         uniform float u_time;
+        uniform sampler2D u_texture;
 
-        varying vec3 vUv;
+        varying vec2 vUv;
+        varying vec3 vposition;
 
         void main()
         {
             // uncoment when using real texture
-            //vec4 texture_color = texture(TEXTURE, UV);
-            vec4 texture_color = vec4(0.192156862745098/2., 0.6627450980392157/2., 0.9333333333333333/2., 1.0);
+            vec4 texture_color = texture2D(u_texture, vUv.xy);
+            // vec4 texture_color = vec4(0.192156862745098/2., 0.6627450980392157/2., 0.9333333333333333/2., 1.0);
 
             vec4 k = vec4(u_time)*speed;
-            //k.xy = UV * zoom;
-            //k.xy = vUv * zoom;
-            k.xy = vec2(vUv * zoom);
-            // ---vec2 uv2 = fract(vUv * 10.);
+            // k.xy = vec2(vUv * zoom);
+            // k.xy = vec2(vposition * zoom);
+
+            // Use the xz-coordinated to view from top
+            k.xy = vec2(vposition.x, vposition.z) * zoom;
+
             float val1 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.5));
             float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.2));
             float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.5));

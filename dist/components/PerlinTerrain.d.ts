@@ -8,7 +8,11 @@ export declare class PerlinTerrain {
     readonly material: THREE.Material;
     readonly mesh: THREE.Mesh;
     constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable);
-    private static generateTexture;
+    static generateTexture(data: Uint8Array, width: number, height: number): {
+        imageData: ImageData;
+        imageDataArray: Uint8ClampedArray;
+        imageCanvas: HTMLCanvasElement;
+    };
     private static customRandom;
     private static generateMeshMaterial;
     /**

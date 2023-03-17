@@ -44,12 +44,8 @@ var PerlinTerrain = /** @class */ (function () {
         // );
         this.heightMap = heightMap;
         this.worldSize = worldSize;
-        // this.worldWidthSegments = worldWidthSegments;
-        // this.worldDepthSegments = worldDepthSegments;
-        // this.geometry = new THREE.PlaneGeometry(7500, 7500, worldWidthSegments - 1, worldDepthSegments - 1);
-        console.log("size", worldSize);
-        this.geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1); // worldWidthSegments - 1, worldDepthSegments - 1);
-        this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments); // worldWidthSegments, worldDepthSegments);
+        this.geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1);
+        this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
         this.geometry.rotateX(-Math.PI / 2);
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         // !!! TODO: check this
@@ -59,7 +55,10 @@ var PerlinTerrain = /** @class */ (function () {
         }
     }
     PerlinTerrain.generateTexture = function (data, width, height) {
-        var context, image, imageData, shade;
+        var context;
+        var imageData;
+        var imageDataArray;
+        var shade;
         var vector3 = new THREE.Vector3(0, 0, 0);
         var sun = new THREE.Vector3(1, 1, 1);
         sun.normalize();
@@ -69,20 +68,21 @@ var PerlinTerrain = /** @class */ (function () {
         context = canvas.getContext("2d");
         context.fillStyle = "#000";
         context.fillRect(0, 0, width, height);
-        image = context.getImageData(0, 0, canvas.width, canvas.height);
+        imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         // !!! TODO Check
-        imageData = image.data; //  as any as Array<number>;
-        for (var i = 0, j = 0, l = imageData.length; i < l; i += 4, j++) {
+        imageDataArray = imageData.data; //  as any as Array<number>;
+        for (var i = 0, j = 0, l = imageDataArray.length; i < l; i += 4, j++) {
             vector3.x = data[j - 2] - data[j + 2];
             vector3.y = 2;
             vector3.z = data[j - width * 2] - data[j + width * 2];
             vector3.normalize();
             shade = vector3.dot(sun);
-            imageData[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
-            imageData[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
-            imageData[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+            imageDataArray[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
+            imageDataArray[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
+            imageDataArray[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+            imageDataArray[i + 3] = 255;
         }
-        context.putImageData(image, 0, 0);
+        context.putImageData(imageData, 0, 0);
         // Scaled 4x
         var canvasScaled = document.createElement("canvas");
         canvasScaled.width = width * 4;
@@ -90,16 +90,16 @@ var PerlinTerrain = /** @class */ (function () {
         context = canvasScaled.getContext("2d");
         context.scale(4, 4);
         context.drawImage(canvas, 0, 0);
-        image = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
-        imageData = image.data;
-        for (var i = 0, l = imageData.length; i < l; i += 4) {
+        imageData = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
+        imageDataArray = imageData.data;
+        for (var i = 0, l = imageDataArray.length; i < l; i += 4) {
             var v = ~~(Math.random() * 5);
-            imageData[i] += v;
-            imageData[i + 1] += v;
-            imageData[i + 2] += v;
+            imageDataArray[i] += v;
+            imageDataArray[i + 1] += v;
+            imageDataArray[i + 2] += v;
         }
-        context.putImageData(image, 0, 0);
-        return canvasScaled;
+        context.putImageData(imageData, 0, 0);
+        return { imageData: imageData, imageDataArray: imageDataArray, imageCanvas: canvasScaled };
     };
     PerlinTerrain.customRandom = function (seed) {
         var x = Math.sin(seed++) * 10000;
@@ -155,7 +155,8 @@ var PerlinTerrain = /** @class */ (function () {
         return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
     };
     PerlinTerrain.generateMeshMaterial = function (data, worldWidth, worldDepth) {
-        var texture = new THREE.CanvasTexture(PerlinTerrain.generateTexture(data, worldWidth, worldDepth));
+        var textureData = PerlinTerrain.generateTexture(data, worldWidth, worldDepth);
+        var texture = new THREE.CanvasTexture(textureData.imageCanvas);
         texture.wrapS = THREE.ClampToEdgeWrapping;
         texture.wrapT = THREE.ClampToEdgeWrapping;
         return new THREE.MeshBasicMaterial({ map: texture });
