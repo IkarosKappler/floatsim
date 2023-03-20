@@ -7,6 +7,7 @@ import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
 import { noise } from "../utils/perlin";
 import { CausticShaderMaterial } from "../utils/texture/CausticShaderMaterial";
 import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
+import { SceneContainer } from "./SceneContainer";
 
 export class PerlinTerrain {
   // extends THREE.Mesh<THREE.PlaneGeometry> {
@@ -52,10 +53,11 @@ export class PerlinTerrain {
     const canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
     const baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture, fog: true });
 
-    this.causticShaderMaterial = new CausticShaderMaterial(heightMap, baseTexture);
+    this.causticShaderMaterial = new CausticShaderMaterial(baseTexture);
 
-    this.mesh = new THREE.Mesh(this.geometry, [baseMaterial, this.causticShaderMaterial.waterMaterial]);
+    // this.mesh = new THREE.Mesh(this.geometry, [baseMaterial, this.causticShaderMaterial.waterMaterial]);
     // this.mesh = new THREE.Mesh(this.geometry, baseMaterial);
+    this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
 
     // !!! TODO: check this
     const vertices: Array<number> = (this.geometry.attributes.position as any).array;

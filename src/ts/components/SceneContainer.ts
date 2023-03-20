@@ -64,8 +64,8 @@ export class SceneContainer {
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
 
     this.fogHandler = new FogHandler(this);
-    this.scene.background = new THREE.Color(this.fogHandler.fogLowerColor);
-    this.scene.fog = new THREE.FogExp2(this.fogHandler.fogLowerColor.getHex(), 0.0021);
+    this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
+    this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
 
     // ... and append it to the DOM
     document.body.appendChild(this.renderer.domElement);
@@ -191,10 +191,10 @@ export class SceneContainer {
 
       this.renderer.render(this.scene, this.camera);
       this.hud.renderHud(this.renderer, { depth: this.camera.position.y });
-      terrain.causticShaderMaterial.update(elapsedTime);
+
+      terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 
       physicsHandler.render();
-      // this.controls.update();
 
       requestAnimationFrame(_render);
     };

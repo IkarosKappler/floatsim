@@ -45,7 +45,7 @@ var THREE = __importStar(require("three"));
 var FogHandler = /** @class */ (function () {
     function FogHandler(sceneContainer) {
         this.sceneContainer = sceneContainer;
-        this.fogNormalColor = new THREE.Color(0x021a38);
+        this.fogNormalColor = new THREE.Color(0x021a38); // = (0.0078, 9.8007, 4.5536) per cent
         this.fogUpperColor = new THREE.Color(0x004001);
         this.fogLowerColor = new THREE.Color(0x000000);
     }

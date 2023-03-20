@@ -7,6 +7,9 @@ globalThis.addEventListener("load", function () {
   this.renderer = new THREE.WebGLRenderer({ antialias: true });
   this.renderer.autoClear = false;
 
+  this.scene.background = new THREE.Color(0.75, 0.86, 0.86);
+  this.scene.fog = new THREE.FogExp2(0x021a38, 0.0051);
+
   this.renderer.setSize(window.innerWidth, window.innerHeight);
   this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
   this.camera.position.set(75, 75, 75);
@@ -57,21 +60,22 @@ globalThis.addEventListener("load", function () {
   for (var i = 0; i < binary.length; i++) {
     binary[i] = imageData.data[i];
   }
-  //   var dTex = new THREE.DataTexture(binary, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
   var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
   dTex.needsUpdate = true;
 
-  //   uniform float zoom = 127.0; // 7f;
-  //   uniform float speed = .8;
-  //   uniform float bright = 63.0; // 3f;
   var uniforms = {
-    u_zoom: { type: "f", value: 0.5 }, // 127.0 },
+    // Fog
+    fogColor: { type: "t", value: new THREE.Color(0x021a38) }, // TODO: change fog color
+    vFogDepth: { type: "f", value: 0.0021 }, // ???
+    fogDensity: { type: "f", value: 0.0021 }, // TODO: take from FogHandler
+    // Caustics
+    u_zoom: { type: "f", value: 0.5 },
     u_speed: { type: "f", value: 0.4 },
     u_bright: { type: "f", value: 32.0 },
     u_intensity: { type: "f", value: 0.5 },
     u_time: { type: "f", value: this.clock.getDelta() },
     u_texture: { type: "t", value: dTex }, // , texture: dTex }
-    u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
+    u_effect_color: { type: "t", value: new THREE.Color(0.19, 0.86, 0.86) }
   };
   var waterMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -79,7 +83,6 @@ globalThis.addEventListener("load", function () {
     fragmentShader: fragShader,
     transparent: true
   });
-  // waterMaterial.defines = { "USE_UV": "" };
   //--- END--- Create Water Shader (TEST)
 
   // Create a geometry conaining the logical 3D information (here: a cube)
@@ -90,15 +93,11 @@ globalThis.addEventListener("load", function () {
   cubeGeometry.clearGroups();
   cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
   cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
-  // this.cube = new THREE.Mesh(cubeGeometry, waterMaterial);
   this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, waterMaterial]);
 
   this.cube.position.set(12, 12, 12);
   // ... and add it to your scene.
   this.scene.add(this.cube);
-
-  // THIS IS DIRTY
-  //   terrain.mesh.material = waterMaterial;
 
   // Finally we want to be able to rotate the whole scene with the mouse:
   // add an orbit control helper.
@@ -125,8 +124,8 @@ globalThis.addEventListener("load", function () {
     var elapsedTime = _self.clock.getElapsedTime();
     _self.stats.update();
     // Let's animate the cube: a rotation.
-    // _self.cube.rotation.x += 0.01;
-    // _self.cube.rotation.y += 0.005;
+    _self.cube.rotation.x += 0.01;
+    _self.cube.rotation.y += 0.005;
     _self.renderer.render(_self.scene, _self.camera);
 
     // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
@@ -138,7 +137,7 @@ globalThis.addEventListener("load", function () {
     }
     // waterMaterial.uniformsNeedUpdate = true;
     // terrain.mesh.material.uniformsNeedUpdate = true;
-    terrain.causticShaderMaterial.update(elapsedTime);
+    terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
     _self.cube.material[1].uniformsNeedUpdate = true;
 
     loopNumber++;

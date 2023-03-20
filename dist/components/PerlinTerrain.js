@@ -55,9 +55,10 @@ var PerlinTerrain = /** @class */ (function () {
         // this.mesh = new THREE.Mesh(this.geometry, this.material);
         var canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
         var baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture, fog: true });
-        this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(heightMap, baseTexture);
-        this.mesh = new THREE.Mesh(this.geometry, [baseMaterial, this.causticShaderMaterial.waterMaterial]);
+        this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(baseTexture);
+        // this.mesh = new THREE.Mesh(this.geometry, [baseMaterial, this.causticShaderMaterial.waterMaterial]);
         // this.mesh = new THREE.Mesh(this.geometry, baseMaterial);
+        this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;
         for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {

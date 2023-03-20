@@ -66,8 +66,8 @@ var SceneContainer = /** @class */ (function () {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
         this.fogHandler = new FogHandler_1.FogHandler(this);
-        this.scene.background = new THREE.Color(this.fogHandler.fogLowerColor);
-        this.scene.fog = new THREE.FogExp2(this.fogHandler.fogLowerColor.getHex(), 0.0021);
+        this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
+        this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
         // ... and append it to the DOM
         document.body.appendChild(this.renderer.domElement);
         // Create a geometry conaining the logical 3D information (here: a cube)
@@ -168,9 +168,8 @@ var SceneContainer = /** @class */ (function () {
             _this.cube.rotation.y += 0.04;
             _this.renderer.render(_this.scene, _this.camera);
             _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y });
-            terrain.causticShaderMaterial.update(elapsedTime);
+            terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
             physicsHandler.render();
-            // this.controls.update();
             requestAnimationFrame(_render);
         };
         // const zStartOffset = 800.0; // for ImprovedNoise

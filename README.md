@@ -57,6 +57,7 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Add a sonar HUD.
 - [DONE] Let initial settings being passed by GET parameters.
 - Tinker with THREE VolumetricLight.
+- Fog Color must be passed to the new terrain shader on each position change.
 
 ## Credits
 
