@@ -19,7 +19,7 @@ import { PerlinHeightMap, SceneData, Size3Immutable } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
-import { PerlinTexture } from "./PerlinTexture";
+import { PerlinTexture } from "../utils/texture/PerlinTexture";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -171,6 +171,7 @@ export class SceneContainer {
     // // depending on your machines possible frame rate.
     const _render = () => {
       // Pass the render function itself
+      let elapsedTime = _self.clock.getElapsedTime();
 
       this.fogHandler.updateFogColor();
       firstPersonControls.update(this.clock.getDelta());
@@ -182,6 +183,7 @@ export class SceneContainer {
 
       this.renderer.render(this.scene, this.camera);
       this.hud.renderHud(this.renderer, { depth: this.camera.position.y });
+      terrain.causticShaderMaterial.update(elapsedTime);
 
       physicsHandler.render();
 

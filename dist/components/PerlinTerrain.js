@@ -29,8 +29,9 @@ var THREE = __importStar(require("three"));
 // import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 var ImprovedNoise_js_1 = require("three/examples/jsm/math/ImprovedNoise.js");
 var perlin_1 = require("../utils/perlin");
+var CausticShaderMaterial_1 = require("../utils/texture/CausticShaderMaterial");
 var PerlinTerrain = /** @class */ (function () {
-    function PerlinTerrain(heightMap, worldSize, texture) {
+    function PerlinTerrain(heightMap, worldSize, baseTexture) {
         // }, worldWidthSegments: number, worldDepthSegments: number) {
         // TODO: solve subclassing problem with ES5
         // super(
@@ -48,9 +49,11 @@ var PerlinTerrain = /** @class */ (function () {
         // this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
         this.geometry.rotateX(-Math.PI / 2);
         // this.mesh = new THREE.Mesh(this.geometry, this.material);
-        var canvasTexture = new THREE.CanvasTexture(texture.imageCanvas);
-        this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        var canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
+        // this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
+        this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(heightMap, baseTexture); // canvasTexture);
+        // this.material = this.causticShaderMaterial.waterMaterial;
+        this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial); // this.material);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;
         for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {

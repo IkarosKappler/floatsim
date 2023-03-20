@@ -40,7 +40,7 @@ var CockpitPlane_1 = require("./CockpitPlane");
 var HudComponent_1 = require("./HudComponent");
 var FogHandler_1 = require("./FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
-var PerlinTexture_1 = require("./PerlinTexture");
+var PerlinTexture_1 = require("../utils/texture/PerlinTexture");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -152,6 +152,7 @@ var SceneContainer = /** @class */ (function () {
         // // depending on your machines possible frame rate.
         var _render = function () {
             // Pass the render function itself
+            var elapsedTime = _self.clock.getElapsedTime();
             _this.fogHandler.updateFogColor();
             firstPersonControls.update(_this.clock.getDelta());
             _this.stats.update();
@@ -160,6 +161,7 @@ var SceneContainer = /** @class */ (function () {
             _this.cube.rotation.y += 0.04;
             _this.renderer.render(_this.scene, _this.camera);
             _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y });
+            terrain.causticShaderMaterial.update(elapsedTime);
             physicsHandler.render();
             requestAnimationFrame(_render);
         };

@@ -125,6 +125,7 @@ globalThis.addEventListener("load", function () {
 
   var loopNumber = 0;
   var _render = function () {
+    var elapsedTime = _self.clock.getElapsedTime();
     _self.stats.update();
     // Let's animate the cube: a rotation.
     // _self.cube.rotation.x += 0.01;
@@ -132,13 +133,15 @@ globalThis.addEventListener("load", function () {
     _self.renderer.render(_self.scene, _self.camera);
 
     // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
-    _self.cube.material.uniforms.u_time.value = _self.clock.getElapsedTime();
+    _self.cube.material.uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
     waterMaterial.uniforms.u_texture.texture = dTex;
     _self.cube.material.uniforms.u_texture.texture = dTex;
     if (loopNumber < 10) {
       console.log("waterMaterial.uniforms", loopNumber, waterMaterial.uniforms.u_time.value);
     }
     // waterMaterial.uniformsNeedUpdate = true;
+    // terrain.mesh.material.uniformsNeedUpdate = true;
+    terrain.causticShaderMaterial.update(elapsedTime);
     _self.cube.material.uniformsNeedUpdate = true;
 
     loopNumber++;

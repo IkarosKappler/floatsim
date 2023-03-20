@@ -5,6 +5,7 @@ import * as THREE from "three";
 // import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
 import { noise } from "../utils/perlin";
+import { CausticShaderMaterial } from "../utils/texture/CausticShaderMaterial";
 import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
 
 export class PerlinTerrain {
@@ -14,10 +15,12 @@ export class PerlinTerrain {
   readonly worldSize: Size3Immutable;
   readonly texture: THREE.CanvasTexture;
   readonly geometry: THREE.PlaneGeometry;
-  readonly material: THREE.Material;
+  // readonly material: THREE.Material;
   readonly mesh: THREE.Mesh;
 
-  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, texture: TextureData) {
+  readonly causticShaderMaterial: CausticShaderMaterial;
+
+  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
     // }, worldWidthSegments: number, worldDepthSegments: number) {
     // TODO: solve subclassing problem with ES5
     // super(
@@ -42,9 +45,13 @@ export class PerlinTerrain {
     this.geometry.rotateX(-Math.PI / 2);
 
     // this.mesh = new THREE.Mesh(this.geometry, this.material);
-    const canvasTexture = new THREE.CanvasTexture(texture.imageCanvas);
-    this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
+    const canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
+    // this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
+
+    this.causticShaderMaterial = new CausticShaderMaterial(heightMap, baseTexture); // canvasTexture);
+    // this.material = this.causticShaderMaterial.waterMaterial;
+
+    this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial); // this.material);
 
     // !!! TODO: check this
     const vertices: Array<number> = (this.geometry.attributes.position as any).array;

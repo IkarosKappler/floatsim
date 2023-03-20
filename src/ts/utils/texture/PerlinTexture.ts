@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 // import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
 // import { noise } from "../utils/perlin";
-import { TextureData, PerlinHeightMap, Size3Immutable } from "./interfaces";
+import { TextureData, PerlinHeightMap, Size3Immutable } from "../../components/interfaces";
 
 export class PerlinTexture implements TextureData {
   //   readonly heightMap: PerlinHeightMap;
