@@ -76,6 +76,11 @@ export class SceneContainer {
     // Pick a material, something like MeshBasicMaterial, PhongMaterial,
     var cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
+    // const layerMaterial = new THREE.Layers();
+    // cubeGeometry.clearGroups();
+    // cubeGeometry.addGroup( 0, Number.POSITIVE_INFINITY, 0 );
+    // cubeGeometry.addGroup( 0, Number.POSITIVE_INFINITY, 1 );
+
     // Create the cube from the geometry and the material ...
     this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
@@ -147,8 +152,8 @@ export class SceneContainer {
     orbitControls.enableDamping = true;
     orbitControls.dampingFactor = 1.0;
     orbitControls.enableZoom = true;
-    orbitControls.target.copy(cube.position);
-*/
+    orbitControls.target.copy(this.cube.position);
+    */
 
     const firstPersonControls = new FirstPersonControls(this.camera, this.renderer.domElement);
     firstPersonControls.movementSpeed = 35; // 50;
@@ -160,6 +165,8 @@ export class SceneContainer {
     firstPersonControls.verticalMax = Math.PI * 0.75; // in radians
     // firstPersonControls.lon = -150;
     // firstPersonControls.lat = 120;
+    // firstPersonControls.enabled = true;
+    // console.log("firstPersonControls", firstPersonControls);
 
     this.controls = firstPersonControls;
 
@@ -171,10 +178,11 @@ export class SceneContainer {
     // // depending on your machines possible frame rate.
     const _render = () => {
       // Pass the render function itself
+      let delta = this.clock.getDelta();
       let elapsedTime = _self.clock.getElapsedTime();
 
       this.fogHandler.updateFogColor();
-      firstPersonControls.update(this.clock.getDelta());
+      firstPersonControls.update(delta);
       this.stats.update();
 
       // Let's animate the cube: a rotation.
@@ -186,6 +194,7 @@ export class SceneContainer {
       terrain.causticShaderMaterial.update(elapsedTime);
 
       physicsHandler.render();
+      // this.controls.update();
 
       requestAnimationFrame(_render);
     };
@@ -228,7 +237,9 @@ export class SceneContainer {
       _self.controls.enabled = false;
     });
     this.renderer.domElement.addEventListener("mouseenter", () => {
+      console.log("enter");
       _self.controls.enabled = true;
+      console.log(_self.controls);
     });
 
     // Call the rendering function. This will cause and infinite recursion (we want

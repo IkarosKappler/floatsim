@@ -76,7 +76,8 @@ globalThis.addEventListener("load", function () {
   var waterMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
     vertexShader: vertShader,
-    fragmentShader: fragShader
+    fragmentShader: fragShader,
+    transparent: true
   });
   // waterMaterial.defines = { "USE_UV": "" };
   //--- END--- Create Water Shader (TEST)
@@ -84,9 +85,14 @@ globalThis.addEventListener("load", function () {
   // Create a geometry conaining the logical 3D information (here: a cube)
   var cubeGeometry = new THREE.BoxGeometry(12, 12, 12);
   // Pick a material, something like MeshBasicMaterial, PhongMaterial,
-  var cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+  var cubeBaseMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
   // Create the cube from the geometry and the material ...
-  this.cube = new THREE.Mesh(cubeGeometry, waterMaterial); // cubeMaterial);
+  cubeGeometry.clearGroups();
+  cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
+  cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
+  // this.cube = new THREE.Mesh(cubeGeometry, waterMaterial);
+  this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, waterMaterial]);
+
   this.cube.position.set(12, 12, 12);
   // ... and add it to your scene.
   this.scene.add(this.cube);
@@ -100,9 +106,11 @@ globalThis.addEventListener("load", function () {
 
   const orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
   // Always move the point light with the camera. Looks much better ;)
-  orbitControls.addEventListener("change", () => {
+  const updateCameraLight = () => {
     pointLight.position.copy(_self.camera.position);
-  });
+  };
+  orbitControls.addEventListener("change", updateCameraLight);
+  updateCameraLight();
   orbitControls.enableDamping = true;
   orbitControls.dampingFactor = 1.0;
   orbitControls.enableZoom = true;
@@ -122,7 +130,7 @@ globalThis.addEventListener("load", function () {
     _self.renderer.render(_self.scene, _self.camera);
 
     // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
-    _self.cube.material.uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
+    _self.cube.material[1].uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
     // waterMaterial.uniforms.u_texture.texture = dTex;
     // _self.cube.material.uniforms.u_texture.texture = dTex;
     if (loopNumber < 10) {
@@ -131,7 +139,7 @@ globalThis.addEventListener("load", function () {
     // waterMaterial.uniformsNeedUpdate = true;
     // terrain.mesh.material.uniformsNeedUpdate = true;
     terrain.causticShaderMaterial.update(elapsedTime);
-    _self.cube.material.uniformsNeedUpdate = true;
+    _self.cube.material[1].uniformsNeedUpdate = true;
 
     loopNumber++;
     requestAnimationFrame(_render);

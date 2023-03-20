@@ -46,13 +46,17 @@ var PerlinTerrain = /** @class */ (function () {
         this.heightMap = heightMap;
         this.worldSize = worldSize;
         this.geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1);
+        // Add to layers: base texture and caustic effect layer
+        this.geometry.clearGroups();
+        this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
+        this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
         // this.material = PerlinTerrain.generateMeshMaterial(this.heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
         this.geometry.rotateX(-Math.PI / 2);
         // this.mesh = new THREE.Mesh(this.geometry, this.material);
         var canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
-        var baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture });
+        var baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture, fog: true });
         this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(heightMap, baseTexture);
-        this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
+        this.mesh = new THREE.Mesh(this.geometry, [baseMaterial, this.causticShaderMaterial.waterMaterial]);
         // this.mesh = new THREE.Mesh(this.geometry, baseMaterial);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;

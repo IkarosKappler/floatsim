@@ -74,6 +74,10 @@ var SceneContainer = /** @class */ (function () {
         var cubeGeometry = new THREE.BoxGeometry(12, 12, 12);
         // Pick a material, something like MeshBasicMaterial, PhongMaterial,
         var cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+        // const layerMaterial = new THREE.Layers();
+        // cubeGeometry.clearGroups();
+        // cubeGeometry.addGroup( 0, Number.POSITIVE_INFINITY, 0 );
+        // cubeGeometry.addGroup( 0, Number.POSITIVE_INFINITY, 1 );
         // Create the cube from the geometry and the material ...
         this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
         this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
@@ -132,8 +136,8 @@ var SceneContainer = /** @class */ (function () {
         orbitControls.enableDamping = true;
         orbitControls.dampingFactor = 1.0;
         orbitControls.enableZoom = true;
-        orbitControls.target.copy(cube.position);
-    */
+        orbitControls.target.copy(this.cube.position);
+        */
         var firstPersonControls = new FirstPersonControls_js_1.FirstPersonControls(this.camera, this.renderer.domElement);
         firstPersonControls.movementSpeed = 35; // 50;
         firstPersonControls.lookSpeed = 0.05;
@@ -144,6 +148,8 @@ var SceneContainer = /** @class */ (function () {
         firstPersonControls.verticalMax = Math.PI * 0.75; // in radians
         // firstPersonControls.lon = -150;
         // firstPersonControls.lat = 120;
+        // firstPersonControls.enabled = true;
+        // console.log("firstPersonControls", firstPersonControls);
         this.controls = firstPersonControls;
         // console.log("Stats", Stats);
         this.stats = new Stats_1.Stats.Stats();
@@ -152,9 +158,10 @@ var SceneContainer = /** @class */ (function () {
         // // depending on your machines possible frame rate.
         var _render = function () {
             // Pass the render function itself
+            var delta = _this.clock.getDelta();
             var elapsedTime = _self.clock.getElapsedTime();
             _this.fogHandler.updateFogColor();
-            firstPersonControls.update(_this.clock.getDelta());
+            firstPersonControls.update(delta);
             _this.stats.update();
             // Let's animate the cube: a rotation.
             _this.cube.rotation.x += 0.05;
@@ -163,6 +170,7 @@ var SceneContainer = /** @class */ (function () {
             _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y });
             terrain.causticShaderMaterial.update(elapsedTime);
             physicsHandler.render();
+            // this.controls.update();
             requestAnimationFrame(_render);
         };
         // const zStartOffset = 800.0; // for ImprovedNoise
@@ -197,7 +205,9 @@ var SceneContainer = /** @class */ (function () {
             _self.controls.enabled = false;
         });
         this.renderer.domElement.addEventListener("mouseenter", function () {
+            console.log("enter");
             _self.controls.enabled = true;
+            console.log(_self.controls);
         });
         // Call the rendering function. This will cause and infinite recursion (we want
         // that here, because the animation shall run forever).
