@@ -5,18 +5,18 @@ globalThis.addEventListener("load", function () {
   // Initialize a new THREE renderer (you are also allowed
   // to pass an existing canvas for rendering).
   this.renderer = new THREE.WebGLRenderer({ antialias: true });
-  // this.renderer.setClearColor(0xffffff, 0);
   this.renderer.autoClear = false;
 
   this.renderer.setSize(window.innerWidth, window.innerHeight);
   this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
+  this.camera.position.set(75, 75, 75);
+  this.camera.lookAt({ x: 0, y: 0, z: 0 });
 
   // ... and append it to the DOM
   document.body.appendChild(this.renderer.domElement);
 
   // Add some light
   var pointLight = new THREE.PointLight(0xffffff);
-  // var pointLight = new THREE.AmbientLight(0xffffff);
   pointLight.position.x = 10;
   pointLight.position.y = 50;
   pointLight.position.z = 130;
@@ -29,11 +29,6 @@ globalThis.addEventListener("load", function () {
   var ah = new THREE.AxesHelper(50);
   ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
   this.scene.add(ah);
-  // Set the camera position
-  this.camera.position.set(75, 75, 75);
-  // And look at the cube again
-  this.camera.lookAt({ x: 0, y: 0, z: 0 }); // this.cube.position);
-  // Add cockpit
 
   //--- BEGIN--- Create Water Shader (TEST)
   var vertShader = document.getElementById("vertexShader").innerHTML;
@@ -47,20 +42,13 @@ globalThis.addEventListener("load", function () {
   var terrainData = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
   var terrainSize = { width: 7500, depth: 7500, height: 0 };
   console.log("PerlinTexture", PerlinTexture);
-  var baseTexture = new PerlinTexture(terrainData, terrainSize); //  worldWidthSegments, worldDepthSegments);
+  var baseTexture = new PerlinTexture(terrainData, terrainSize);
 
   var terrain = new PerlinTerrain(terrainData, terrainSize, baseTexture);
   terrain.mesh.position.y = -zStartOffset;
   terrain.mesh.scale.set(0.1, 0.1, 0.1);
   this.scene.add(terrain.mesh);
   //---END--- Terrain Generation
-
-  //   var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
-  //   var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-  //   dTex.needsUpdate = true;
-
-  //   var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
-  //   var baseTexture = new PerlinTexure(terrainData, terrainSize); //  worldWidthSegments, worldDepthSegments);
 
   var imageData = baseTexture.imageData;
   var buffer = imageData.data.buffer; // ArrayBuffer
