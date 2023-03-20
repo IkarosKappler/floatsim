@@ -46,12 +46,12 @@ export class PerlinTerrain {
 
     // this.mesh = new THREE.Mesh(this.geometry, this.material);
     const canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
-    // this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
+    const baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture });
 
-    this.causticShaderMaterial = new CausticShaderMaterial(heightMap, baseTexture); // canvasTexture);
-    // this.material = this.causticShaderMaterial.waterMaterial;
+    this.causticShaderMaterial = new CausticShaderMaterial(heightMap, baseTexture);
 
-    this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial); // this.material);
+    this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
+    // this.mesh = new THREE.Mesh(this.geometry, baseMaterial);
 
     // !!! TODO: check this
     const vertices: Array<number> = (this.geometry.attributes.position as any).array;

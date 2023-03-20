@@ -62,3 +62,4 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 
 - Ken Perlin for the improved Perlin noise https://cs.nyu.edu/~perlin/noise/
 - jaamo for the HUD howto (https://codepen.io/sjcobb/pen/XWjMdXb)
+- Three JS Custom Shader Material and fog hack: https://snayss.medium.com/three-js-fog-hacks-fc0b42f63386

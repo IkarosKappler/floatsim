@@ -50,10 +50,10 @@ var PerlinTerrain = /** @class */ (function () {
         this.geometry.rotateX(-Math.PI / 2);
         // this.mesh = new THREE.Mesh(this.geometry, this.material);
         var canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
-        // this.material = new THREE.MeshBasicMaterial({ map: canvasTexture });
-        this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(heightMap, baseTexture); // canvasTexture);
-        // this.material = this.causticShaderMaterial.waterMaterial;
-        this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial); // this.material);
+        var baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture });
+        this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(heightMap, baseTexture);
+        this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
+        // this.mesh = new THREE.Mesh(this.geometry, baseMaterial);
         // !!! TODO: check this
         var vertices = this.geometry.attributes.position.array;
         for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {

@@ -8,10 +8,15 @@ import * as THREE from "three";
 import { PerlinHeightMap, TextureData } from "../../components/interfaces";
 
 const vertShader = `
+        // # include <fog_pars_vertex>
+        #include <fog_vertex>
+
         varying vec2 vUv; 
         varying vec3 vposition;
 
         void main() {
+
+
             // This is just the local position.
             vUv = uv; // position;
             // This is the global position in the world.
@@ -24,37 +29,54 @@ const vertShader = `
         `;
 
 const fragShader = `
-        uniform float zoom;
-        uniform float speed;
-        uniform float bright;
-        uniform float u_time;
-        uniform sampler2D u_texture;
 
-        varying vec2 vUv;
-        varying vec3 vposition;
+      #include <fog_fragment>
+      // # include <fog_pars_fragment>
 
-        void main()
-        {
-            // uncoment when using real texture
-            vec4 texture_color = texture2D(u_texture, vUv.xy);
-            // vec4 texture_color = vec4(0.192156862745098/2., 0.6627450980392157/2., 0.9333333333333333/2., 1.0);
+      // Scales the effect
+      uniform float u_zoom;
+      // The effect speed
+      uniform float u_speed;
+      // General brightness
+      uniform float u_bright;
+      // Intensity, like the maximal alpha value of the effect
+      uniform float u_intensity;
+      // The current shader animation time frame
+      uniform float u_time;
+      // The underlying texture to use
+      uniform sampler2D u_texture;
+      // The effect color on its peak brightness value
+      uniform vec4 u_effect_color;
 
-            vec4 k = vec4(u_time)*speed;
-            // k.xy = vec2(vUv * zoom);
-            // k.xy = vec2(vposition * zoom);
 
-            // Use the xz-coordinated to view from top
-            k.xy = vec2(vposition.x, vposition.z) * zoom;
+      varying vec2 vUv;
+      varying vec3 vposition;
 
-            float val1 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.5));
-            float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.2));
-            float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.5));
-            gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 7.0) * bright)+texture_color;
-            // gl_FragColor = texture_color;
+      void main()
+      {
 
-            // vec3 color = 0.5 + 0.5*cos(u_time*speed+vUv.xyx+vec3(0,2,4));
-            // gl_FragColor = vec4(color,1.0);
-        }
+          // uncoment when using real texture
+          vec4 texture_color = texture2D(u_texture, vUv.xy);
+          // vec4 effect_color = vec4(0.19, 0.86, 0.86, 1.0);
+
+
+          vec4 k = vec4(u_time)*u_speed;
+
+          // Use the xz-coordinated to view from top
+          k.xy = vec2(vposition.x, vposition.z) * u_zoom;
+          vec3 factors = vec3(1.0,1.0,1.0);
+
+          float val1 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.x*0.5));
+          float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.y*0.2));
+          float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.z*0.5));
+          
+          // gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 8.0) * u_bright)+texture_color;
+          float brightValue = pow(min(min(val1,val2),val3), 8.0) * u_bright;
+
+          // gl_FragColor = texture_color + (effect_color-texture_color) * min(intensity,brightValue);
+          gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);
+
+      }
     `;
 
 export class CausticShaderMaterial {
@@ -79,30 +101,79 @@ export class CausticShaderMaterial {
     var dTex = new THREE.DataTexture(
       // binary, //baseTexture.imageData, // as unknown as BufferSource,
       baseTexture.imageData as unknown as BufferSource,
-      worldWidthSegments,
-      worldDepthSegments,
+      baseTexture.imageCanvas.width, //  worldWidthSegments,
+      baseTexture.imageCanvas.height, //  worldDepthSegments,
       THREE.RGBAFormat
     );
 
     dTex.needsUpdate = true;
 
-    //   uniform float zoom = 127.0; // 7f;
-    //   uniform float speed = .8;
-    //   uniform float bright = 63.0; // 3f;
-    var uniforms = {
-      zoom: { type: "f", value: 0.5 },
-      speed: { type: "f", value: 0.8 },
-      bright: { type: "f", value: 32.0 },
-      u_time: { type: "f", value: 0.0 },
-      u_texture: { type: "t", value: dTex }
-    };
+    // var uniforms = {
+    //   u_zoom: { type: "f", value: worldWidthSegments * 0.00001 }, // 0.05 }, // 127.0 },
+    //   u_speed: { type: "f", value: 0.4 },
+    //   u_bright: { type: "f", value: 32.0 },
+    //   u_intensity: { type: "f", value: 0.5 },
+    //   u_time: { type: "f", value: 0.0 },
+    //   u_texture: { type: "t", value: dTex }, // , texture: dTex }
+    //   u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
+    // };
+    var uniforms = THREE.UniformsUtils.merge([
+      // THREE.UniformsLib["fog"],
+      // THREE.UniformsLib.common,
+      // THREE.UniformsLib.specularmap,
+      // THREE.UniformsLib.envmap,
+      // THREE.UniformsLib.aomap,
+      // THREE.UniformsLib.lightmap,
+      // THREE.UniformsLib.emissivemap,
+      // THREE.UniformsLib.bumpmap,
+      // THREE.UniformsLib.normalmap,
+      // THREE.UniformsLib.displacementmap,
+      // THREE.UniformsLib.gradientmap,
+      THREE.UniformsLib.fog,
+      // THREE.UniformsLib.lights,
+      {
+        u_zoom: { type: "f", value: worldWidthSegments * 0.00001 }, // 0.05 }, // 127.0 },
+        u_speed: { type: "f", value: 0.4 },
+        u_bright: { type: "f", value: 32.0 },
+        u_intensity: { type: "f", value: 0.5 },
+        u_time: { type: "f", value: 0.0 },
+        u_texture: { type: "t", value: dTex }, // , texture: dTex }
+        // u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
+        u_effect_color: { type: "t", value: new THREE.Vector4(0.9, 0.9, 0.9, 1.0) }
+      }
+    ]);
     this.waterMaterial = new THREE.ShaderMaterial({
       uniforms: uniforms,
       vertexShader: vertShader,
       fragmentShader: fragShader
-    });
+      // fog: true,
+      // fogColor: new THREE.Color(0x021a38) // TODO: get from fog handler
+    } as any);
     // TODO: is this still required?
     // this.waterMaterial.defines = { "USE_UV": "" };
+
+    // --- BEGIN--- MIX IN FOG SHADER
+
+    const commonChunk = THREE.ShaderChunk.common; // ["common"];
+    const fogParsFrag = THREE.ShaderChunk.fog_pars_fragment; //["fog_pars_fragment"];
+    const fogFrag = THREE.ShaderChunk.fog_fragment; // ["fog_fragment"];
+    // const fogFrag = ${THREE.ShaderChunk[ "fog_fragment" ]}
+    const fogParsVert = THREE.ShaderChunk.fog_pars_fragment; // ["fog_pars_vertex"];
+    const fogVert = THREE.ShaderChunk.fog_pars_fragment; // ["fog_vertex"];
+
+    console.log("fogParsFrag", fogParsFrag);
+    console.log("fogFrag", fogFrag);
+    console.log("fogParsVert", fogParsVert);
+    console.log("fogVert", fogVert);
+
+    // this.waterMaterial.onBeforeCompile = shader => {
+    //   shader.vertexShader = shader.vertexShader.replace(`#include <fog_pars_vertex>`, fogParsVert);
+    //   shader.vertexShader = shader.vertexShader.replace(`#include <fog_vertex>`, fogVert);
+    //   shader.fragmentShader = shader.fragmentShader.replace(`#include <fog_pars_fragment>`, fogParsFrag);
+    //   shader.fragmentShader = shader.fragmentShader.replace(`#include <fog_fragment>`, fogFrag);
+    // };
+
+    // --- END --- MIX IN FOG SHADER
   }
 
   update(elapsedTime: number) {

@@ -37,11 +37,21 @@
     </script>
 
     <script id="fragmentShader" type="x-shader/x-fragment">
-        uniform float zoom;
-        uniform float speed;
-        uniform float bright;
+        // Scales the effect
+        uniform float u_zoom;
+        // The effect speed
+        uniform float u_speed;
+        // General brightness
+        uniform float u_bright;
+        // Intensity, like the maximal alpha value of the effect
+        uniform float u_intensity;
+        // The current shader animation time frame
         uniform float u_time;
+        // The underlying texture to use
         uniform sampler2D u_texture;
+        // The effect color on its peak brightness value
+        uniform vec4 u_effect_color;
+
 
         varying vec2 vUv;
         varying vec3 vposition;
@@ -50,23 +60,25 @@
         {
             // uncoment when using real texture
             vec4 texture_color = texture2D(u_texture, vUv.xy);
-            // vec4 texture_color = vec4(0.192156862745098/2., 0.6627450980392157/2., 0.9333333333333333/2., 1.0);
+            // vec4 effect_color = vec4(0.19, 0.86, 0.86, 1.0);
 
-            vec4 k = vec4(u_time)*speed;
-            // k.xy = vec2(vUv * zoom);
-            // k.xy = vec2(vposition * zoom);
+
+            vec4 k = vec4(u_time)*u_speed;
 
             // Use the xz-coordinated to view from top
-            k.xy = vec2(vposition.x, vposition.z) * zoom;
+            k.xy = vec2(vposition.x, vposition.z) * u_zoom;
+            vec3 factors = vec3(1.0,1.0,1.0);
 
-            float val1 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.5));
-            float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.2));
-            float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*0.5));
-            gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 7.0) * bright)+texture_color;
-            // gl_FragColor = texture_color;
+            float val1 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.x*0.5));
+            float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.y*0.2));
+            float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.z*0.5));
+            
+            // gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 8.0) * u_bright)+texture_color;
+            float brightValue = pow(min(min(val1,val2),val3), 8.0) * u_bright;
 
-            // vec3 color = 0.5 + 0.5*cos(u_time*speed+vUv.xyx+vec3(0,2,4));
-            // gl_FragColor = vec4(color,1.0);
+            // gl_FragColor = texture_color + (effect_color-texture_color) * min(intensity,brightValue);
+            gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);
+
         }
     </script>
 

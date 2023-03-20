@@ -65,19 +65,20 @@ globalThis.addEventListener("load", function () {
   //   uniform float speed = .8;
   //   uniform float bright = 63.0; // 3f;
   var uniforms = {
-    zoom: { type: "f", value: 0.5 }, // 127.0 },
-    speed: { type: "f", value: 0.8 },
-    bright: { type: "f", value: 32.0 },
+    u_zoom: { type: "f", value: 0.5 }, // 127.0 },
+    u_speed: { type: "f", value: 0.4 },
+    u_bright: { type: "f", value: 32.0 },
+    u_intensity: { type: "f", value: 0.5 },
     u_time: { type: "f", value: this.clock.getDelta() },
-    // u_texture: { type: "t", value: 0, texture: THREE.ImageUtils.loadTexture( 'texture.jpg' ) }
-    u_texture: { type: "t", value: dTex } // , texture: dTex }
+    u_texture: { type: "t", value: dTex }, // , texture: dTex }
+    u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
   };
   var waterMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
     vertexShader: vertShader,
     fragmentShader: fragShader
   });
-  waterMaterial.defines = { "USE_UV": "" };
+  // waterMaterial.defines = { "USE_UV": "" };
   //--- END--- Create Water Shader (TEST)
 
   // Create a geometry conaining the logical 3D information (here: a cube)
@@ -122,8 +123,8 @@ globalThis.addEventListener("load", function () {
 
     // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
     _self.cube.material.uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
-    waterMaterial.uniforms.u_texture.texture = dTex;
-    _self.cube.material.uniforms.u_texture.texture = dTex;
+    // waterMaterial.uniforms.u_texture.texture = dTex;
+    // _self.cube.material.uniforms.u_texture.texture = dTex;
     if (loopNumber < 10) {
       console.log("waterMaterial.uniforms", loopNumber, waterMaterial.uniforms.u_time.value);
     }

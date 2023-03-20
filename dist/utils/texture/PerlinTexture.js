@@ -26,33 +26,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PerlinTexture = void 0;
 var THREE = __importStar(require("three"));
 var PerlinTexture = /** @class */ (function () {
-    //   readonly mesh: THREE.Mesh;
     function PerlinTexture(heightMap, worldSize) {
-        // this.heightMap = heightMap;
-        // this.worldSize = worldSize;
-        // this.geometry = new THREE.PlaneGeometry(
-        //   worldSize.width,
-        //   worldSize.depth,
-        //   heightMap.widthSegments - 1,
-        //   heightMap.depthSegments - 1
-        // );
         var textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
         this.imageCanvas = textureData.imageCanvas;
         this.imageData = textureData.imageData;
         this.imageDataArray = textureData.imageDataArray;
-        // this.material = PerlinTexture.generateMeshMaterial(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
-        // const textureData = PerlinTerrain.generateTexture(data, worldWidth, worldDepth);
         var texture = new THREE.CanvasTexture(textureData.imageCanvas);
         texture.wrapS = THREE.ClampToEdgeWrapping;
         texture.wrapT = THREE.ClampToEdgeWrapping;
         this.material = new THREE.MeshBasicMaterial({ map: texture });
-        // this.geometry.rotateX(-Math.PI / 2);
-        // this.mesh = new THREE.Mesh(this.geometry, this.material);
-        // // !!! TODO: check this
-        // const vertices: Array<number> = (this.geometry.attributes.position as any).array;
-        // for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-        //   vertices[j + 1] = this.heightMap.data[i] * 10;
-        // }
     }
     PerlinTexture.generateTexture = function (data, width, height) {
         var context;
