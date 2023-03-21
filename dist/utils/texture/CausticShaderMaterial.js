@@ -34,8 +34,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CausticShaderMaterial = void 0;
 var THREE = __importStar(require("three"));
-var VERT_SHADER = "\n        // -- <fog_pars_vertex>\n        // uniform vec3 fogColor;\n        // varying float vFogDepth;\n        // uniform float fogDensity;\n        varying float vFogDepth;\n          \n        \n        varying vec2 vUv; \n        varying vec3 vposition;\n        varying vec4 mvPosition;\n        \n        void main() {\n          \n          \n          // This is just the local position.\n          vUv = uv; // position;\n          // This is the global position in the world.\n          vposition = (modelMatrix * vec4(position, 1.0)).xyz;\n          \n          vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);\n          // gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n          gl_Position = projectionMatrix * modelViewPosition; \n\n\n          // General THREEJS varying\n          vec4 mvPosition = modelViewMatrix * vec4( position, 1.0);\n\n          // # --- <fog_vertex>\n          vFogDepth = - mvPosition.z;\n        }\n        ";
-var FRAG_SHADER = "\n\n      // -- <fog_pars_fragment>\n      uniform vec3 fogColor;\n      varying float vFogDepth;\n      uniform float fogDensity;\n       \n\n      // Scales the effect\n      uniform float u_zoom;\n      // The effect speed\n      uniform float u_speed;\n      // General brightness\n      uniform float u_bright;\n      // Intensity, like the maximal alpha value of the effect\n      uniform float u_intensity;\n      // The current shader animation time frame\n      uniform float u_time;\n      // The underlying texture to use\n      uniform sampler2D u_texture;\n      // The effect color on its peak brightness value\n        uniform vec4 u_effect_color;\n        \n        \n        varying vec2 vUv;\n        varying vec3 vposition;\n        varying vec4 mvPosition;\n        \n        void main()\n        {\n          // uncoment when using real texture\n          vec4 texture_color = texture2D(u_texture, vUv.xy);\n          // vec4 effect_color = vec4(0.19, 0.86, 0.86, 1.0);\n          // vec4 texture_color = vec4(0.19, 0.86, 0.86, 0.0);\n          \n          \n          vec4 k = vec4(u_time)*u_speed;\n          \n          // Use the xz-coordinated to view from top\n          k.xy = vec2(vposition.x, vposition.z) * u_zoom;\n          vec3 factors = vec3(1.0,1.0,1.0);\n          \n          float val1 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.x*0.5));\n          float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.y*0.2));\n          float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.z*0.5));\n          \n          gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 8.0) * u_bright)+texture_color;\n          // float brightValue = pow(min(min(val1,val2),val3), 8.0) * u_bright;\n          \n          // gl_FragColor = texture_color + (effect_color-texture_color) * min(intensity,brightValue);\n          // gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);\n          gl_FragColor.rgb = gl_FragColor.xyz;\n\n          // -- <fog_fragment>\n          float fogFactor = 1.0 - exp( - fogDensity * fogDensity * vFogDepth * vFogDepth );\n          gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );\n        }\n  \n    ";
+var caustic_shader_material_glsl_1 = require("./shaders/caustic_shader_material.glsl");
 var CausticShaderMaterial = /** @class */ (function () {
     function CausticShaderMaterial(baseTexture) {
         this.loopNumber = 0;
@@ -49,39 +48,14 @@ var CausticShaderMaterial = /** @class */ (function () {
         for (var i = 0; i < binary.length; i++) {
             binary[i] = imageData.data[i];
         }
-        //   var dTex = new THREE.DataTexture(binary, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        // var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
         // TODO: FIX THIS TYPE!!!
-        var dTex = new THREE.DataTexture(
-        // binary, //baseTexture.imageData, // as unknown as BufferSource,
-        baseTexture.imageData, baseTexture.imageCanvas.width, //  worldWidthSegments,
-        baseTexture.imageCanvas.height, //  worldDepthSegments,
-        THREE.RGBAFormat);
+        var dTex = new THREE.DataTexture(baseTexture.imageData, baseTexture.imageCanvas.width, baseTexture.imageCanvas.height, THREE.RGBAFormat);
         dTex.needsUpdate = true;
-        var commonChunk = THREE.ShaderChunk.common; // ["common"];
-        var fogParsFrag = THREE.ShaderChunk.fog_pars_fragment; //["fog_pars_fragment"];
-        var fogFrag = THREE.ShaderChunk.fog_fragment; // ["fog_fragment"];
-        // const fogFrag = ${THREE.ShaderChunk[ "fog_fragment" ]}
-        var fogParsVert = THREE.ShaderChunk.fog_pars_vertex; // ["fog_pars_vertex"];
-        var fogVert = THREE.ShaderChunk.fog_vertex; // ["fog_vertex"];
-        // console.log("fogParsFrag", fogParsFrag);
-        // console.log("fogFrag", fogFrag);
-        console.log("commonChunk", commonChunk);
-        console.log("fogParsVert", fogParsVert);
-        console.log("fogVert", fogVert);
-        var vertexShader = VERT_SHADER; //.replace(`#include <fog_pars_vertex>`, fogParsVert).replace(`#include <fog_vertex>`, fogVert);
-        var fragmentShader = FRAG_SHADER; // .replace(`#include <fog_pars_fragment>`, fogParsFrag).replace( `#include <fog_fragment>`,      fogFrag    );
-        // console.log("extended vertexShader", vertexShader);
-        // console.log("extended fragmentShader", fragmentShader);
-        // var uniforms = {
-        //   u_zoom: { type: "f", value: worldWidthSegments * 0.00001 }, // 0.05 }, // 127.0 },
-        //   u_speed: { type: "f", value: 0.4 },
-        //   u_bright: { type: "f", value: 32.0 },
-        //   u_intensity: { type: "f", value: 0.5 },
-        //   u_time: { type: "f", value: 0.0 },
-        //   u_texture: { type: "t", value: dTex }, // , texture: dTex }
-        //   u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
-        // };
+        // const commonChunk = THREE.ShaderChunk.common;
+        // const fogParsFrag = THREE.ShaderChunk.fog_pars_fragment;
+        // const fogFrag = THREE.ShaderChunk.fog_fragment;
+        // const fogParsVert = THREE.ShaderChunk.fog_pars_vertex;
+        // const fogVert = THREE.ShaderChunk.fog_vertex;
         var uniforms = THREE.UniformsUtils.merge([
             // THREE.UniformsLib["fog"],
             // THREE.UniformsLib.common,
@@ -98,57 +72,34 @@ var CausticShaderMaterial = /** @class */ (function () {
             // THREE.UniformsLib.lights,
             {
                 // Fog shader
-                // uniform vec3 fogColor; // = 0x021a38
-                // varying float vFogDepth;
-                // uniform float fogDensity;
-                // fogColor: { type: "t", value: new THREE.Vector3(0.000078, 0.098007, 0.045536) }, // TODO: change fog color
+                // TODO: take initial fog color from FogHandler?
                 fogColor: { type: "t", value: new THREE.Color(0x021a38) },
                 vFogDepth: { type: "f", value: 0.0021 },
                 fogDensity: { type: "f", value: 0.0021 },
                 // Caustic shader
-                u_zoom: { type: "f", value: worldWidthSegments * 0.00001 },
+                u_zoom: { type: "f", value: worldWidthSegments * 0.000025 },
                 u_speed: { type: "f", value: 0.4 },
                 u_bright: { type: "f", value: 32.0 },
                 u_intensity: { type: "f", value: 0.5 },
                 u_time: { type: "f", value: 0.0 },
                 u_texture: { type: "t", value: dTex },
                 // u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
-                // u_effect_color: { type: "t", value: new THREE.Vector4(0.9, 0.9, 0.9, 1.0) }
-                u_effect_color: { type: "t", value: new THREE.Vector4(0.19, 0.86, 0.86, 1.0) }
+                u_effect_color: { type: "t", value: new THREE.Vector4(0.5, 0.85, 0.95) }
             }
         ]);
         this.waterMaterial = new THREE.ShaderMaterial({
             uniforms: uniforms,
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            // transparent: true,
-            fog: true,
-            fogColor: new THREE.Color(0x021a38) // TODO: get from fog handler
+            vertexShader: caustic_shader_material_glsl_1.vertex,
+            fragmentShader: caustic_shader_material_glsl_1.fragment,
+            fog: true
         });
-        // TODO: is this still required?
-        // this.waterMaterial.defines = { "USE_UV": "" };
-        // --- BEGIN--- MIX IN FOG SHADER
-        // console.log("fogParsFrag", fogParsFrag);
-        // console.log("fogFrag", fogFrag);
-        // console.log("fogParsVert", fogParsVert);
-        // console.log("fogVert", fogVert);
-        // this.waterMaterial.onBeforeCompile = shader => {
-        //   shader.vertexShader = shader.vertexShader.replace(`#include <fog_pars_vertex>`, fogParsVert);
-        //   shader.vertexShader = shader.vertexShader.replace(`#include <fog_vertex>`, fogVert);
-        //   shader.fragmentShader = shader.fragmentShader.replace(`#include <fog_pars_fragment>`, fogParsFrag);
-        //   shader.fragmentShader = shader.fragmentShader.replace(`#include <fog_fragment>`, fogFrag);
-        // };
-        // --- END --- MIX IN FOG SHADER
     }
     CausticShaderMaterial.prototype.update = function (elapsedTime, fogColor) {
-        // self.cube.material.uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
-        this.waterMaterial.uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
-        this.waterMaterial.uniforms.fogColor.value = fogColor; // this.sceneContainer.scene.fog.color;
-        // console.log("this.waterMaterial.uniforms.u_texture.value", this.waterMaterial.uniforms.u_texture.value);
-        // this.waterMaterial.uniforms.u_texture.value.minFilter = THREE.LinearMipMapLinearFilter;
-        if (this.loopNumber < 10) {
-            console.log("waterMaterial.uniforms", this.loopNumber, this.waterMaterial.uniforms.u_time.value);
-        }
+        this.waterMaterial.uniforms.u_time.value = elapsedTime;
+        this.waterMaterial.uniforms.fogColor.value = fogColor;
+        // if (this.loopNumber < 10) {
+        //   console.log("waterMaterial.uniforms", this.loopNumber, this.waterMaterial.uniforms.u_time.value);
+        // }
         this.waterMaterial.uniformsNeedUpdate = true;
         this.loopNumber++;
     };

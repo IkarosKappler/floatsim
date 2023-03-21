@@ -5,13 +5,10 @@
  */
 
 import * as THREE from "three";
-// import { clamp } from ""
+import PlaySound from "play-sound";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
-// import Stats from "three/examples/jsm/libs/stats.module.js";
-// import { Stats } from "../Stats.js";
 import { Stats } from "../Stats";
-// import * as SceneUtils from "three/examples/jsm/utils/SceneUtils.js";
 import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
@@ -20,6 +17,7 @@ import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
 import { PerlinTexture } from "../utils/texture/PerlinTexture";
+import { AudioPlayer } from "../utils/AudioPlayer";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -61,7 +59,7 @@ export class SceneContainer {
     this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 10, 10000);
 
     this.fogHandler = new FogHandler(this);
     this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
@@ -216,7 +214,6 @@ export class SceneContainer {
     terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
     this.scene.add(terrain.mesh);
 
-    // var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
     var imageData = terrainTexture.imageData;
     var buffer = imageData.data.buffer; // ArrayBuffer
     var arrayBuffer = new ArrayBuffer(imageData.data.length);
@@ -250,6 +247,18 @@ export class SceneContainer {
     const physicsHandler = new PhysicsHandler(this, terrain);
     physicsHandler.start().then(_render);
     // _render();
+
+    this.startAudio();
+  }
+
+  startAudio() {
+    const audioPlayer = new AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+    const startButton = document.querySelector("#button-start");
+    startButton.addEventListener("click", () => {
+      const overlay = document.querySelector("#overlay");
+      overlay.classList.add("d-none");
+      audioPlayer.play();
+    });
   }
 
   onWindowResize() {

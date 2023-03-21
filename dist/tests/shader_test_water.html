@@ -15,6 +15,7 @@
     <script src="../lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script>globalThis.three = THREE;</script>
     <script src="../lib/three/examples/umd/math/ImprovedNoise.js"></script>
+    <script src="../utils/texture/shaders/caustic_shader_material.glsl.js"></script>
     <script src="../utils/texture/CausticShaderMaterial.js"></script> 
     <script src="../utils/texture/PerlinTexture.js"></script> 
     <script src="../components/PerlinTerrain.js"></script> 
@@ -37,6 +38,9 @@
     </script>
 
     <script id="fragmentShader" type="x-shader/x-fragment">
+
+        #define FOG_EXP2 1
+
         // Scales the effect
         uniform float u_zoom;
         // The effect speed
@@ -52,12 +56,25 @@
         // The effect color on its peak brightness value
         uniform vec4 u_effect_color;
 
+        // ### USE FOG 
+        uniform vec3 fogColor;
+        varying float vFogDepth;
+        #ifdef FOG_EXP2
+            uniform float fogDensity;
+        #else
+            uniform float fogNear;
+            uniform float fogFar;
+        #endif
 
         varying vec2 vUv;
         varying vec3 vposition;
 
+
         void main()
         {
+
+            
+
             // uncoment when using real texture
             vec4 texture_color = texture2D(u_texture, vUv.xy);
             // vec4 effect_color = vec4(0.19, 0.86, 0.86, 1.0);
@@ -74,12 +91,10 @@
             float val2 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.y*0.2));
             float val3 = length(0.5-fract(k.xyw*=mat3(vec3(-2.0,-1.0,0.0), vec3(3.0,-1.0,1.0), vec3(1.0,-1.0,-1.0))*factors.z*0.5));
             
-            gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 8.0) * u_bright)+texture_color;
-            // float brightValue = pow(min(min(val1,val2),val3), 8.0) * u_bright;
+            //gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 8.0) * u_bright)+texture_color;
+            float brightValue = pow(min(min(val1,val2),val3), 8.0) * u_bright;
 
-            // gl_FragColor = texture_color + (effect_color-texture_color) * min(intensity,brightValue);
-            // gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);
-
+            gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);
         }
     </script>
 

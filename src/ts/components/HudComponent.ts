@@ -15,17 +15,12 @@ export class HudComponent {
     // BEGIN Try a HUD
     // We will use 2D canvas element to render our HUD.
     this.hudCanvas = document.createElement("canvas");
-    // hudCanvas.style.background = "rgba(255,255,255,0.5)";
-
     // Again, set dimensions to fit the screen.
-    // const width = initialWidth; // TODO get canvas size here
-    // const height = initialHeight;
     this.hudCanvas.width = width;
     this.hudCanvas.height = height;
 
     // Get 2D context and draw something supercool.
     this.hudBitmap = this.hudCanvas.getContext("2d");
-    // hudBitmap.globalCompositeOperation = ;
     this.hudBitmap.font = "Normal 16px Arial";
     this.hudBitmap.textAlign = "center";
     this.hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
@@ -34,17 +29,9 @@ export class HudComponent {
     this.hudImage.onload = function () {
       // hudBitmap.drawImage(hudImage, 69, 50);
     };
-    // this.hudImage.src = "img/cockpit-nasa.png";
-
-    // const hudImageAlphaMap = new THREE.TextureLoader().load("img/cockpit-nasa-alphamap.png");
-
-    var hudWidth = 1500;
-    var hudHeight = 1400;
 
     // Create the camera and set the viewport to match the screen dimensions.
     this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 30);
-    // this.hudCamera = new THREE.OrthographicCamera(-hudWidth / 2, hudWidth / 2, hudHeight / 2, -hudHeight / 2, 0, 30);
-
     // Create also a custom scene for HUD.
     this.hudScene = new THREE.Scene();
 
@@ -54,15 +41,11 @@ export class HudComponent {
 
     // Create HUD material.
     this.hudMaterial = new THREE.MeshBasicMaterial({
-      //   color: new THREE.Color(0x000000),
       map: this.hudTexture,
       //   alphaMap: hudImageAlphaMap,
       transparent: true
       // opacity: 1
     });
-    // hudMaterial.transparent = true;
-    // hudMaterial.alphaTest = 0.5;
-    // hudMaterial.color.
 
     // Create plane to render the HUD. This plane fill the whole screen.
     var planeGeometry = new THREE.PlaneGeometry(100, 100); //width, height);
@@ -70,10 +53,6 @@ export class HudComponent {
     this.plane.scale.set(width / 100, height / 100, 1);
     this.hudScene.add(this.plane);
   }
-
-  //   getHudData() {
-  //     return this.hudData;
-  //   }
 
   setHudSize(width: number, height: number) {
     this.hudCanvas.width = width;

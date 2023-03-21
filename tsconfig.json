@@ -11,6 +11,8 @@
 
 		"allowJs": false,
 
+		"esModuleInterop" : true,
+
 		"forceConsistentCasingInFileNames": true,
 		"noImplicitReturns": false,
 		"noImplicitThis": false,

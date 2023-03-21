@@ -27,6 +27,8 @@ exports.PerlinTexture = void 0;
 var THREE = __importStar(require("three"));
 var PerlinTexture = /** @class */ (function () {
     function PerlinTexture(heightMap, worldSize) {
+        // const textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
+        // const textureData = PerlinTexture.generateTexture(heightMap.data, worldSize.width, worldSize.depth);
         var textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
         this.imageCanvas = textureData.imageCanvas;
         this.imageData = textureData.imageData;

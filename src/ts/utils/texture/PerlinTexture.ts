@@ -9,7 +9,10 @@ export class PerlinTexture implements TextureData {
   readonly imageCanvas: HTMLCanvasElement;
 
   constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable) {
+    // const textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
+    // const textureData = PerlinTexture.generateTexture(heightMap.data, worldSize.width, worldSize.depth);
     const textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
+
     this.imageCanvas = textureData.imageCanvas;
     this.imageData = textureData.imageData;
     this.imageDataArray = textureData.imageDataArray;
@@ -60,7 +63,6 @@ export class PerlinTexture implements TextureData {
     context.putImageData(imageData, 0, 0);
 
     // Scaled 4x
-
     const canvasScaled = document.createElement("canvas");
     canvasScaled.width = width * 4;
     canvasScaled.height = height * 4;

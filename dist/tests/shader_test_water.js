@@ -75,7 +75,8 @@ globalThis.addEventListener("load", function () {
     u_intensity: { type: "f", value: 0.5 },
     u_time: { type: "f", value: this.clock.getDelta() },
     u_texture: { type: "t", value: dTex }, // , texture: dTex }
-    u_effect_color: { type: "t", value: new THREE.Color(0.19, 0.86, 0.86) }
+    // u_effect_color: { type: "t", value: new THREE.Color(0.19, 0.86, 0.86) },
+    u_effect_color: { type: "t", value: new THREE.Vector4(0.29, 0.75, 0.89) }
   };
   var waterMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -128,15 +129,7 @@ globalThis.addEventListener("load", function () {
     _self.cube.rotation.y += 0.005;
     _self.renderer.render(_self.scene, _self.camera);
 
-    // waterMaterial.uniforms.u_time.value = _self.clock.getElapsedTime();
-    _self.cube.material[1].uniforms.u_time.value = elapsedTime; // _self.clock.getElapsedTime();
-    // waterMaterial.uniforms.u_texture.texture = dTex;
-    // _self.cube.material.uniforms.u_texture.texture = dTex;
-    if (loopNumber < 10) {
-      console.log("waterMaterial.uniforms", loopNumber, waterMaterial.uniforms.u_time.value);
-    }
-    // waterMaterial.uniformsNeedUpdate = true;
-    // terrain.mesh.material.uniformsNeedUpdate = true;
+    _self.cube.material[1].uniforms.u_time.value = elapsedTime;
     terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
     _self.cube.material[1].uniformsNeedUpdate = true;
 

@@ -7,36 +7,29 @@
     <script src="lib/three/build/three.150.min.js"></script>
     <script>globalThis.three = THREE;</script>
     <script src="lib/three/examples/umd/lib/stats.module.js"></script> 
-    <!-- <script src="module.js"></script> -->
-    <!-- <script src="lib/ammojs/ammo.wasm.js"></script> -->
     <script src="module.js"></script>
     <script src="lib/ammojs/ammo.js"></script>
     <!-- <script src="lib/ammo.wasm-downloaded.js"></script> -->
     <script>
-        /*  globalThis.Ammo = Ammo;
-        exports.Ammo = Ammo;  */
         console.log("[Ammojs]", Ammo);
         console.log("exports after Ammo", exports);
         globalThis.module = globalThis;
     </script>
     <script src="lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script src="lib/three/examples/umd/controls/FirstPersonControls.js"></script>
-    <!-- <script>console.log("[DOC] FirstPersonControls", exports.FirstPersonControls);</script> -->
     <script src="lib/three/examples/umd/math/ImprovedNoise.js"></script>
     <script src="lib/three/examples/umd/utils/BufferGeometryUtils.js"></script>
     <script src="lib/three/examples/umd/utils/SceneUtils.js"></script>
-    <!-- <script src="lib/Stats.js"></script> -->
-    <!-- <script src="lib/three/examples/umd/lib/stats.module.js"></script> -->
-    <!-- <script>console.log("[DOC] Stats", exports.Stats);</script> -->
     <script src="utils/texture/PerlinTexture.js"></script> 
+    <script src="utils/texture/shaders/caustic_shader_material.glsl.js"></script>
     <script src="utils/texture/CausticShaderMaterial.js"></script> 
     <script src="components/PerlinTerrain.js"></script> 
     <script src="components/CockpitPlane.js"></script> 
     <script src="components/HudComponent.js"></script> 
     <script src="components/FogHandler.js"></script> 
     <script src="components/PhysicsHandler.js"></script> 
+    <script src="utils/AudioPlayer.js"></script> 
     <script src="components/SceneContainer.js"></script> 
-    <!-- <script>console.log("[DOC] SceneContainer", exports.SceneContainer);</script> -->
     <script src="utils/generateDemoHeight.js"></script> 
     <script src="utils/gup.js"></script> 
     <script src="utils/Params.js"></script> 
@@ -47,7 +40,7 @@
 </head>
 
 <body> 
-    <div id="Stats-output">
-    </div>
+    <div id="Stats-output"></div>
+    <div id="overlay"><button id="button-start">Start</button></div>
 </body> 
 </html>

@@ -31,16 +31,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SceneContainer = void 0;
 var THREE = __importStar(require("three"));
 var FirstPersonControls_js_1 = require("three/examples/jsm/controls/FirstPersonControls.js");
-// import Stats from "three/examples/jsm/libs/stats.module.js";
-// import { Stats } from "../Stats.js";
 var Stats_1 = require("../Stats");
-// import * as SceneUtils from "three/examples/jsm/utils/SceneUtils.js";
 var PerlinTerrain_1 = require("./PerlinTerrain");
 var CockpitPlane_1 = require("./CockpitPlane");
 var HudComponent_1 = require("./HudComponent");
 var FogHandler_1 = require("./FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
 var PerlinTexture_1 = require("../utils/texture/PerlinTexture");
+var AudioPlayer_1 = require("../utils/AudioPlayer");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -64,7 +62,7 @@ var SceneContainer = /** @class */ (function () {
         this.renderer.autoClear = false;
         this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 10, 10000);
         this.fogHandler = new FogHandler_1.FogHandler(this);
         this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
         this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
@@ -184,7 +182,6 @@ var SceneContainer = /** @class */ (function () {
         console.log("terrainData", terrainData);
         terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
         this.scene.add(terrain.mesh);
-        // var baseTexture = PerlinTerrain.generateTexture(terrainData.data, worldWidthSegments, worldDepthSegments);
         var imageData = terrainTexture.imageData;
         var buffer = imageData.data.buffer; // ArrayBuffer
         var arrayBuffer = new ArrayBuffer(imageData.data.length);
@@ -215,7 +212,17 @@ var SceneContainer = /** @class */ (function () {
         var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
         physicsHandler.start().then(_render);
         // _render();
+        this.startAudio();
     }
+    SceneContainer.prototype.startAudio = function () {
+        var audioPlayer = new AudioPlayer_1.AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+        var startButton = document.querySelector("#button-start");
+        startButton.addEventListener("click", function () {
+            var overlay = document.querySelector("#overlay");
+            overlay.classList.add("d-none");
+            audioPlayer.play();
+        });
+    };
     SceneContainer.prototype.onWindowResize = function () {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
