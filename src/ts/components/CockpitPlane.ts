@@ -16,7 +16,7 @@ export class CockpitPlane {
     const cockpitTexture = new THREE.TextureLoader().load("img/cockpit-nasa.png");
     const cockpitAlpahMap = new THREE.TextureLoader().load("img/cockpit-nasa-alphamap.png");
     var material = new THREE.MeshBasicMaterial({
-      color: 0x888888,
+      color: 0x888888, // Make the cockpit a bit darker
       map: cockpitTexture,
       alphaMap: cockpitAlpahMap,
       transparent: true,
@@ -27,10 +27,10 @@ export class CockpitPlane {
     cockpitAlpahMap.wrapS = THREE.ClampToEdgeWrapping;
     cockpitAlpahMap.wrapT = THREE.ClampToEdgeWrapping;
 
-    var geometryco = new THREE.PlaneGeometry(1, 1, 10, 10);
-    geometryco.rotateX(-Math.PI / 4);
-    geometryco.translate(0, 0, -12);
-    this.mesh = new THREE.Mesh(geometryco, material);
+    var geometry = new THREE.PlaneGeometry(1, 1, 10, 10);
+    geometry.rotateX(-Math.PI / 4);
+    geometry.translate(0, 0, -12);
+    this.mesh = new THREE.Mesh(geometry, material);
   }
 
   setCockpitSize(width: number, height: number) {

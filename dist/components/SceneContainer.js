@@ -165,7 +165,7 @@ var SceneContainer = /** @class */ (function () {
             _this.cube.rotation.x += 0.05;
             _this.cube.rotation.y += 0.04;
             _this.renderer.render(_this.scene, _this.camera);
-            _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y });
+            _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y, shipRotation: _this.camera.rotation });
             terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
             physicsHandler.render();
             requestAnimationFrame(_render);

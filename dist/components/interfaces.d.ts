@@ -3,6 +3,12 @@
  */
 export interface HUDData {
     depth: number;
+    shipRotation: NTriple;
+}
+export interface NTriple {
+    x: number;
+    y: number;
+    z: number;
 }
 export interface MinMax {
     min: number;

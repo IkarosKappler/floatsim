@@ -79,6 +79,7 @@
             vec4 texture_color = texture2D(u_texture, vUv.xy);
             // vec4 effect_color = vec4(0.19, 0.86, 0.86, 1.0);
             // vec4 texture_color = vec4(0.19, 0.86, 0.86, 1.0);
+            // vec4 effect_color_dark = vec4(0.5, 0.5, 0.5, 1.0);
 
 
             vec4 k = vec4(u_time)*u_speed;
@@ -93,8 +94,14 @@
             
             //gl_FragColor = vec4 (pow(min(min(val1,val2),val3), 8.0) * u_bright)+texture_color;
             float brightValue = pow(min(min(val1,val2),val3), 8.0) * u_bright;
+            // float brightValue_inv = 0.5 - pow(min(min(val1,val2),val3), 8.0) * u_bright;
 
-            gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);
+            // gl_FragColor = texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue);
+            // gl_FragColor = mix(texture_color, u_effect_color, min(u_intensity,brightValue));
+            gl_FragColor = mix( texture_color, u_effect_color, min(u_intensity,brightValue));
+
+            // gl_FragColor = mix( gl_FragColor, effect_color_dark, min(u_intensity,brightValue_inv));
+
         }
     </script>
 

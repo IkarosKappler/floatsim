@@ -10,6 +10,7 @@ export class HudComponent {
   private hudTexture: THREE.Texture;
   private hudMaterial: THREE.MeshBasicMaterial;
   private plane: THREE.Mesh;
+  private compassMesh: THREE.Mesh;
 
   constructor(width: number, height: number) {
     // BEGIN Try a HUD
@@ -31,7 +32,8 @@ export class HudComponent {
     };
 
     // Create the camera and set the viewport to match the screen dimensions.
-    this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 30);
+    this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1000);
+    this.hudCamera.position.z = 40;
     // Create also a custom scene for HUD.
     this.hudScene = new THREE.Scene();
 
@@ -51,7 +53,16 @@ export class HudComponent {
     var planeGeometry = new THREE.PlaneGeometry(100, 100); //width, height);
     this.plane = new THREE.Mesh(planeGeometry, this.hudMaterial);
     this.plane.scale.set(width / 100, height / 100, 1);
+    this.plane.position.z = -150; // Depth in the scene
     this.hudScene.add(this.plane);
+    console.log("blaaaaah");
+
+    // Create a compass
+    const compassGeometry = new THREE.CylinderGeometry(30, 30, 10, 8, 2);
+    const compassMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    this.compassMesh = new THREE.Mesh(compassGeometry, compassMaterial);
+    this.compassMesh.position.add(new THREE.Vector3(30, 300, -160)); // Radius=30 -> definitely in range of camera
+    this.hudScene.add(this.compassMesh);
   }
 
   setHudSize(width: number, height: number) {
@@ -65,10 +76,6 @@ export class HudComponent {
 
   renderHud(renderer: THREE.WebGLRenderer, data: HUDData) {
     // Render the HUD scene
-    // this.hudData.x += 0.01;
-    // this.hudData.y -= 0.01;
-    // this.hudData.z += 0.03;
-
     var hudSize = { width: 240, height: 80 };
 
     // Update HUD graphics.
@@ -79,12 +86,17 @@ export class HudComponent {
 
     // console.log("this.hudCanvas.width", this.hudCanvas.width);
 
-    this.hudBitmap.clearRect(
-      this.hudCanvas.width - hudSize.width,
-      this.hudCanvas.height - hudSize.height,
-      hudSize.width,
-      hudSize.height
-    );
+    // Clear only the lower HUD rect?
+    // this.hudBitmap.clearRect(
+    //   this.hudCanvas.width - hudSize.width,
+    //   this.hudCanvas.height - hudSize.height,
+    //   hudSize.width,
+    //   hudSize.height
+    // );
+
+    // Or clear the whole scene?
+    this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
+
     this.hudBitmap.fillStyle = "rgba(0,192,192,0.5)";
     this.hudBitmap.fillRect(
       this.hudCanvas.width - hudSize.width,
@@ -106,8 +118,8 @@ export class HudComponent {
     this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
     this.hudTexture.needsUpdate = true;
 
-    // Render scene.
-    // renderer.render(scene, camera);
+    // Update compass
+    this.compassMesh.rotation.set(data.shipRotation.x, data.shipRotation.y, data.shipRotation.z);
 
     // Render HUD on top of the scene.
     renderer.render(this.hudScene, this.hudCamera);

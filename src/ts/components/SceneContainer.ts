@@ -188,7 +188,7 @@ export class SceneContainer {
       this.cube.rotation.y += 0.04;
 
       this.renderer.render(this.scene, this.camera);
-      this.hud.renderHud(this.renderer, { depth: this.camera.position.y });
+      this.hud.renderHud(this.renderer, { depth: this.camera.position.y, shipRotation: this.camera.rotation });
 
       terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 

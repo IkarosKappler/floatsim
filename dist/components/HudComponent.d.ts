@@ -9,6 +9,7 @@ export declare class HudComponent {
     private hudTexture;
     private hudMaterial;
     private plane;
+    private compassMesh;
     constructor(width: number, height: number);
     setHudSize(width: number, height: number): void;
     renderHud(renderer: THREE.WebGLRenderer, data: HUDData): void;
