@@ -18,14 +18,14 @@ globalThis.addEventListener("load", () => {
   const params: Params = new Params(GUP);
 
   console.log("SceneContainer", SceneContainer);
-  new SceneContainer(params);
+  const sceneContainer = new SceneContainer(params);
 
   console.log(TweakPane);
   const pane = new window["Tweakpane"].Pane() as TweakPane.Pane;
-  const PARAMS = {
-    z: 0.5
-  };
-  pane.addInput(PARAMS, "z", {
+  // const PARAMS = {
+  //   z: 0.5
+  // };
+  pane.addInput(sceneContainer.tweakParams, "z", {
     min: -150,
     max: 150
   });

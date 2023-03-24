@@ -66,3 +66,4 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Three JS Custom Shader Material and fog hack: https://snayss.medium.com/three-js-fog-hacks-fc0b42f63386
 - Underwater ambience sound https://pixabay.com/sound-effects/underwater-ambiencewav-14428/
 - Cocopon for Tweakpane https://cocopon.github.io/tweakpane
+- Vector Ruler Generator by robbbb https://robbbb.github.io/VectorRuler/

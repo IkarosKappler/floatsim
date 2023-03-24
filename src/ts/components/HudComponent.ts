@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { HUDData } from "./interfaces";
+import { HUDData, TweakParams } from "./interfaces";
 
 export class HudComponent {
   private hudCanvas: HTMLCanvasElement;
@@ -7,7 +7,7 @@ export class HudComponent {
   private hudCamera: THREE.OrthographicCamera;
   private hudScene: THREE.Scene;
   private hudImage: HTMLImageElement;
-  private hudTexture: THREE.Texture;
+  private hudDynamicTexture: THREE.Texture;
   private hudMaterial: THREE.MeshBasicMaterial;
   private plane: THREE.Mesh;
   private compassMesh: THREE.Mesh;
@@ -32,19 +32,18 @@ export class HudComponent {
     };
 
     // Create the camera and set the viewport to match the screen dimensions.
-    this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1000);
-    this.hudCamera.position.z = 40;
+    this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
+    this.hudCamera.position.z = 150;
     // Create also a custom scene for HUD.
     this.hudScene = new THREE.Scene();
 
     // Create texture from rendered graphics.
-    this.hudTexture = new THREE.Texture(this.hudCanvas);
-    this.hudTexture.needsUpdate = true;
+    this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
+    this.hudDynamicTexture.needsUpdate = true;
 
     // Create HUD material.
     this.hudMaterial = new THREE.MeshBasicMaterial({
-      map: this.hudTexture,
-      //   alphaMap: hudImageAlphaMap,
+      map: this.hudDynamicTexture,
       transparent: true
       // opacity: 1
     });
@@ -53,13 +52,21 @@ export class HudComponent {
     var planeGeometry = new THREE.PlaneGeometry(100, 100); //width, height);
     this.plane = new THREE.Mesh(planeGeometry, this.hudMaterial);
     this.plane.scale.set(width / 100, height / 100, 1);
-    this.plane.position.z = -150; // Depth in the scene
+    this.plane.position.z = 0; // Depth in the scene
     this.hudScene.add(this.plane);
-    console.log("blaaaaah");
 
     // Create a compass
-    const compassGeometry = new THREE.CylinderGeometry(30, 30, 10, 8, 2);
-    const compassMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const compassTexture = new THREE.TextureLoader().load("img/compass-texture-c.png");
+    const compassGeometry = new THREE.CylinderGeometry(100, 100, 20, 32, 2, true);
+    const compassMaterial = new THREE.MeshStandardMaterial({
+      color: 0xff0000, // Make the cockpit a bit darker
+      map: compassTexture,
+      // alphaMap: compassTexture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      emissive: new THREE.Color(255, 0, 0),
+      flatShading: true
+    });
     this.compassMesh = new THREE.Mesh(compassGeometry, compassMaterial);
     this.compassMesh.position.add(new THREE.Vector3(30, 300, -160)); // Radius=30 -> definitely in range of camera
     this.hudScene.add(this.compassMesh);
@@ -68,13 +75,16 @@ export class HudComponent {
   setHudSize(width: number, height: number) {
     this.hudCanvas.width = width;
     this.hudCanvas.height = height;
-    this.hudTexture = new THREE.Texture(this.hudCanvas);
-    this.hudTexture.needsUpdate = true;
-    this.hudMaterial.map = this.hudTexture;
+    this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
+    this.hudDynamicTexture.needsUpdate = true;
+    this.hudMaterial.map = this.hudDynamicTexture;
     this.plane.scale.set(width / 100, height / 100, 1);
   }
 
-  renderHud(renderer: THREE.WebGLRenderer, data: HUDData) {
+  renderHud(renderer: THREE.WebGLRenderer, data: HUDData, tweakParams: TweakParams) {
+    // Apply tweak params
+    this.compassMesh.position.z = tweakParams.z;
+
     // Render the HUD scene
     var hudSize = { width: 240, height: 80 };
 
@@ -116,7 +126,7 @@ export class HudComponent {
     // "]";
     var hudText = `Depth: ${data.depth.toFixed(1)}m`;
     this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
-    this.hudTexture.needsUpdate = true;
+    this.hudDynamicTexture.needsUpdate = true;
 
     // Update compass
     this.compassMesh.rotation.set(data.shipRotation.x, data.shipRotation.y, data.shipRotation.z);

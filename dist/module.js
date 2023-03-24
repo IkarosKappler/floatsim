@@ -14,7 +14,7 @@
 // globalThis.module = globalThis;
 globalThis.exports = globalThis.export = globalThis;
 var require = (globalThis.require = function (...args) {
-  console.log(args[0], args);
+  // console.log(args[0], args);
   var itemName = args[0];
   var itemNameStart = itemName.lastIndexOf("/");
   var itemNameEnd = itemName.lastIndexOf(".");
@@ -26,7 +26,7 @@ var require = (globalThis.require = function (...args) {
       itemName = itemName.substring(itemNameStart + 1, itemNameEnd);
     }
   }
-  console.log("itemName", itemName);
+  // console.log("itemName", itemName);
   if (["three", "OrbitControls"].indexOf(itemName) !== -1) {
     return globalThis[itemName]; // [args[0]];
   } else {

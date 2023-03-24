@@ -10,14 +10,14 @@
     <script src="module.js"></script>
     <script src="lib/tweakpane/tweakpane.min.js"></script>
     <script>
-        console.log("Tweakpane", Tweakpane);
+        {{/*  console.log("Tweakpane", Tweakpane);  */}}
         globalThis.exports["tweakpane"] = Tweakpane;
     </script>
     <script src="lib/ammojs/ammo.js"></script>
     <!-- <script src="lib/ammo.wasm-downloaded.js"></script> -->
     <script>
-        console.log("[Ammojs]", Ammo);
-        console.log("exports after Ammo", exports);
+        {{/*  console.log("[Ammojs]", Ammo);
+        console.log("exports after Ammo", exports);  */}}
         globalThis.module = globalThis;
     </script>
     <script src="lib/three/examples/umd/controls/OrbitControls.js"></script>

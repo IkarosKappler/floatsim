@@ -44,17 +44,16 @@ var HudComponent = /** @class */ (function () {
             // hudBitmap.drawImage(hudImage, 69, 50);
         };
         // Create the camera and set the viewport to match the screen dimensions.
-        this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1000);
-        this.hudCamera.position.z = 40;
+        this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
+        this.hudCamera.position.z = 150;
         // Create also a custom scene for HUD.
         this.hudScene = new THREE.Scene();
         // Create texture from rendered graphics.
-        this.hudTexture = new THREE.Texture(this.hudCanvas);
-        this.hudTexture.needsUpdate = true;
+        this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
+        this.hudDynamicTexture.needsUpdate = true;
         // Create HUD material.
         this.hudMaterial = new THREE.MeshBasicMaterial({
-            map: this.hudTexture,
-            //   alphaMap: hudImageAlphaMap,
+            map: this.hudDynamicTexture,
             transparent: true
             // opacity: 1
         });
@@ -62,12 +61,20 @@ var HudComponent = /** @class */ (function () {
         var planeGeometry = new THREE.PlaneGeometry(100, 100); //width, height);
         this.plane = new THREE.Mesh(planeGeometry, this.hudMaterial);
         this.plane.scale.set(width / 100, height / 100, 1);
-        this.plane.position.z = -150; // Depth in the scene
+        this.plane.position.z = 0; // Depth in the scene
         this.hudScene.add(this.plane);
-        console.log("blaaaaah");
         // Create a compass
-        var compassGeometry = new THREE.CylinderGeometry(30, 30, 10, 8, 2);
-        var compassMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        var compassTexture = new THREE.TextureLoader().load("img/compass-texture-c.png");
+        var compassGeometry = new THREE.CylinderGeometry(100, 100, 20, 32, 2, true);
+        var compassMaterial = new THREE.MeshStandardMaterial({
+            color: 0xff0000,
+            map: compassTexture,
+            // alphaMap: compassTexture,
+            transparent: true,
+            side: THREE.DoubleSide,
+            emissive: new THREE.Color(255, 0, 0),
+            flatShading: true
+        });
         this.compassMesh = new THREE.Mesh(compassGeometry, compassMaterial);
         this.compassMesh.position.add(new THREE.Vector3(30, 300, -160)); // Radius=30 -> definitely in range of camera
         this.hudScene.add(this.compassMesh);
@@ -75,12 +82,14 @@ var HudComponent = /** @class */ (function () {
     HudComponent.prototype.setHudSize = function (width, height) {
         this.hudCanvas.width = width;
         this.hudCanvas.height = height;
-        this.hudTexture = new THREE.Texture(this.hudCanvas);
-        this.hudTexture.needsUpdate = true;
-        this.hudMaterial.map = this.hudTexture;
+        this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
+        this.hudDynamicTexture.needsUpdate = true;
+        this.hudMaterial.map = this.hudDynamicTexture;
         this.plane.scale.set(width / 100, height / 100, 1);
     };
-    HudComponent.prototype.renderHud = function (renderer, data) {
+    HudComponent.prototype.renderHud = function (renderer, data, tweakParams) {
+        // Apply tweak params
+        this.compassMesh.position.z = tweakParams.z;
         // Render the HUD scene
         var hudSize = { width: 240, height: 80 };
         // Update HUD graphics.
@@ -112,7 +121,7 @@ var HudComponent = /** @class */ (function () {
         // "]";
         var hudText = "Depth: ".concat(data.depth.toFixed(1), "m");
         this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
-        this.hudTexture.needsUpdate = true;
+        this.hudDynamicTexture.needsUpdate = true;
         // Update compass
         this.compassMesh.rotation.set(data.shipRotation.x, data.shipRotation.y, data.shipRotation.z);
         // Render HUD on top of the scene.

@@ -12,7 +12,7 @@ import { Stats } from "../Stats";
 import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { PerlinHeightMap, SceneData, Size3Immutable } from "./interfaces";
+import { PerlinHeightMap, SceneData, Size3Immutable, TweakParams } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
@@ -32,6 +32,8 @@ export class SceneContainer {
 
   readonly sceneData: SceneData;
 
+  readonly tweakParams: TweakParams;
+
   // Example cube
   cube: THREE.Mesh;
 
@@ -50,6 +52,7 @@ export class SceneContainer {
         min: -500
       }
     };
+    this.tweakParams = { z: 0 };
 
     // Initialize a new THREE renderer (you are also allowed
     // to pass an existing canvas for rendering).
@@ -188,7 +191,7 @@ export class SceneContainer {
       this.cube.rotation.y += 0.04;
 
       this.renderer.render(this.scene, this.camera);
-      this.hud.renderHud(this.renderer, { depth: this.camera.position.y, shipRotation: this.camera.rotation });
+      this.hud.renderHud(this.renderer, { depth: this.camera.position.y, shipRotation: this.camera.rotation }, this.tweakParams);
 
       terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 

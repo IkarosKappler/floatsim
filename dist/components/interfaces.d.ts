@@ -10,6 +10,9 @@ export interface NTriple {
     y: number;
     z: number;
 }
+export interface TweakParams {
+    z: 0;
+}
 export interface MinMax {
     min: number;
     max: number;

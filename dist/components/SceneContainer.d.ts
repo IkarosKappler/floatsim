@@ -9,7 +9,7 @@ import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonCont
 import { Stats } from "../Stats";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { SceneData } from "./interfaces";
+import { SceneData, TweakParams } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { Params } from "../utils/Params";
 export declare class SceneContainer {
@@ -23,6 +23,7 @@ export declare class SceneContainer {
     readonly hud: HudComponent;
     readonly fogHandler: FogHandler;
     readonly sceneData: SceneData;
+    readonly tweakParams: TweakParams;
     cube: THREE.Mesh;
     constructor(params: Params);
     startAudio(): void;

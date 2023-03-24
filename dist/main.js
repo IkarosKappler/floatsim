@@ -38,13 +38,13 @@ globalThis.addEventListener("load", function () {
     var GUP = (0, gup_1.gup)();
     var params = new Params_1.Params(GUP);
     console.log("SceneContainer", SceneContainer_1.SceneContainer);
-    new SceneContainer_1.SceneContainer(params);
+    var sceneContainer = new SceneContainer_1.SceneContainer(params);
     console.log(TweakPane);
     var pane = new window["Tweakpane"].Pane();
-    var PARAMS = {
-        z: 0.5
-    };
-    pane.addInput(PARAMS, "z", {
+    // const PARAMS = {
+    //   z: 0.5
+    // };
+    pane.addInput(sceneContainer.tweakParams, "z", {
         min: -150,
         max: 150
     });
