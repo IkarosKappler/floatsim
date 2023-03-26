@@ -26,8 +26,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HudComponent = void 0;
 var THREE = __importStar(require("three"));
 var Compass_1 = require("./hud/Compass");
-var Helpers_1 = require("../utils/Helpers");
-var DepthMeter_1 = require("./hud/DepthMeter");
+var DepthMeterFragment_1 = require("./hud/DepthMeterFragment");
+var LowerInfoHudFragment_1 = require("./hud/LowerInfoHudFragment");
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor) {
         this.primaryColor = primaryColor;
@@ -69,7 +69,9 @@ var HudComponent = /** @class */ (function () {
         // Create a compass
         this.compass = new Compass_1.Compass(this);
         // Create the depth meter
-        this.depthMeter = new DepthMeter_1.DepthMeter(this);
+        this.depthMeter = new DepthMeterFragment_1.DepthMeterFragment(this);
+        // Create the lower info hud fragment
+        this.lowerInfoHud = new LowerInfoHudFragment_1.LowerInfoHudFragment(this);
     }
     HudComponent.prototype.setHudSize = function (width, height) {
         this.hudCanvas.width = width;
@@ -87,27 +89,34 @@ var HudComponent = /** @class */ (function () {
         this.compass.beforeRender(sceneContainer, hudData, tweakParams);
         this.prepareLowerInfoDisplay(sceneContainer, hudData, tweakParams);
         this.prepareDepthMeter(sceneContainer, hudData, tweakParams);
+        this.hudDynamicTexture.needsUpdate = true;
     };
-    HudComponent.prototype.prepareLowerInfoDisplay = function (_sceneContainer, hudData, tweakParams) {
-        // The lower right hus area
+    HudComponent.prototype.prepareLowerInfoDisplay = function (sceneContainer, hudData, tweakParams) {
+        // The lower right hud area
         // TODO: add x and y position here, NOT below (like in DepthMeter)
         // TODO 2: refactor to hud fragment, too
-        var hudSize = { width: 240, height: 80 };
-        // Update HUD graphics.
-        this.hudBitmap.font = "Normal 16px Arial";
-        this.hudBitmap.textAlign = "center";
-        // TODO: buffer color style string in class variable (is rarely changed)
-        var colorStyle = (0, Helpers_1.getColorStyle)(this.primaryColor, 0.25);
-        // Clear only the lower HUD rect?
-        // Or clear the whole scene?
-        this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
-        this.hudBitmap.fillStyle = colorStyle;
-        this.hudBitmap.fillRect(this.hudCanvas.width - hudSize.width, this.hudCanvas.height - hudSize.height, hudSize.width, hudSize.height);
-        // Draw HUD in the lower right corner
-        this.hudBitmap.fillStyle = (0, Helpers_1.getColorStyle)(this.primaryColor, 0.75);
-        var hudText = "Depth: ".concat(hudData.depth.toFixed(1), "m");
-        this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
-        this.hudDynamicTexture.needsUpdate = true;
+        // var hudSize = { width: 240, height: 80 };
+        // // Update HUD graphics.
+        // this.hudBitmap.font = "Normal 16px Arial";
+        // this.hudBitmap.textAlign = "center";
+        // // TODO: buffer color style string in class variable (is rarely changed)
+        // const colorStyle = getColorStyle(this.primaryColor, 0.25);
+        // // Clear only the lower HUD rect?
+        // // Or clear the whole scene?
+        // this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
+        // this.hudBitmap.fillStyle = colorStyle;
+        // this.hudBitmap.fillRect(
+        //   this.hudCanvas.width - hudSize.width,
+        //   this.hudCanvas.height - hudSize.height,
+        //   hudSize.width,
+        //   hudSize.height
+        // );
+        // // Draw HUD in the lower right corner
+        // this.hudBitmap.fillStyle = getColorStyle(this.primaryColor, 0.75);
+        // const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
+        // this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
+        this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
+        // this.hudDynamicTexture.needsUpdate = true;
         // END Try a HUD
     };
     HudComponent.prototype.prepareDepthMeter = function (sceneContainer, hudData, tweakParams) {

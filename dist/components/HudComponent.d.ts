@@ -12,13 +12,14 @@ export declare class HudComponent implements RenderableComponent {
     private compass;
     readonly primaryColor: THREE.Color;
     private depthMeter;
+    private lowerInfoHud;
     constructor(width: number, height: number, primaryColor: THREE.Color);
     setHudSize(width: number, height: number): void;
     /**
      * @implement RenderableComponent
      */
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
-    prepareLowerInfoDisplay(_sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
+    prepareLowerInfoDisplay(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     prepareDepthMeter(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     renderFragment(renderer: THREE.WebGLRenderer): void;
 }

@@ -6,19 +6,21 @@
 
 import * as THREE from "three";
 import { getColorStyle } from "../../utils/Helpers";
+import { TAU } from "../constants";
 import { HudComponent } from "../HudComponent";
 
 import { Dimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 
-export class DepthMeter implements RenderableComponent {
+export class DepthMeterFragment implements RenderableComponent {
   private hudComponent: HudComponent;
-  private depthMeterTexture: HTMLImageElement;
 
-  readonly ASSET_SIZE: Dimension2Immutable = { width: 576, height: 1357 };
+  private depthMeterTexture: HTMLImageElement;
+  static readonly ASSET_PATH: string = "img/depth-meter-a.png";
+  static readonly ASSET_SIZE: Dimension2Immutable = { width: 576, height: 1357 };
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
-    this.depthMeterTexture = new THREE.ImageLoader().load("img/depth-meter-a.png");
+    this.depthMeterTexture = new THREE.ImageLoader().load(DepthMeterFragment.ASSET_PATH);
   }
 
   /**
@@ -28,7 +30,7 @@ export class DepthMeter implements RenderableComponent {
     this.hudComponent.hudBitmap.save();
     // The lower right hud area
     const desiredHeight = this.hudComponent.hudCanvas.height / 3.0;
-    const ratio = this.ASSET_SIZE.width / this.ASSET_SIZE.height;
+    const ratio = DepthMeterFragment.ASSET_SIZE.width / DepthMeterFragment.ASSET_SIZE.height;
     var hudSize = {
       x: 30,
       y: (this.hudComponent.hudCanvas.height - desiredHeight) / 2.0,
@@ -39,30 +41,25 @@ export class DepthMeter implements RenderableComponent {
     // TODO: buffer color style string in class variable (is rarely changed)
     const colorStyle = getColorStyle(this.hudComponent.primaryColor, 1.0);
 
-    // // Clear only the lower HUD rect?
-    // // Or clear the whole scene?
-    // this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
+    const mPct = 0.22;
+    const kPct = 0.56;
+    const mY = hudSize.y + hudSize.height * mPct;
+    const kY = hudSize.y + hudSize.height * kPct;
+    const mX = hudSize.x + hudSize.width / 2.0 - 10;
+    const kX = hudSize.x + hudSize.width / 2.0 + 10;
 
-    // this.hudBitmap.fillRect(
-    //   this.hudCanvas.width - hudSize.width,
-    //   this.hudCanvas.height - hudSize.height,
-    //   hudSize.width,
-    //   hudSize.height
-    // );
+    // Draw indicators
+    this.hudComponent.hudBitmap.beginPath();
+    this.hudComponent.hudBitmap.arc(mX, mY, 5, 0.0, TAU);
+    this.hudComponent.hudBitmap.arc(kX, kY, 5, 0.0, TAU);
+    this.hudComponent.hudBitmap.closePath();
+    this.hudComponent.hudBitmap.fill();
 
+    // Draw texture with primary color (source-atop)
     this.hudComponent.hudBitmap.drawImage(this.depthMeterTexture, hudSize.x, hudSize.y, hudSize.width, hudSize.height);
     this.hudComponent.hudBitmap.globalCompositeOperation = "source-atop";
     this.hudComponent.hudBitmap.fillStyle = colorStyle;
     this.hudComponent.hudBitmap.fillRect(hudSize.x, hudSize.y, hudSize.width, hudSize.height);
-
-    // Draw HUD in the lower right corner
-    // this.hudBitmap.fillStyle = getColorStyle(this.primaryColor, 0.75);
-
-    // const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
-    // this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
-
-    // this.hudDynamicTexture.needsUpdate = true;
-    // END Try a HUD
     this.hudComponent.hudBitmap.restore();
   }
 

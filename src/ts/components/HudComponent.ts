@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./interfaces";
 import { Compass } from "./hud/Compass";
 import { getColorStyle } from "../utils/Helpers";
-import { DepthMeter } from "./hud/DepthMeter";
+import { DepthMeterFragment } from "./hud/DepthMeterFragment";
+import { LowerInfoHudFragment } from "./hud/LowerInfoHudFragment";
 
 export class HudComponent implements RenderableComponent {
   readonly hudCanvas: HTMLCanvasElement;
@@ -17,7 +18,8 @@ export class HudComponent implements RenderableComponent {
   private compass: Compass;
   readonly primaryColor: THREE.Color;
 
-  private depthMeter: DepthMeter;
+  private depthMeter: DepthMeterFragment;
+  private lowerInfoHud: LowerInfoHudFragment;
 
   constructor(width: number, height: number, primaryColor: THREE.Color) {
     this.primaryColor = primaryColor;
@@ -66,7 +68,10 @@ export class HudComponent implements RenderableComponent {
     this.compass = new Compass(this);
 
     // Create the depth meter
-    this.depthMeter = new DepthMeter(this);
+    this.depthMeter = new DepthMeterFragment(this);
+
+    // Create the lower info hud fragment
+    this.lowerInfoHud = new LowerInfoHudFragment(this);
   }
 
   setHudSize(width: number, height: number) {
@@ -87,39 +92,42 @@ export class HudComponent implements RenderableComponent {
 
     this.prepareLowerInfoDisplay(sceneContainer, hudData, tweakParams);
     this.prepareDepthMeter(sceneContainer, hudData, tweakParams);
+
+    this.hudDynamicTexture.needsUpdate = true;
   }
 
-  prepareLowerInfoDisplay(_sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
-    // The lower right hus area
+  prepareLowerInfoDisplay(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
+    // The lower right hud area
     // TODO: add x and y position here, NOT below (like in DepthMeter)
     // TODO 2: refactor to hud fragment, too
-    var hudSize = { width: 240, height: 80 };
+    // var hudSize = { width: 240, height: 80 };
 
-    // Update HUD graphics.
-    this.hudBitmap.font = "Normal 16px Arial";
-    this.hudBitmap.textAlign = "center";
+    // // Update HUD graphics.
+    // this.hudBitmap.font = "Normal 16px Arial";
+    // this.hudBitmap.textAlign = "center";
 
-    // TODO: buffer color style string in class variable (is rarely changed)
-    const colorStyle = getColorStyle(this.primaryColor, 0.25);
+    // // TODO: buffer color style string in class variable (is rarely changed)
+    // const colorStyle = getColorStyle(this.primaryColor, 0.25);
 
-    // Clear only the lower HUD rect?
-    // Or clear the whole scene?
-    this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
+    // // Clear only the lower HUD rect?
+    // // Or clear the whole scene?
+    // this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
 
-    this.hudBitmap.fillStyle = colorStyle;
-    this.hudBitmap.fillRect(
-      this.hudCanvas.width - hudSize.width,
-      this.hudCanvas.height - hudSize.height,
-      hudSize.width,
-      hudSize.height
-    );
+    // this.hudBitmap.fillStyle = colorStyle;
+    // this.hudBitmap.fillRect(
+    //   this.hudCanvas.width - hudSize.width,
+    //   this.hudCanvas.height - hudSize.height,
+    //   hudSize.width,
+    //   hudSize.height
+    // );
 
-    // Draw HUD in the lower right corner
-    this.hudBitmap.fillStyle = getColorStyle(this.primaryColor, 0.75);
+    // // Draw HUD in the lower right corner
+    // this.hudBitmap.fillStyle = getColorStyle(this.primaryColor, 0.75);
 
-    const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
-    this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
-    this.hudDynamicTexture.needsUpdate = true;
+    // const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
+    // this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
+    this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
+    // this.hudDynamicTexture.needsUpdate = true;
     // END Try a HUD
   }
 
