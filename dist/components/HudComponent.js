@@ -81,34 +81,20 @@ var HudComponent = /** @class */ (function () {
      */
     HudComponent.prototype.beforeRender = function (sceneContainer, hudData, tweakParams) {
         // Apply tweak params
-        // this.compassMesh.position.z = tweakParams.z;
         this.compass.beforeRender(sceneContainer, hudData, tweakParams);
-        // Render the HUD scene
+        // The lower right hus area
         var hudSize = { width: 240, height: 80 };
         // Update HUD graphics.
-        // this.hudBitmap.globalAlpha = 0.5;
         this.hudBitmap.font = "Normal 16px Arial";
         this.hudBitmap.textAlign = "center";
-        // this.hudBitmap.fillStyle = "rgba(255,255,255,0.5)";
-        // this.hudBitmap.fillStyle = `rgba(${hudData.primaryColor.r}, ${hudData.primaryColor.g}, ${hudData.primaryColor.r}, 0.5)`;
+        // TODO: buffer color style string in class variable (is rarely changed)
         var colorStyle = (0, Helpers_1.getColorStyle)(this.primaryColor, 0.25);
-        console.log("HUD color", colorStyle);
-        // console.log("this.hudCanvas.width", this.hudCanvas.width);
         // Clear only the lower HUD rect?
-        // this.hudBitmap.clearRect(
-        //   this.hudCanvas.width - hudSize.width,
-        //   this.hudCanvas.height - hudSize.height,
-        //   hudSize.width,
-        //   hudSize.height
-        // );
         // Or clear the whole scene?
         this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
-        // this.hudBitmap.fillStyle = "rgba(0,192,192,0.5)";
-        this.hudBitmap.fillStyle = colorStyle; // `rgba(${hudData.primaryColor.r}, ${hudData.primaryColor.g}, ${hudData.primaryColor.r}, 0.5)`;
+        this.hudBitmap.fillStyle = colorStyle;
         this.hudBitmap.fillRect(this.hudCanvas.width - hudSize.width, this.hudCanvas.height - hudSize.height, hudSize.width, hudSize.height);
         // Draw HUD in the lower right corner
-        // this.hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-        // this.hudBitmap.fillStyle = `rgba(${hudData.primaryColor.r}, ${hudData.primaryColor.g}, ${hudData.primaryColor.r}, 0.75)`;
         this.hudBitmap.fillStyle = (0, Helpers_1.getColorStyle)(this.primaryColor, 0.75);
         var hudText = "Depth: ".concat(hudData.depth.toFixed(1), "m");
         this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);

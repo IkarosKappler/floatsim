@@ -173,8 +173,6 @@ var SceneContainer = /** @class */ (function () {
             // Updat HUD data
             hudData.shipRotation = _this.camera.rotation;
             hudData.depth = _this.camera.position.y;
-            // hudData.primaryColor.set(0xff0000);
-            // console.log("hudColor", hudData.primaryColor);
             _this.hud.beforeRender(_this, hudData, _this.tweakParams);
             _this.hud.renderHud(_this.renderer);
             terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
@@ -223,9 +221,9 @@ var SceneContainer = /** @class */ (function () {
         var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
         physicsHandler.start().then(_render);
         // _render();
-        this.startAudio();
+        this.initializeAudio();
     }
-    SceneContainer.prototype.startAudio = function () {
+    SceneContainer.prototype.initializeAudio = function () {
         var audioPlayer = new AudioPlayer_1.AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
         var startButton = document.querySelector("#button-start");
         startButton.addEventListener("click", function () {

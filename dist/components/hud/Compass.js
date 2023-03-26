@@ -25,12 +25,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Compass = void 0;
 var THREE = __importStar(require("three"));
+var Helpers_1 = require("../../utils/Helpers");
 var Compass = /** @class */ (function () {
     function Compass(hudComponent) {
         this.hudComponent = hudComponent;
         // Create a compass
+        // TODO: load compass texture from SVG?
         // const compassTextureSvg = new SVGLoader().load("img/compass-texture-d.svg");
-        var compassTexture = new THREE.TextureLoader().load("img/compass-texture-d.png");
+        var compassTexture = null; //new THREE.TextureLoader().load("img/compass-texture-d.png");
         var radiusTop = 100;
         var radiuBottom = 100;
         var height = 75;
@@ -45,8 +47,14 @@ var Compass = /** @class */ (function () {
             flatShading: true
         });
         this.compassMesh = new THREE.Mesh(compassGeometry, compassMaterial);
-        this.compassMesh.position.add(new THREE.Vector3(30, 300, -160)); // Radius=30 -> definitely in range of camera
+        // Radius=30 -> definitely in range of camera
+        this.compassMesh.position.add(new THREE.Vector3(30, 300, -160));
         this.hudComponent.hudScene.add(this.compassMesh);
+        var onTextureReady = function (texture) {
+            console.log("Texture", texture);
+            compassMaterial.map = texture;
+        };
+        (0, Helpers_1.svg2texture)("img/compass-texture-d.svg", onTextureReady);
     }
     /**
      * @implement RenderableComponent
@@ -54,10 +62,7 @@ var Compass = /** @class */ (function () {
     Compass.prototype.beforeRender = function (_sceneContainer, _data, tweakParams) {
         // Apply tweak params
         this.compassMesh.position.z = tweakParams.z;
-        // Update compass
-        // this.compassMesh.rotation.set(data.shipRotation.x, data.shipRotation.y, data.shipRotation.z);
-        // var m = new THREE.Matrix4()
-        // m.invert(camera.matrixWorld)
+        // Update compass rotation
         var m = new THREE.Matrix4();
         m.copy(_sceneContainer.camera.matrixWorld);
         m.invert();

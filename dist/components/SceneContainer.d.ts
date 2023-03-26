@@ -26,6 +26,6 @@ export declare class SceneContainer {
     readonly tweakParams: TweakParams;
     cube: THREE.Mesh;
     constructor(params: Params);
-    startAudio(): void;
+    initializeAudio(): void;
     onWindowResize(): void;
 }
