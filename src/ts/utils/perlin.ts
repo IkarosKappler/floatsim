@@ -12,14 +12,8 @@
  * Stefan Gustavson. You may use it as you see fit, but
  * attribution is appreciated.
  *
+ * @modified 2023-03-07 Ikaros Kappler; ported to Typescript & refactored to class.
  */
-
-// (function (global) {
-//   var module = (global.noise = {});
-
-// const Grad = (x:number, y:number, z:number) => {
-//   this.x = x; this.y = y; this.z = z;
-// }
 
 class Grad {
   x: number;
@@ -38,15 +32,7 @@ class Grad {
   }
 }
 
-//   Grad.prototype.dot2 = function (x: number, y: number) {
-//     return this.x * x + this.y * y;
-//   };
-
-//   Grad.prototype.dot3 = function (x: number, y: number, z: number) {
-//     return this.x * x + this.y * y + this.z * z;
-//   };
-
-var grad3 = [
+const grad3: Array<Grad> = [
   new Grad(1, 1, 0),
   new Grad(-1, 1, 0),
   new Grad(1, -1, 0),
@@ -61,7 +47,7 @@ var grad3 = [
   new Grad(0, -1, -1)
 ];
 
-var p = [
+const p: Array<number> = [
   151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
   190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56, 87, 174, 20,
   125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220,
@@ -74,29 +60,29 @@ var p = [
   66, 215, 61, 156, 180
 ];
 // To remove the need for index wrapping, double the permutation table length
-var perm = new Array(512);
-var gradP = new Array(512);
+const perm = new Array<number>(512);
+const gradP = new Array<Grad>(512);
 
 // Skewing and unskewing factors for 2, 3, and 4 dimensions
-var F2 = 0.5 * (Math.sqrt(3) - 1);
-var G2 = (3 - Math.sqrt(3)) / 6;
+const F2 = 0.5 * (Math.sqrt(3) - 1);
+const G2 = (3 - Math.sqrt(3)) / 6;
 
-var F3 = 1 / 3;
-var G3 = 1 / 6;
+const F3 = 1 / 3;
+const G3 = 1 / 6;
 
-function fade(t: number) {
+const fade = (t: number) => {
   return t * t * t * (t * (t * 6 - 15) + 10);
-}
+};
 
-function lerp(a: number, b: number, t: number) {
+const lerp = (a: number, b: number, t: number) => {
   return (1 - t) * a + t * b;
-}
+};
 
 export const noise = {
   // This isn't a very good seeding function, but it works ok. It supports 2^16
   // different seed values. Write something better if you need more seeds.
   //   module.seed = function (seed) {
-  seed: function (seed: number) {
+  seed: (seed: number) => {
     if (seed > 0 && seed < 1) {
       // Scale the seed out
       seed *= 65536;
@@ -108,7 +94,7 @@ export const noise = {
     }
 
     for (var i = 0; i < 256; i++) {
-      var v;
+      var v: number;
       if (i & 1) {
         v = p[i] ^ (seed & 255);
       } else {
@@ -121,18 +107,18 @@ export const noise = {
   },
 
   // 2D simplex noise
-  simplex2: function (xin: number, yin: number) {
-    var n0, n1, n2; // Noise contributions from the three corners
+  simplex2: (xin: number, yin: number) => {
+    var n0: number, n1: number, n2: number; // Noise contributions from the three corners
     // Skew the input space to determine which simplex cell we're in
-    var s = (xin + yin) * F2; // Hairy factor for 2D
-    var i = Math.floor(xin + s);
-    var j = Math.floor(yin + s);
-    var t = (i + j) * G2;
-    var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
-    var y0 = yin - j + t;
+    const s = (xin + yin) * F2; // Hairy factor for 2D
+    var i: number = Math.floor(xin + s);
+    var j: number = Math.floor(yin + s);
+    const t: number = (i + j) * G2;
+    const x0: number = xin - i + t; // The x,y distances from the cell origin, unskewed.
+    const y0: number = yin - j + t;
     // For the 2D case, the simplex shape is an equilateral triangle.
     // Determine which simplex we are in.
-    var i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
+    var i1: number, j1: number; // Offsets for second (middle) corner of simplex in (i,j) coords
     if (x0 > y0) {
       // lower triangle, XY order: (0,0)->(1,0)->(1,1)
       i1 = 1;
@@ -145,16 +131,16 @@ export const noise = {
     // A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
     // a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
     // c = (3-sqrt(3))/6
-    var x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
-    var y1 = y0 - j1 + G2;
-    var x2 = x0 - 1 + 2 * G2; // Offsets for last corner in (x,y) unskewed coords
-    var y2 = y0 - 1 + 2 * G2;
+    const x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
+    const y1 = y0 - j1 + G2;
+    const x2 = x0 - 1 + 2 * G2; // Offsets for last corner in (x,y) unskewed coords
+    const y2 = y0 - 1 + 2 * G2;
     // Work out the hashed gradient indices of the three simplex corners
     i &= 255;
     j &= 255;
-    var gi0 = gradP[i + perm[j]];
-    var gi1 = gradP[i + i1 + perm[j + j1]];
-    var gi2 = gradP[i + 1 + perm[j + 1]];
+    const gi0 = gradP[i + perm[j]];
+    const gi1 = gradP[i + i1 + perm[j + j1]];
+    const gi2 = gradP[i + 1 + perm[j + 1]];
     // Calculate the contribution from the three corners
     var t0 = 0.5 - x0 * x0 - y0 * y0;
     if (t0 < 0) {
@@ -183,24 +169,24 @@ export const noise = {
   },
 
   // 3D simplex noise
-  simplex3: function (xin: number, yin: number, zin: number) {
-    var n0, n1, n2, n3; // Noise contributions from the four corners
+  simplex3: (xin: number, yin: number, zin: number) => {
+    var n0: number, n1: number, n2: number, n3: number; // Noise contributions from the four corners
 
     // Skew the input space to determine which simplex cell we're in
-    var s = (xin + yin + zin) * F3; // Hairy factor for 2D
-    var i = Math.floor(xin + s);
-    var j = Math.floor(yin + s);
-    var k = Math.floor(zin + s);
+    const s: number = (xin + yin + zin) * F3; // Hairy factor for 2D
+    var i: number = Math.floor(xin + s);
+    var j: number = Math.floor(yin + s);
+    var k: number = Math.floor(zin + s);
 
-    var t = (i + j + k) * G3;
-    var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
-    var y0 = yin - j + t;
-    var z0 = zin - k + t;
+    const t: number = (i + j + k) * G3;
+    const x0: number = xin - i + t; // The x,y distances from the cell origin, unskewed.
+    const y0: number = yin - j + t;
+    const z0: number = zin - k + t;
 
     // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
     // Determine which simplex we are in.
-    var i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
-    var i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
+    var i1: number, j1: number, k1: number; // Offsets for second corner of simplex in (i,j,k) coords
+    var i2: number, j2: number, k2: number; // Offsets for third corner of simplex in (i,j,k) coords
     if (x0 >= y0) {
       if (y0 >= z0) {
         i1 = 1;
@@ -252,29 +238,29 @@ export const noise = {
     // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
     // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
     // c = 1/6.
-    var x1 = x0 - i1 + G3; // Offsets for second corner
-    var y1 = y0 - j1 + G3;
-    var z1 = z0 - k1 + G3;
+    const x1: number = x0 - i1 + G3; // Offsets for second corner
+    const y1: number = y0 - j1 + G3;
+    const z1: number = z0 - k1 + G3;
 
-    var x2 = x0 - i2 + 2 * G3; // Offsets for third corner
-    var y2 = y0 - j2 + 2 * G3;
-    var z2 = z0 - k2 + 2 * G3;
+    const x2: number = x0 - i2 + 2 * G3; // Offsets for third corner
+    const y2: number = y0 - j2 + 2 * G3;
+    const z2: number = z0 - k2 + 2 * G3;
 
-    var x3 = x0 - 1 + 3 * G3; // Offsets for fourth corner
-    var y3 = y0 - 1 + 3 * G3;
-    var z3 = z0 - 1 + 3 * G3;
+    const x3: number = x0 - 1 + 3 * G3; // Offsets for fourth corner
+    const y3: number = y0 - 1 + 3 * G3;
+    const z3: number = z0 - 1 + 3 * G3;
 
     // Work out the hashed gradient indices of the four simplex corners
     i &= 255;
     j &= 255;
     k &= 255;
-    var gi0 = gradP[i + perm[j + perm[k]]];
-    var gi1 = gradP[i + i1 + perm[j + j1 + perm[k + k1]]];
-    var gi2 = gradP[i + i2 + perm[j + j2 + perm[k + k2]]];
-    var gi3 = gradP[i + 1 + perm[j + 1 + perm[k + 1]]];
+    const gi0: Grad = gradP[i + perm[j + perm[k]]];
+    const gi1: Grad = gradP[i + i1 + perm[j + j1 + perm[k + k1]]];
+    const gi2: Grad = gradP[i + i2 + perm[j + j2 + perm[k + k2]]];
+    const gi3: Grad = gradP[i + 1 + perm[j + 1 + perm[k + 1]]];
 
     // Calculate the contribution from the four corners
-    var t0 = 0.5 - x0 * x0 - y0 * y0 - z0 * z0;
+    var t0: number = 0.5 - x0 * x0 - y0 * y0 - z0 * z0;
     if (t0 < 0) {
       n0 = 0;
     } else {
@@ -308,59 +294,59 @@ export const noise = {
   },
 
   // 2D Perlin Noise
-  perlin2: function (x: number, y: number) {
+  perlin2: function (x_init: number, y_init: number) {
     // Find unit grid cell containing point
-    var X = Math.floor(x),
-      Y = Math.floor(y);
+    var X: number = Math.floor(x_init),
+      Y: number = Math.floor(y_init);
     // Get relative xy coordinates of point within that cell
-    x = x - X;
-    y = y - Y;
+    const x: number = x_init - X;
+    const y: number = y_init - Y;
     // Wrap the integer cells at 255 (smaller integer period can be introduced here)
     X = X & 255;
     Y = Y & 255;
 
     // Calculate noise contributions from each of the four corners
-    var n00 = gradP[X + perm[Y]].dot2(x, y);
-    var n01 = gradP[X + perm[Y + 1]].dot2(x, y - 1);
-    var n10 = gradP[X + 1 + perm[Y]].dot2(x - 1, y);
-    var n11 = gradP[X + 1 + perm[Y + 1]].dot2(x - 1, y - 1);
+    const n00: number = gradP[X + perm[Y]].dot2(x, y);
+    const n01: number = gradP[X + perm[Y + 1]].dot2(x, y - 1);
+    const n10: number = gradP[X + 1 + perm[Y]].dot2(x - 1, y);
+    const n11: number = gradP[X + 1 + perm[Y + 1]].dot2(x - 1, y - 1);
 
     // Compute the fade curve value for x
-    var u = fade(x);
+    const u: number = fade(x);
 
     // Interpolate the four results
     return lerp(lerp(n00, n10, u), lerp(n01, n11, u), fade(y));
   },
 
   // 3D Perlin Noise
-  perlin3: function (x: number, y: number, z: number) {
+  perlin3: (x_init: number, y_init: number, z_init: number) => {
     // Find unit grid cell containing point
-    var X = Math.floor(x),
-      Y = Math.floor(y),
-      Z = Math.floor(z);
+    var X: number = Math.floor(x_init),
+      Y: number = Math.floor(y_init),
+      Z: number = Math.floor(z_init);
     // Get relative xyz coordinates of point within that cell
-    x = x - X;
-    y = y - Y;
-    z = z - Z;
+    const x: number = x_init - X;
+    const y: number = y_init - Y;
+    const z: number = z_init - Z;
     // Wrap the integer cells at 255 (smaller integer period can be introduced here)
     X = X & 255;
     Y = Y & 255;
     Z = Z & 255;
 
     // Calculate noise contributions from each of the eight corners
-    var n000 = gradP[X + perm[Y + perm[Z]]].dot3(x, y, z);
-    var n001 = gradP[X + perm[Y + perm[Z + 1]]].dot3(x, y, z - 1);
-    var n010 = gradP[X + perm[Y + 1 + perm[Z]]].dot3(x, y - 1, z);
-    var n011 = gradP[X + perm[Y + 1 + perm[Z + 1]]].dot3(x, y - 1, z - 1);
-    var n100 = gradP[X + 1 + perm[Y + perm[Z]]].dot3(x - 1, y, z);
-    var n101 = gradP[X + 1 + perm[Y + perm[Z + 1]]].dot3(x - 1, y, z - 1);
-    var n110 = gradP[X + 1 + perm[Y + 1 + perm[Z]]].dot3(x - 1, y - 1, z);
-    var n111 = gradP[X + 1 + perm[Y + 1 + perm[Z + 1]]].dot3(x - 1, y - 1, z - 1);
+    const n000: number = gradP[X + perm[Y + perm[Z]]].dot3(x, y, z);
+    const n001: number = gradP[X + perm[Y + perm[Z + 1]]].dot3(x, y, z - 1);
+    const n010: number = gradP[X + perm[Y + 1 + perm[Z]]].dot3(x, y - 1, z);
+    const n011: number = gradP[X + perm[Y + 1 + perm[Z + 1]]].dot3(x, y - 1, z - 1);
+    const n100: number = gradP[X + 1 + perm[Y + perm[Z]]].dot3(x - 1, y, z);
+    const n101: number = gradP[X + 1 + perm[Y + perm[Z + 1]]].dot3(x - 1, y, z - 1);
+    const n110: number = gradP[X + 1 + perm[Y + 1 + perm[Z]]].dot3(x - 1, y - 1, z);
+    const n111: number = gradP[X + 1 + perm[Y + 1 + perm[Z + 1]]].dot3(x - 1, y - 1, z - 1);
 
     // Compute the fade curve value for x, y, z
-    var u = fade(x);
-    var v = fade(y);
-    var w = fade(z);
+    const u: number = fade(x);
+    const v: number = fade(y);
+    const w: number = fade(z);
 
     // Interpolate
     return lerp(lerp(lerp(n000, n100, u), lerp(n001, n101, u), w), lerp(lerp(n010, n110, u), lerp(n011, n111, u), w), v);
@@ -368,273 +354,3 @@ export const noise = {
 };
 
 noise.seed(0);
-
-/*
-    for(var i=0; i<256; i++) {
-      perm[i] = perm[i + 256] = p[i];
-      gradP[i] = gradP[i + 256] = grad3[perm[i] % 12];
-    }*/
-
-//   // Skewing and unskewing factors for 2, 3, and 4 dimensions
-//   var F2 = 0.5 * (Math.sqrt(3) - 1);
-//   var G2 = (3 - Math.sqrt(3)) / 6;
-
-//   var F3 = 1 / 3;
-//   var G3 = 1 / 6;
-
-//   // 2D simplex noise
-//   module.simplex2 = function (xin, yin) {
-//     var n0, n1, n2; // Noise contributions from the three corners
-//     // Skew the input space to determine which simplex cell we're in
-//     var s = (xin + yin) * F2; // Hairy factor for 2D
-//     var i = Math.floor(xin + s);
-//     var j = Math.floor(yin + s);
-//     var t = (i + j) * G2;
-//     var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
-//     var y0 = yin - j + t;
-//     // For the 2D case, the simplex shape is an equilateral triangle.
-//     // Determine which simplex we are in.
-//     var i1, j1; // Offsets for second (middle) corner of simplex in (i,j) coords
-//     if (x0 > y0) {
-//       // lower triangle, XY order: (0,0)->(1,0)->(1,1)
-//       i1 = 1;
-//       j1 = 0;
-//     } else {
-//       // upper triangle, YX order: (0,0)->(0,1)->(1,1)
-//       i1 = 0;
-//       j1 = 1;
-//     }
-//     // A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
-//     // a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
-//     // c = (3-sqrt(3))/6
-//     var x1 = x0 - i1 + G2; // Offsets for middle corner in (x,y) unskewed coords
-//     var y1 = y0 - j1 + G2;
-//     var x2 = x0 - 1 + 2 * G2; // Offsets for last corner in (x,y) unskewed coords
-//     var y2 = y0 - 1 + 2 * G2;
-//     // Work out the hashed gradient indices of the three simplex corners
-//     i &= 255;
-//     j &= 255;
-//     var gi0 = gradP[i + perm[j]];
-//     var gi1 = gradP[i + i1 + perm[j + j1]];
-//     var gi2 = gradP[i + 1 + perm[j + 1]];
-//     // Calculate the contribution from the three corners
-//     var t0 = 0.5 - x0 * x0 - y0 * y0;
-//     if (t0 < 0) {
-//       n0 = 0;
-//     } else {
-//       t0 *= t0;
-//       n0 = t0 * t0 * gi0.dot2(x0, y0); // (x,y) of grad3 used for 2D gradient
-//     }
-//     var t1 = 0.5 - x1 * x1 - y1 * y1;
-//     if (t1 < 0) {
-//       n1 = 0;
-//     } else {
-//       t1 *= t1;
-//       n1 = t1 * t1 * gi1.dot2(x1, y1);
-//     }
-//     var t2 = 0.5 - x2 * x2 - y2 * y2;
-//     if (t2 < 0) {
-//       n2 = 0;
-//     } else {
-//       t2 *= t2;
-//       n2 = t2 * t2 * gi2.dot2(x2, y2);
-//     }
-//     // Add contributions from each corner to get the final noise value.
-//     // The result is scaled to return values in the interval [-1,1].
-//     return 70 * (n0 + n1 + n2);
-//   };
-
-//   // 3D simplex noise
-//   module.simplex3 = function (xin, yin, zin) {
-//     var n0, n1, n2, n3; // Noise contributions from the four corners
-
-//     // Skew the input space to determine which simplex cell we're in
-//     var s = (xin + yin + zin) * F3; // Hairy factor for 2D
-//     var i = Math.floor(xin + s);
-//     var j = Math.floor(yin + s);
-//     var k = Math.floor(zin + s);
-
-//     var t = (i + j + k) * G3;
-//     var x0 = xin - i + t; // The x,y distances from the cell origin, unskewed.
-//     var y0 = yin - j + t;
-//     var z0 = zin - k + t;
-
-//     // For the 3D case, the simplex shape is a slightly irregular tetrahedron.
-//     // Determine which simplex we are in.
-//     var i1, j1, k1; // Offsets for second corner of simplex in (i,j,k) coords
-//     var i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
-//     if (x0 >= y0) {
-//       if (y0 >= z0) {
-//         i1 = 1;
-//         j1 = 0;
-//         k1 = 0;
-//         i2 = 1;
-//         j2 = 1;
-//         k2 = 0;
-//       } else if (x0 >= z0) {
-//         i1 = 1;
-//         j1 = 0;
-//         k1 = 0;
-//         i2 = 1;
-//         j2 = 0;
-//         k2 = 1;
-//       } else {
-//         i1 = 0;
-//         j1 = 0;
-//         k1 = 1;
-//         i2 = 1;
-//         j2 = 0;
-//         k2 = 1;
-//       }
-//     } else {
-//       if (y0 < z0) {
-//         i1 = 0;
-//         j1 = 0;
-//         k1 = 1;
-//         i2 = 0;
-//         j2 = 1;
-//         k2 = 1;
-//       } else if (x0 < z0) {
-//         i1 = 0;
-//         j1 = 1;
-//         k1 = 0;
-//         i2 = 0;
-//         j2 = 1;
-//         k2 = 1;
-//       } else {
-//         i1 = 0;
-//         j1 = 1;
-//         k1 = 0;
-//         i2 = 1;
-//         j2 = 1;
-//         k2 = 0;
-//       }
-//     }
-//     // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
-//     // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and
-//     // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where
-//     // c = 1/6.
-//     var x1 = x0 - i1 + G3; // Offsets for second corner
-//     var y1 = y0 - j1 + G3;
-//     var z1 = z0 - k1 + G3;
-
-//     var x2 = x0 - i2 + 2 * G3; // Offsets for third corner
-//     var y2 = y0 - j2 + 2 * G3;
-//     var z2 = z0 - k2 + 2 * G3;
-
-//     var x3 = x0 - 1 + 3 * G3; // Offsets for fourth corner
-//     var y3 = y0 - 1 + 3 * G3;
-//     var z3 = z0 - 1 + 3 * G3;
-
-//     // Work out the hashed gradient indices of the four simplex corners
-//     i &= 255;
-//     j &= 255;
-//     k &= 255;
-//     var gi0 = gradP[i + perm[j + perm[k]]];
-//     var gi1 = gradP[i + i1 + perm[j + j1 + perm[k + k1]]];
-//     var gi2 = gradP[i + i2 + perm[j + j2 + perm[k + k2]]];
-//     var gi3 = gradP[i + 1 + perm[j + 1 + perm[k + 1]]];
-
-//     // Calculate the contribution from the four corners
-//     var t0 = 0.5 - x0 * x0 - y0 * y0 - z0 * z0;
-//     if (t0 < 0) {
-//       n0 = 0;
-//     } else {
-//       t0 *= t0;
-//       n0 = t0 * t0 * gi0.dot3(x0, y0, z0); // (x,y) of grad3 used for 2D gradient
-//     }
-//     var t1 = 0.5 - x1 * x1 - y1 * y1 - z1 * z1;
-//     if (t1 < 0) {
-//       n1 = 0;
-//     } else {
-//       t1 *= t1;
-//       n1 = t1 * t1 * gi1.dot3(x1, y1, z1);
-//     }
-//     var t2 = 0.5 - x2 * x2 - y2 * y2 - z2 * z2;
-//     if (t2 < 0) {
-//       n2 = 0;
-//     } else {
-//       t2 *= t2;
-//       n2 = t2 * t2 * gi2.dot3(x2, y2, z2);
-//     }
-//     var t3 = 0.5 - x3 * x3 - y3 * y3 - z3 * z3;
-//     if (t3 < 0) {
-//       n3 = 0;
-//     } else {
-//       t3 *= t3;
-//       n3 = t3 * t3 * gi3.dot3(x3, y3, z3);
-//     }
-//     // Add contributions from each corner to get the final noise value.
-//     // The result is scaled to return values in the interval [-1,1].
-//     return 32 * (n0 + n1 + n2 + n3);
-//   };
-
-// ##### Perlin noise stuff
-
-//   function fade(t) {
-//     return t * t * t * (t * (t * 6 - 15) + 10);
-//   }
-
-//   function lerp(a, b, t) {
-//     return (1 - t) * a + t * b;
-//   }
-
-//   // 2D Perlin Noise
-//   module.perlin2 = function (x, y) {
-//     // Find unit grid cell containing point
-//     var X = Math.floor(x),
-//       Y = Math.floor(y);
-//     // Get relative xy coordinates of point within that cell
-//     x = x - X;
-//     y = y - Y;
-//     // Wrap the integer cells at 255 (smaller integer period can be introduced here)
-//     X = X & 255;
-//     Y = Y & 255;
-
-//     // Calculate noise contributions from each of the four corners
-//     var n00 = gradP[X + perm[Y]].dot2(x, y);
-//     var n01 = gradP[X + perm[Y + 1]].dot2(x, y - 1);
-//     var n10 = gradP[X + 1 + perm[Y]].dot2(x - 1, y);
-//     var n11 = gradP[X + 1 + perm[Y + 1]].dot2(x - 1, y - 1);
-
-//     // Compute the fade curve value for x
-//     var u = fade(x);
-
-//     // Interpolate the four results
-//     return lerp(lerp(n00, n10, u), lerp(n01, n11, u), fade(y));
-//   };
-
-//   // 3D Perlin Noise
-//   module.perlin3 = function (x, y, z) {
-//     // Find unit grid cell containing point
-//     var X = Math.floor(x),
-//       Y = Math.floor(y),
-//       Z = Math.floor(z);
-//     // Get relative xyz coordinates of point within that cell
-//     x = x - X;
-//     y = y - Y;
-//     z = z - Z;
-//     // Wrap the integer cells at 255 (smaller integer period can be introduced here)
-//     X = X & 255;
-//     Y = Y & 255;
-//     Z = Z & 255;
-
-//     // Calculate noise contributions from each of the eight corners
-//     var n000 = gradP[X + perm[Y + perm[Z]]].dot3(x, y, z);
-//     var n001 = gradP[X + perm[Y + perm[Z + 1]]].dot3(x, y, z - 1);
-//     var n010 = gradP[X + perm[Y + 1 + perm[Z]]].dot3(x, y - 1, z);
-//     var n011 = gradP[X + perm[Y + 1 + perm[Z + 1]]].dot3(x, y - 1, z - 1);
-//     var n100 = gradP[X + 1 + perm[Y + perm[Z]]].dot3(x - 1, y, z);
-//     var n101 = gradP[X + 1 + perm[Y + perm[Z + 1]]].dot3(x - 1, y, z - 1);
-//     var n110 = gradP[X + 1 + perm[Y + 1 + perm[Z]]].dot3(x - 1, y - 1, z);
-//     var n111 = gradP[X + 1 + perm[Y + 1 + perm[Z + 1]]].dot3(x - 1, y - 1, z - 1);
-
-//     // Compute the fade curve value for x, y, z
-//     var u = fade(x);
-//     var v = fade(y);
-//     var w = fade(z);
-
-//     // Interpolate
-//     return lerp(lerp(lerp(n000, n100, u), lerp(n001, n101, u), w), lerp(lerp(n010, n110, u), lerp(n011, n111, u), w), v);
-//   };
-// })(typeof module === "undefined" ? this : module.exports);

@@ -42,6 +42,7 @@ var AudioPlayer_1 = require("../utils/AudioPlayer");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
+        this.isGameRunning = false;
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         this.sceneData = {
@@ -166,9 +167,6 @@ var SceneContainer = /** @class */ (function () {
             _this.fogHandler.updateFogColor();
             firstPersonControls.update(delta);
             _this.stats.update();
-            // Let's animate the cube: a rotation.
-            _this.cube.rotation.x += 0.05;
-            _this.cube.rotation.y += 0.04;
             _this.renderer.render(_this.scene, _this.camera);
             // Updat HUD data
             hudData.shipRotation = _this.camera.rotation;
@@ -176,7 +174,13 @@ var SceneContainer = /** @class */ (function () {
             _this.hud.beforeRender(_this, hudData, _this.tweakParams);
             _this.hud.renderHud(_this.renderer);
             terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
-            physicsHandler.render();
+            if (_this.isGameRunning) {
+                // Let's animate the cube: a rotation.
+                _this.cube.rotation.x += 0.05;
+                _this.cube.rotation.y += 0.04;
+                // Update physica
+                physicsHandler.render();
+            }
             requestAnimationFrame(_render);
         };
         // const zStartOffset = 800.0; // for ImprovedNoise
@@ -219,17 +223,26 @@ var SceneContainer = /** @class */ (function () {
         this.onWindowResize();
         // Initialize physics
         var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
-        physicsHandler.start().then(_render);
-        // _render();
-        this.initializeAudio();
+        var waitingFor = [
+            // This will start the physics engine and them immediately begin rendering.
+            physicsHandler.start().then(_render),
+            // Only after the "Start" button was hit (user interaction) audio can play.
+            this.initializeAudio()
+        ];
+        Promise.all(waitingFor).then(function () {
+            _this.isGameRunning = true;
+        });
     }
     SceneContainer.prototype.initializeAudio = function () {
         var audioPlayer = new AudioPlayer_1.AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
-        var startButton = document.querySelector("#button-start");
-        startButton.addEventListener("click", function () {
-            var overlay = document.querySelector("#overlay");
-            overlay.classList.add("d-none");
-            audioPlayer.play();
+        return new Promise(function (accept, _reject) {
+            var startButton = document.querySelector("#button-start");
+            startButton.addEventListener("click", function () {
+                var overlay = document.querySelector("#overlay");
+                overlay.classList.add("d-none");
+                audioPlayer.play();
+                accept();
+            });
         });
     };
     SceneContainer.prototype.onWindowResize = function () {

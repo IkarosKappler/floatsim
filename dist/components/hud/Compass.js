@@ -30,17 +30,18 @@ var Compass = /** @class */ (function () {
     function Compass(hudComponent) {
         this.hudComponent = hudComponent;
         // Create a compass
-        // TODO: load compass texture from SVG?
-        // const compassTextureSvg = new SVGLoader().load("img/compass-texture-d.svg");
-        var compassTexture = null; //new THREE.TextureLoader().load("img/compass-texture-d.png");
+        //  - option one (direct): load PNG
+        //  - option two: load and convert SVG
+        // const compassTexture = new THREE.TextureLoader().load("img/compass-texture-d.png");
+        var compassTexture = null;
         var radiusTop = 100;
         var radiuBottom = 100;
         var height = 75;
         var compassGeometry = new THREE.CylinderGeometry(radiusTop, radiuBottom, height, 32, 2, true);
         var compassMaterial = new THREE.MeshStandardMaterial({
+            // Make the cockpit a bit darker
             color: 0xff0000,
             map: compassTexture,
-            // alphaMap: compassTexture,
             transparent: true,
             side: THREE.DoubleSide,
             emissive: hudComponent.primaryColor,
@@ -51,7 +52,6 @@ var Compass = /** @class */ (function () {
         this.compassMesh.position.add(new THREE.Vector3(30, 300, -160));
         this.hudComponent.hudScene.add(this.compassMesh);
         var onTextureReady = function (texture) {
-            console.log("Texture", texture);
             compassMaterial.map = texture;
         };
         (0, Helpers_1.svg2texture)("img/compass-texture-d.svg", onTextureReady);

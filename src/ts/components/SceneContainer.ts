@@ -28,10 +28,10 @@ export class SceneContainer {
   readonly cockpit: CockpitPlane;
   readonly hud: HudComponent;
   readonly fogHandler: FogHandler;
-
   readonly sceneData: SceneData;
-
   readonly tweakParams: TweakParams;
+
+  private isGameRunning: boolean = false;
 
   // Example cube
   cube: THREE.Mesh;
@@ -190,10 +190,6 @@ export class SceneContainer {
       firstPersonControls.update(delta);
       this.stats.update();
 
-      // Let's animate the cube: a rotation.
-      this.cube.rotation.x += 0.05;
-      this.cube.rotation.y += 0.04;
-
       this.renderer.render(this.scene, this.camera);
 
       // Updat HUD data
@@ -204,7 +200,14 @@ export class SceneContainer {
 
       terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 
-      physicsHandler.render();
+      if (this.isGameRunning) {
+        // Let's animate the cube: a rotation.
+        this.cube.rotation.x += 0.05;
+        this.cube.rotation.y += 0.04;
+
+        // Update physica
+        physicsHandler.render();
+      }
 
       requestAnimationFrame(_render);
     };
@@ -257,19 +260,28 @@ export class SceneContainer {
 
     // Initialize physics
     const physicsHandler = new PhysicsHandler(this, terrain);
-    physicsHandler.start().then(_render);
-    // _render();
+    const waitingFor = [
+      // This will start the physics engine and them immediately begin rendering.
+      physicsHandler.start().then(_render),
 
-    this.initializeAudio();
+      // Only after the "Start" button was hit (user interaction) audio can play.
+      this.initializeAudio()
+    ];
+    Promise.all(waitingFor).then(() => {
+      this.isGameRunning = true;
+    });
   }
 
-  initializeAudio() {
+  initializeAudio(): Promise<void> {
     const audioPlayer = new AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
-    const startButton = document.querySelector("#button-start");
-    startButton.addEventListener("click", () => {
-      const overlay = document.querySelector("#overlay");
-      overlay.classList.add("d-none");
-      audioPlayer.play();
+    return new Promise<void>((accept, _reject) => {
+      const startButton = document.querySelector("#button-start");
+      startButton.addEventListener("click", () => {
+        const overlay = document.querySelector("#overlay");
+        overlay.classList.add("d-none");
+        audioPlayer.play();
+        accept();
+      });
     });
   }
 

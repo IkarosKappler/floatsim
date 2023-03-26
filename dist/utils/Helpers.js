@@ -31,7 +31,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.svg2texture = exports.getColorStyle = void 0;
 var THREE = __importStar(require("three"));
-// import { SVGLoader, SVGResult } from "three/examples/jsm/loaders/SVGLoader.js";
 /**
  * Get the CSS colors string with adjustable alpha value.
  * @param {THREE.Color} color
@@ -42,37 +41,17 @@ var getColorStyle = function (color, alpha) {
     return "rgba(".concat(Math.floor(color.r * 255), ", ").concat(Math.floor(color.g * 255), ", ").concat(Math.floor(color.b * 255), ", ").concat(alpha, ")");
 };
 exports.getColorStyle = getColorStyle;
+/**
+ * Fetch the SVG at the given path and convert it to a THREE.Texture.
+ * @param {string} svgPath
+ * @param {function} onTextureReady
+ */
 var svg2texture = function (svgPath, onTextureReady) {
-    //   const svgPath = "img/compass-texture-d.svg";
-    //   const onSvgLoaded = (data: SVGResult) => {
-    //     console.log("SVG data", data);
-    //   };
-    //   const compassTextureSvg = new SVGLoader().load(svgPath, onSvgLoaded);
-    //   var svg = document.getElementById("svgContainer").querySelector("svg");
-    //   var svgData = new XMLSerializer().serializeToString(svg);
-    //   var canvas = document.createElement("canvas");
-    //   var svgSize = svg.getBoundingClientRect();
-    //   canvas.width = svgSize.width;
-    //   canvas.height = svgSize.height;
-    //   var ctx = canvas.getContext("2d");
-    //   var img = document.createElement("img");
-    //   //   img.setAttribute("src", "data:image/svg+xml;base64," + window.btoa(unescape(encodeURIComponent(svgData))));
-    //   img.setAttribute("src", svgPath);
-    //   img.onload = function () {
-    //     ctx.drawImage(img, 0, 0);
-    //     var texture = new THREE.Texture(canvas);
-    //     texture.needsUpdate = true;
-    //   };
-    //   var canvas = document.createElement("canvas");
-    //   var texture = new THREE.Texture(canvas);
-    //   texture.needsUpdate = true;
-    //   var geometry = new THREE.SphereGeometry(3, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2);
-    //   var material = new THREE.MeshBasicMaterial({ map: texture });
-    //   material.map.minFilter = THREE.LinearFilter;
-    //   const mesh = new THREE.Mesh(geometry, material);
     var svgImage = document.createElement("img");
-    // imgPreview.style.position = 'absolute';
-    // imgPreview.style.top = '-9999px';
+    svgImage.style.position = "absolute";
+    svgImage.style.top = "-9999px";
+    // The image _needs_ to be attached to the DOM, otherwise its
+    // attributes will not be availale.
     document.body.appendChild(svgImage);
     svgImage.onload = function () {
         var canvas = document.createElement("canvas");
@@ -80,9 +59,6 @@ var svg2texture = function (svgPath, onTextureReady) {
         canvas.height = svgImage.clientHeight;
         var canvasCtx = canvas.getContext("2d");
         canvasCtx.drawImage(svgImage, 0, 0);
-        // const imgData = canvas.toDataURL("image/png");
-        // callback(canvas); //imgData);
-        // document.body.removeChild(imgPreview);
         var texture = new THREE.Texture(canvas);
         texture.needsUpdate = true;
         svgImage.remove();

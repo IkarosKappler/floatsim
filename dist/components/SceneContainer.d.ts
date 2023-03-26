@@ -24,8 +24,9 @@ export declare class SceneContainer {
     readonly fogHandler: FogHandler;
     readonly sceneData: SceneData;
     readonly tweakParams: TweakParams;
+    private isGameRunning;
     cube: THREE.Mesh;
     constructor(params: Params);
-    initializeAudio(): void;
+    initializeAudio(): Promise<void>;
     onWindowResize(): void;
 }

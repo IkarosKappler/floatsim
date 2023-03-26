@@ -12,4 +12,9 @@ import * as THREE from "three";
  * @returns
  */
 export declare const getColorStyle: (color: THREE.RGB, alpha: number) => string;
+/**
+ * Fetch the SVG at the given path and convert it to a THREE.Texture.
+ * @param {string} svgPath
+ * @param {function} onTextureReady
+ */
 export declare const svg2texture: (svgPath: string, onTextureReady: (texture: THREE.Texture) => void) => void;

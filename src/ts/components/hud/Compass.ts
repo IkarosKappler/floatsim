@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
-// import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { HudComponent } from "../HudComponent";
 import { svg2texture } from "../../utils/Helpers";
 
@@ -12,6 +11,8 @@ export class Compass implements RenderableComponent {
     this.hudComponent = hudComponent;
 
     // Create a compass
+    //  - option one (direct): load PNG
+    //  - option two: load and convert SVG
     // const compassTexture = new THREE.TextureLoader().load("img/compass-texture-d.png");
     const compassTexture: THREE.Texture | null = null;
     const radiusTop: number = 100;
@@ -22,7 +23,6 @@ export class Compass implements RenderableComponent {
       // Make the cockpit a bit darker
       color: 0xff0000,
       map: compassTexture,
-      // alphaMap: compassTexture,
       transparent: true,
       side: THREE.DoubleSide,
       emissive: hudComponent.primaryColor,
