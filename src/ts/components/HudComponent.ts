@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./interfaces";
-import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { Compass } from "./hud/Compass";
 import { getColorStyle } from "../utils/Helpers";
+import { DepthMeter } from "./hud/DepthMeter";
 
 export class HudComponent implements RenderableComponent {
-  private hudCanvas: HTMLCanvasElement;
-  private hudBitmap: CanvasRenderingContext2D;
+  readonly hudCanvas: HTMLCanvasElement;
+  readonly hudBitmap: CanvasRenderingContext2D;
   private hudCamera: THREE.OrthographicCamera;
   readonly hudScene: THREE.Scene;
   private hudImage: HTMLImageElement;
@@ -16,6 +16,8 @@ export class HudComponent implements RenderableComponent {
 
   private compass: Compass;
   readonly primaryColor: THREE.Color;
+
+  private depthMeter: DepthMeter;
 
   constructor(width: number, height: number, primaryColor: THREE.Color) {
     this.primaryColor = primaryColor;
@@ -62,6 +64,9 @@ export class HudComponent implements RenderableComponent {
 
     // Create a compass
     this.compass = new Compass(this);
+
+    // Create the depth meter
+    this.depthMeter = new DepthMeter(this);
   }
 
   setHudSize(width: number, height: number) {
@@ -80,7 +85,14 @@ export class HudComponent implements RenderableComponent {
     // Apply tweak params
     this.compass.beforeRender(sceneContainer, hudData, tweakParams);
 
+    this.prepareLowerInfoDisplay(sceneContainer, hudData, tweakParams);
+    this.prepareDepthMeter(sceneContainer, hudData, tweakParams);
+  }
+
+  prepareLowerInfoDisplay(_sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
     // The lower right hus area
+    // TODO: add x and y position here, NOT below (like in DepthMeter)
+    // TODO 2: refactor to hud fragment, too
     var hudSize = { width: 240, height: 80 };
 
     // Update HUD graphics.
@@ -105,13 +117,17 @@ export class HudComponent implements RenderableComponent {
     // Draw HUD in the lower right corner
     this.hudBitmap.fillStyle = getColorStyle(this.primaryColor, 0.75);
 
-    var hudText = `Depth: ${hudData.depth.toFixed(1)}m`;
+    const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
     this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
     this.hudDynamicTexture.needsUpdate = true;
     // END Try a HUD
   }
 
-  renderHud(renderer: THREE.WebGLRenderer) {
+  prepareDepthMeter(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
+    this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
+  }
+
+  renderFragment(renderer: THREE.WebGLRenderer) {
     // Render HUD on top of the scene.
     renderer.render(this.hudScene, this.hudCamera);
     // END Try a HUD

@@ -57,7 +57,7 @@ var Compass = /** @class */ (function () {
         (0, Helpers_1.svg2texture)("img/compass-texture-d.svg", onTextureReady);
     }
     /**
-     * @implement RenderableComponent
+     * @implement RenderableComponent.befoRerender
      */
     Compass.prototype.beforeRender = function (_sceneContainer, _data, tweakParams) {
         // Apply tweak params
@@ -67,6 +67,13 @@ var Compass = /** @class */ (function () {
         m.copy(_sceneContainer.camera.matrixWorld);
         m.invert();
         this.compassMesh.setRotationFromMatrix(m);
+    };
+    /**
+     * @implement RenderableComponent.render
+     */
+    Compass.prototype.renderFragment = function (_renderer) {
+        // NOOP (nothing to render here)
+        // The compass just updates its rotation/position
     };
     return Compass;
 }());

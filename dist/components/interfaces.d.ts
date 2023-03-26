@@ -13,6 +13,10 @@ export interface NTriple {
 export interface TweakParams {
     z: 0;
 }
+export interface Dimension2Immutable {
+    readonly width: number;
+    readonly height: number;
+}
 export interface MinMax {
     min: number;
     max: number;
@@ -43,5 +47,6 @@ export interface ISceneContainer {
     readonly camera: THREE.PerspectiveCamera;
 }
 export interface RenderableComponent {
-    beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): any;
+    beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
+    renderFragment(renderer: THREE.WebGLRenderer): void;
 }

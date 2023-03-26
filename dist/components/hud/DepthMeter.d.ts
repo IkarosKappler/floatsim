@@ -1,9 +1,15 @@
+/**
+ * @author  Ikaros Kappler
+ * @date    2023-03-26
+ * @version 1.0.0
+ */
 import * as THREE from "three";
-import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 import { HudComponent } from "../HudComponent";
-export declare class Compass implements RenderableComponent {
-    readonly hudComponent: HudComponent;
-    private readonly compassMesh;
+import { Dimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
+export declare class DepthMeter implements RenderableComponent {
+    private hudComponent;
+    private depthMeterTexture;
+    readonly ASSET_SIZE: Dimension2Immutable;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender

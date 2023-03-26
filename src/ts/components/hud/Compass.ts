@@ -41,7 +41,7 @@ export class Compass implements RenderableComponent {
   }
 
   /**
-   * @implement RenderableComponent
+   * @implement RenderableComponent.befoRerender
    */
   beforeRender(_sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams) {
     // Apply tweak params
@@ -51,5 +51,13 @@ export class Compass implements RenderableComponent {
     m.copy(_sceneContainer.camera.matrixWorld);
     m.invert();
     this.compassMesh.setRotationFromMatrix(m);
+  }
+
+  /**
+   * @implement RenderableComponent.render
+   */
+  renderFragment(_renderer: THREE.WebGLRenderer): void {
+    // NOOP (nothing to render here)
+    // The compass just updates its rotation/position
   }
 }

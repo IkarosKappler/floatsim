@@ -196,7 +196,7 @@ export class SceneContainer {
       hudData.shipRotation = this.camera.rotation;
       hudData.depth = this.camera.position.y;
       this.hud.beforeRender(this, hudData, this.tweakParams);
-      this.hud.renderHud(this.renderer);
+      this.hud.renderFragment(this.renderer);
 
       terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 

@@ -19,6 +19,16 @@ export interface TweakParams {
   z: 0;
 }
 
+export interface Dimension2Immutable {
+  readonly width: number;
+  readonly height: number;
+}
+
+// export interface Dimension2 {
+//   width: number;
+//   height: number;
+// }
+
 export interface MinMax {
   min: number;
   max: number;
@@ -28,6 +38,7 @@ export interface SceneData {
   initialDepth: number;
   deepFogDepth: MinMax;
   highFogDepth: MinMax;
+  // viewportSize: Dimension2;
 }
 
 export interface Size3Immutable {
@@ -55,5 +66,6 @@ export interface ISceneContainer {
 }
 
 export interface RenderableComponent {
-  beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams);
+  beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
+  renderFragment(renderer: THREE.WebGLRenderer): void;
 }

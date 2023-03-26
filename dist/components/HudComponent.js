@@ -27,6 +27,7 @@ exports.HudComponent = void 0;
 var THREE = __importStar(require("three"));
 var Compass_1 = require("./hud/Compass");
 var Helpers_1 = require("../utils/Helpers");
+var DepthMeter_1 = require("./hud/DepthMeter");
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor) {
         this.primaryColor = primaryColor;
@@ -67,6 +68,8 @@ var HudComponent = /** @class */ (function () {
         this.hudScene.add(this.plane);
         // Create a compass
         this.compass = new Compass_1.Compass(this);
+        // Create the depth meter
+        this.depthMeter = new DepthMeter_1.DepthMeter(this);
     }
     HudComponent.prototype.setHudSize = function (width, height) {
         this.hudCanvas.width = width;
@@ -82,7 +85,13 @@ var HudComponent = /** @class */ (function () {
     HudComponent.prototype.beforeRender = function (sceneContainer, hudData, tweakParams) {
         // Apply tweak params
         this.compass.beforeRender(sceneContainer, hudData, tweakParams);
+        this.prepareLowerInfoDisplay(sceneContainer, hudData, tweakParams);
+        this.prepareDepthMeter(sceneContainer, hudData, tweakParams);
+    };
+    HudComponent.prototype.prepareLowerInfoDisplay = function (_sceneContainer, hudData, tweakParams) {
         // The lower right hus area
+        // TODO: add x and y position here, NOT below (like in DepthMeter)
+        // TODO 2: refactor to hud fragment, too
         var hudSize = { width: 240, height: 80 };
         // Update HUD graphics.
         this.hudBitmap.font = "Normal 16px Arial";
@@ -101,7 +110,10 @@ var HudComponent = /** @class */ (function () {
         this.hudDynamicTexture.needsUpdate = true;
         // END Try a HUD
     };
-    HudComponent.prototype.renderHud = function (renderer) {
+    HudComponent.prototype.prepareDepthMeter = function (sceneContainer, hudData, tweakParams) {
+        this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
+    };
+    HudComponent.prototype.renderFragment = function (renderer) {
         // Render HUD on top of the scene.
         renderer.render(this.hudScene, this.hudCamera);
         // END Try a HUD

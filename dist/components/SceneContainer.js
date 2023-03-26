@@ -172,7 +172,7 @@ var SceneContainer = /** @class */ (function () {
             hudData.shipRotation = _this.camera.rotation;
             hudData.depth = _this.camera.position.y;
             _this.hud.beforeRender(_this, hudData, _this.tweakParams);
-            _this.hud.renderHud(_this.renderer);
+            _this.hud.renderFragment(_this.renderer);
             terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
             if (_this.isGameRunning) {
                 // Let's animate the cube: a rotation.
