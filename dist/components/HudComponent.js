@@ -25,9 +25,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HudComponent = void 0;
 var THREE = __importStar(require("three"));
+var Compass_1 = require("./hud/Compass");
+var Helpers_1 = require("../utils/Helpers");
 var HudComponent = /** @class */ (function () {
-    function HudComponent(width, height) {
-        // BEGIN Try a HUD
+    function HudComponent(width, height, primaryColor) {
+        this.primaryColor = primaryColor;
         // We will use 2D canvas element to render our HUD.
         this.hudCanvas = document.createElement("canvas");
         // Again, set dimensions to fit the screen.
@@ -64,20 +66,7 @@ var HudComponent = /** @class */ (function () {
         this.plane.position.z = 0; // Depth in the scene
         this.hudScene.add(this.plane);
         // Create a compass
-        var compassTexture = new THREE.TextureLoader().load("img/compass-texture-c.png");
-        var compassGeometry = new THREE.CylinderGeometry(100, 100, 20, 32, 2, true);
-        var compassMaterial = new THREE.MeshStandardMaterial({
-            color: 0xff0000,
-            map: compassTexture,
-            // alphaMap: compassTexture,
-            transparent: true,
-            side: THREE.DoubleSide,
-            emissive: new THREE.Color(255, 0, 0),
-            flatShading: true
-        });
-        this.compassMesh = new THREE.Mesh(compassGeometry, compassMaterial);
-        this.compassMesh.position.add(new THREE.Vector3(30, 300, -160)); // Radius=30 -> definitely in range of camera
-        this.hudScene.add(this.compassMesh);
+        this.compass = new Compass_1.Compass(this);
     }
     HudComponent.prototype.setHudSize = function (width, height) {
         this.hudCanvas.width = width;
@@ -87,16 +76,23 @@ var HudComponent = /** @class */ (function () {
         this.hudMaterial.map = this.hudDynamicTexture;
         this.plane.scale.set(width / 100, height / 100, 1);
     };
-    HudComponent.prototype.renderHud = function (renderer, data, tweakParams) {
+    /**
+     * @implement RenderableComponent
+     */
+    HudComponent.prototype.beforeRender = function (sceneContainer, hudData, tweakParams) {
         // Apply tweak params
-        this.compassMesh.position.z = tweakParams.z;
+        // this.compassMesh.position.z = tweakParams.z;
+        this.compass.beforeRender(sceneContainer, hudData, tweakParams);
         // Render the HUD scene
         var hudSize = { width: 240, height: 80 };
         // Update HUD graphics.
         // this.hudBitmap.globalAlpha = 0.5;
         this.hudBitmap.font = "Normal 16px Arial";
         this.hudBitmap.textAlign = "center";
-        this.hudBitmap.fillStyle = "rgba(255,255,255,0.5)";
+        // this.hudBitmap.fillStyle = "rgba(255,255,255,0.5)";
+        // this.hudBitmap.fillStyle = `rgba(${hudData.primaryColor.r}, ${hudData.primaryColor.g}, ${hudData.primaryColor.r}, 0.5)`;
+        var colorStyle = (0, Helpers_1.getColorStyle)(this.primaryColor, 0.25);
+        console.log("HUD color", colorStyle);
         // console.log("this.hudCanvas.width", this.hudCanvas.width);
         // Clear only the lower HUD rect?
         // this.hudBitmap.clearRect(
@@ -107,23 +103,19 @@ var HudComponent = /** @class */ (function () {
         // );
         // Or clear the whole scene?
         this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
-        this.hudBitmap.fillStyle = "rgba(0,192,192,0.5)";
+        // this.hudBitmap.fillStyle = "rgba(0,192,192,0.5)";
+        this.hudBitmap.fillStyle = colorStyle; // `rgba(${hudData.primaryColor.r}, ${hudData.primaryColor.g}, ${hudData.primaryColor.r}, 0.5)`;
         this.hudBitmap.fillRect(this.hudCanvas.width - hudSize.width, this.hudCanvas.height - hudSize.height, hudSize.width, hudSize.height);
-        // this.hudBitmap.drawImage(this.hudImage, 0, 0); // 69, 50);
         // Draw HUD in the lower right corner
-        this.hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
-        // var hudText =  "RAD [x:" +
-        // (this.hudData.x % (2 * Math.PI)).toFixed(1) +
-        // ", y:" +
-        // (this.hudData.y % (2 * Math.PI)).toFixed(1) +
-        // ", z:" +
-        // (this.hudData.z % (2 * Math.PI)).toFixed(1) +
-        // "]";
-        var hudText = "Depth: ".concat(data.depth.toFixed(1), "m");
+        // this.hudBitmap.fillStyle = "rgba(245,245,245,0.75)";
+        // this.hudBitmap.fillStyle = `rgba(${hudData.primaryColor.r}, ${hudData.primaryColor.g}, ${hudData.primaryColor.r}, 0.75)`;
+        this.hudBitmap.fillStyle = (0, Helpers_1.getColorStyle)(this.primaryColor, 0.75);
+        var hudText = "Depth: ".concat(hudData.depth.toFixed(1), "m");
         this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
         this.hudDynamicTexture.needsUpdate = true;
-        // Update compass
-        this.compassMesh.rotation.set(data.shipRotation.x, data.shipRotation.y, data.shipRotation.z);
+        // END Try a HUD
+    };
+    HudComponent.prototype.renderHud = function (renderer) {
         // Render HUD on top of the scene.
         renderer.render(this.hudScene, this.hudCamera);
         // END Try a HUD

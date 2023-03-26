@@ -2,6 +2,8 @@
  * Global interfaces.
  */
 
+import { SceneContainer } from "./SceneContainer";
+
 export interface HUDData {
   depth: number;
   shipRotation: NTriple;
@@ -24,7 +26,6 @@ export interface MinMax {
 
 export interface SceneData {
   initialDepth: number;
-  //   normalFogDepth: number;
   deepFogDepth: MinMax;
   highFogDepth: MinMax;
 }
@@ -47,4 +48,12 @@ export interface TextureData {
   readonly imageData: ImageData;
   readonly imageDataArray: Uint8ClampedArray;
   readonly imageCanvas: HTMLCanvasElement;
+}
+
+export interface ISceneContainer {
+  readonly camera: THREE.PerspectiveCamera;
+}
+
+export interface RenderableComponent {
+  beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams);
 }

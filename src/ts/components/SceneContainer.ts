@@ -5,14 +5,13 @@
  */
 
 import * as THREE from "three";
-import PlaySound from "play-sound";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { PerlinHeightMap, SceneData, Size3Immutable, TweakParams } from "./interfaces";
+import { HUDData, PerlinHeightMap, SceneData, Size3Immutable, TweakParams } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
@@ -135,7 +134,8 @@ export class SceneContainer {
     this.cockpit = new CockpitPlane();
     this.camera.add(this.cockpit.mesh);
 
-    this.hud = new HudComponent(this.renderer.domElement.width, this.renderer.domElement.height);
+    const hudPrimaryColor = new THREE.Color("#ff0000");
+    this.hud = new HudComponent(this.renderer.domElement.width, this.renderer.domElement.height, hudPrimaryColor);
 
     // To get the Cockpit visible we also need to add the camera to the scene
     this.scene.add(this.camera);
@@ -171,9 +171,13 @@ export class SceneContainer {
 
     this.controls = firstPersonControls;
 
-    // console.log("Stats", Stats);
     this.stats = new (Stats as any).Stats();
     document.querySelector("body").appendChild(this.stats.domElement);
+
+    const hudData: HUDData = {
+      depth: this.camera.position.y,
+      shipRotation: this.camera.rotation
+    };
 
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.
@@ -191,7 +195,12 @@ export class SceneContainer {
       this.cube.rotation.y += 0.04;
 
       this.renderer.render(this.scene, this.camera);
-      this.hud.renderHud(this.renderer, { depth: this.camera.position.y, shipRotation: this.camera.rotation }, this.tweakParams);
+
+      // Updat HUD data
+      hudData.shipRotation = this.camera.rotation;
+      hudData.depth = this.camera.position.y;
+      this.hud.beforeRender(this, hudData, this.tweakParams);
+      this.hud.renderHud(this.renderer);
 
       terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 
@@ -251,10 +260,10 @@ export class SceneContainer {
     physicsHandler.start().then(_render);
     // _render();
 
-    this.startAudio();
+    this.initializeAudio();
   }
 
-  startAudio() {
+  initializeAudio() {
     const audioPlayer = new AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
     const startButton = document.querySelector("#button-start");
     startButton.addEventListener("click", () => {

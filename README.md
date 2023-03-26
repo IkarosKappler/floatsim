@@ -52,12 +52,18 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Add collision sounds. Each "material" should have its own sound (sand, metal, stone, organic?).
 - [DONE] Add a depth measure (to the ground and to the surface). Add a "pressure" HUD.
 - Add a system alarm to warn for "radiation" and "high pressure".
-- Add add compass HUD.
+- Add add compass HUD. (use OrbitControls.getAzimuthalAngle() ?)
 - Add water plants.
 - Add a sonar HUD.
 - [DONE] Let initial settings being passed by GET parameters.
 - Tinker with THREE VolumetricLight.
 - Fog Color must be passed to the new terrain shader on each position change.
+- Add a custom camera/scene for separate cockpit rendering.
+- Create simple logo and favicon?
+- Add target HUD like CubeIconBox (https://hofk.de/main/discourse.threejs/2019/CubeBoxIcon/CubeBoxIcon.html)
+- Make hudData a globally available object?
+- HudComponent: buffer color style string in class variable (is rarely changed)
+- Compass: load compass texture from SVG?
 
 ## Credits
 

@@ -1,16 +1,21 @@
 import * as THREE from "three";
-import { HUDData, TweakParams } from "./interfaces";
-export declare class HudComponent {
+import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./interfaces";
+export declare class HudComponent implements RenderableComponent {
     private hudCanvas;
     private hudBitmap;
     private hudCamera;
-    private hudScene;
+    readonly hudScene: THREE.Scene;
     private hudImage;
     private hudDynamicTexture;
     private hudMaterial;
     private plane;
-    private compassMesh;
-    constructor(width: number, height: number);
+    private compass;
+    readonly primaryColor: THREE.Color;
+    constructor(width: number, height: number, primaryColor: THREE.Color);
     setHudSize(width: number, height: number): void;
-    renderHud(renderer: THREE.WebGLRenderer, data: HUDData, tweakParams: TweakParams): void;
+    /**
+     * @implement RenderableComponent
+     */
+    beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
+    renderHud(renderer: THREE.WebGLRenderer): void;
 }

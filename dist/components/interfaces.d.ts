@@ -39,3 +39,9 @@ export interface TextureData {
     readonly imageDataArray: Uint8ClampedArray;
     readonly imageCanvas: HTMLCanvasElement;
 }
+export interface ISceneContainer {
+    readonly camera: THREE.PerspectiveCamera;
+}
+export interface RenderableComponent {
+    beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): any;
+}

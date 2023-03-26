@@ -120,7 +120,8 @@ var SceneContainer = /** @class */ (function () {
         // Add cockpit
         this.cockpit = new CockpitPlane_1.CockpitPlane();
         this.camera.add(this.cockpit.mesh);
-        this.hud = new HudComponent_1.HudComponent(this.renderer.domElement.width, this.renderer.domElement.height);
+        var hudPrimaryColor = new THREE.Color("#ff0000");
+        this.hud = new HudComponent_1.HudComponent(this.renderer.domElement.width, this.renderer.domElement.height, hudPrimaryColor);
         // To get the Cockpit visible we also need to add the camera to the scene
         this.scene.add(this.camera);
         // Finally we want to be able to rotate the whole scene with the mouse:
@@ -150,9 +151,12 @@ var SceneContainer = /** @class */ (function () {
         // firstPersonControls.enabled = true;
         // console.log("firstPersonControls", firstPersonControls);
         this.controls = firstPersonControls;
-        // console.log("Stats", Stats);
         this.stats = new Stats_1.Stats.Stats();
         document.querySelector("body").appendChild(this.stats.domElement);
+        var hudData = {
+            depth: this.camera.position.y,
+            shipRotation: this.camera.rotation
+        };
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
@@ -166,7 +170,13 @@ var SceneContainer = /** @class */ (function () {
             _this.cube.rotation.x += 0.05;
             _this.cube.rotation.y += 0.04;
             _this.renderer.render(_this.scene, _this.camera);
-            _this.hud.renderHud(_this.renderer, { depth: _this.camera.position.y, shipRotation: _this.camera.rotation }, _this.tweakParams);
+            // Updat HUD data
+            hudData.shipRotation = _this.camera.rotation;
+            hudData.depth = _this.camera.position.y;
+            // hudData.primaryColor.set(0xff0000);
+            // console.log("hudColor", hudData.primaryColor);
+            _this.hud.beforeRender(_this, hudData, _this.tweakParams);
+            _this.hud.renderHud(_this.renderer);
             terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
             physicsHandler.render();
             requestAnimationFrame(_render);
