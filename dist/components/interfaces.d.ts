@@ -23,6 +23,10 @@ export interface TweakParams {
     isRendering: boolean;
     highlightHudFragments: boolean;
 }
+export interface IDimension2 {
+    width: number;
+    height: number;
+}
 export interface IDimension2Immutable {
     readonly width: number;
     readonly height: number;
@@ -72,5 +76,5 @@ export interface ISceneContainer {
 export interface RenderableComponent {
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     renderFragment(renderer: THREE.WebGLRenderer): void;
-    updateSize(): void;
+    updateSize(width: number, height: number): void;
 }

@@ -73,16 +73,16 @@ var HudComponent = /** @class */ (function () {
         // Create the lower info hud fragment
         this.lowerInfoHud = new LowerInfoHudFragment_1.LowerInfoHudFragment(this);
     }
-    HudComponent.prototype.setHudSize = function (width, height) {
-        this.hudCanvas.width = width;
-        this.hudCanvas.height = height;
-        this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
-        this.hudDynamicTexture.needsUpdate = true;
-        this.hudMaterial.map = this.hudDynamicTexture;
-        this.plane.scale.set(width / 100, height / 100, 1);
-        this.lowerInfoHud.updateSize();
-        this.depthMeter.updateSize();
-    };
+    // setHudSize(width: number, height: number) {
+    //   this.hudCanvas.width = width;
+    //   this.hudCanvas.height = height;
+    //   this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
+    //   this.hudDynamicTexture.needsUpdate = true;
+    //   this.hudMaterial.map = this.hudDynamicTexture;
+    //   this.plane.scale.set(width / 100, height / 100, 1);
+    //   this.lowerInfoHud.updateSize();
+    //   this.depthMeter.updateSize();
+    // }
     /**
      * @implement RenderableComponent.beforeRender
      */
@@ -104,8 +104,15 @@ var HudComponent = /** @class */ (function () {
     /**
      * @implement RenderableComponent.updateSize
      */
-    HudComponent.prototype.updateSize = function () {
-        // NOOP?
+    HudComponent.prototype.updateSize = function (width, height) {
+        this.hudCanvas.width = width;
+        this.hudCanvas.height = height;
+        this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
+        this.hudDynamicTexture.needsUpdate = true;
+        this.hudMaterial.map = this.hudDynamicTexture;
+        this.plane.scale.set(width / 100, height / 100, 1);
+        this.lowerInfoHud.updateSize(width, height);
+        this.depthMeter.updateSize(width, height);
     };
     return HudComponent;
 }());

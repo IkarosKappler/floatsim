@@ -12,7 +12,7 @@ export declare class LowerInfoHudFragment implements RenderableComponent {
     /**
      * @implement RenderableComponent.befoRerender
      */
-    beforeRender(_sceneContainer: ISceneContainer, hudData: HUDData, _tweakParams: TweakParams): void;
+    beforeRender(_sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     /**
      * @implement RenderableComponent.renderFragment
      */
@@ -20,5 +20,5 @@ export declare class LowerInfoHudFragment implements RenderableComponent {
     /**
      * @implement RenderableComponent.updateSize
      */
-    updateSize(): void;
+    updateSize(width: number, height: number): void;
 }

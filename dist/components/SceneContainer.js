@@ -121,7 +121,7 @@ var SceneContainer = /** @class */ (function () {
         // Add cockpit
         this.cockpit = new CockpitPlane_1.CockpitPlane();
         this.camera.add(this.cockpit.mesh);
-        var hudPrimaryColor = new THREE.Color("#ff0000");
+        var hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
         this.hud = new HudComponent_1.HudComponent(this.renderer.domElement.width, this.renderer.domElement.height, hudPrimaryColor);
         // To get the Cockpit visible we also need to add the camera to the scene
         this.scene.add(this.camera);
@@ -252,7 +252,8 @@ var SceneContainer = /** @class */ (function () {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.cockpit.setCockpitSize(window.innerWidth, window.innerHeight);
-        this.hud.setHudSize(this.renderer.domElement.width, this.renderer.domElement.height);
+        // this.hud.setHudSize(this.renderer.domElement.width, this.renderer.domElement.height);
+        this.hud.updateSize(this.renderer.domElement.width, this.renderer.domElement.height);
         if (this.controls.hasOwnProperty("handleResize")) {
             this.controls.handleResize();
         }

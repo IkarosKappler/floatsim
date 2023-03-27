@@ -32,5 +32,5 @@ export declare class DepthMeterFragment implements RenderableComponent {
     /**
      * @implement RenderableComponent.updateSize
      */
-    updateSize(): void;
+    updateSize(width: number, height: number): void;
 }

@@ -14,7 +14,6 @@ export declare class HudComponent implements RenderableComponent {
     private depthMeter;
     private lowerInfoHud;
     constructor(width: number, height: number, primaryColor: THREE.Color);
-    setHudSize(width: number, height: number): void;
     /**
      * @implement RenderableComponent.beforeRender
      */
@@ -26,5 +25,5 @@ export declare class HudComponent implements RenderableComponent {
     /**
      * @implement RenderableComponent.updateSize
      */
-    updateSize(): void;
+    updateSize(width: number, height: number): void;
 }
