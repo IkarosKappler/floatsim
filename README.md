@@ -12,7 +12,7 @@ Tweaking the fog colors when changing depth. Adding a depth display.
 ![Depth and fog color](screenshots/screenshot-20230310-0.png)
 
 Adding more HUD fragments: Depth meter and compass.
-![Depth meter and compass](screenshot-20230327-0.png)
+![Depth meter and compass](screenshots/screenshot-20230327-0.png)
 
 ## Build THREE examples
 
