@@ -14,7 +14,11 @@ export declare class LowerInfoHudFragment implements RenderableComponent {
      */
     beforeRender(_sceneContainer: ISceneContainer, hudData: HUDData, _tweakParams: TweakParams): void;
     /**
-     * @implement RenderableComponent.render
+     * @implement RenderableComponent.renderFragment
      */
     renderFragment(_renderer: THREE.WebGLRenderer): void;
+    /**
+     * @implement RenderableComponent.updateSize
+     */
+    updateSize(): void;
 }

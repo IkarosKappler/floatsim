@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./interfaces";
 import { Compass } from "./hud/Compass";
-import { getColorStyle } from "../utils/Helpers";
 import { DepthMeterFragment } from "./hud/DepthMeterFragment";
 import { LowerInfoHudFragment } from "./hud/LowerInfoHudFragment";
 
@@ -81,63 +80,34 @@ export class HudComponent implements RenderableComponent {
     this.hudDynamicTexture.needsUpdate = true;
     this.hudMaterial.map = this.hudDynamicTexture;
     this.plane.scale.set(width / 100, height / 100, 1);
+    this.lowerInfoHud.updateSize();
+    this.depthMeter.updateSize();
   }
 
   /**
-   * @implement RenderableComponent
+   * @implement RenderableComponent.beforeRender
    */
   beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
     // Apply tweak params
     this.compass.beforeRender(sceneContainer, hudData, tweakParams);
-
-    this.prepareLowerInfoDisplay(sceneContainer, hudData, tweakParams);
-    this.prepareDepthMeter(sceneContainer, hudData, tweakParams);
-
+    this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
+    this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
     this.hudDynamicTexture.needsUpdate = true;
   }
 
-  prepareLowerInfoDisplay(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
-    // The lower right hud area
-    // TODO: add x and y position here, NOT below (like in DepthMeter)
-    // TODO 2: refactor to hud fragment, too
-    // var hudSize = { width: 240, height: 80 };
-
-    // // Update HUD graphics.
-    // this.hudBitmap.font = "Normal 16px Arial";
-    // this.hudBitmap.textAlign = "center";
-
-    // // TODO: buffer color style string in class variable (is rarely changed)
-    // const colorStyle = getColorStyle(this.primaryColor, 0.25);
-
-    // // Clear only the lower HUD rect?
-    // // Or clear the whole scene?
-    // this.hudBitmap.clearRect(0, 0, this.hudCanvas.width, this.hudCanvas.height);
-
-    // this.hudBitmap.fillStyle = colorStyle;
-    // this.hudBitmap.fillRect(
-    //   this.hudCanvas.width - hudSize.width,
-    //   this.hudCanvas.height - hudSize.height,
-    //   hudSize.width,
-    //   hudSize.height
-    // );
-
-    // // Draw HUD in the lower right corner
-    // this.hudBitmap.fillStyle = getColorStyle(this.primaryColor, 0.75);
-
-    // const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
-    // this.hudBitmap.fillText(hudText, this.hudCanvas.width - hudSize.width / 2, this.hudCanvas.height - hudSize.height / 2);
-    this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
-    // this.hudDynamicTexture.needsUpdate = true;
-    // END Try a HUD
-  }
-
-  prepareDepthMeter(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
-    this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
-  }
-
+  /**
+   * @implement RenderableComponent.renderFragment
+   */
   renderFragment(renderer: THREE.WebGLRenderer) {
     // Render HUD on top of the scene.
     renderer.render(this.hudScene, this.hudCamera);
     // END Try a HUD
+  }
+
+  /**
+   * @implement RenderableComponent.updateSize
+   */
+  updateSize() {
+    // NOOP?
   }
 }

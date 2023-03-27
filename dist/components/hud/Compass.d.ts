@@ -10,7 +10,11 @@ export declare class Compass implements RenderableComponent {
      */
     beforeRender(_sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams): void;
     /**
-     * @implement RenderableComponent.render
+     * @implement RenderableComponent.renderFragment
      */
     renderFragment(_renderer: THREE.WebGLRenderer): void;
+    /**
+     * @implement RenderableComponent.updateSize
+     */
+    updateSize(): void;
 }

@@ -69,11 +69,17 @@ var Compass = /** @class */ (function () {
         this.compassMesh.setRotationFromMatrix(m);
     };
     /**
-     * @implement RenderableComponent.render
+     * @implement RenderableComponent.renderFragment
      */
     Compass.prototype.renderFragment = function (_renderer) {
         // NOOP (nothing to render here)
         // The compass just updates its rotation/position
+    };
+    /**
+     * @implement RenderableComponent.updateSize
+     */
+    Compass.prototype.updateSize = function () {
+        // NOOP?
     };
     return Compass;
 }());

@@ -44,10 +44,16 @@ var LowerInfoHudFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.restore();
     };
     /**
-     * @implement RenderableComponent.render
+     * @implement RenderableComponent.renderFragment
      */
     LowerInfoHudFragment.prototype.renderFragment = function (_renderer) {
         // NOOP
+    };
+    /**
+     * @implement RenderableComponent.updateSize
+     */
+    LowerInfoHudFragment.prototype.updateSize = function () {
+        // NOOP?
     };
     return LowerInfoHudFragment;
 }());

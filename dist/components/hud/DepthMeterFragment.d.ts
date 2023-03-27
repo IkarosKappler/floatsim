@@ -13,13 +13,24 @@ export declare class DepthMeterFragment implements RenderableComponent {
     private static ASSET_SIZE;
     private static ASSETS_LEFT_SCALE_BOUNDS;
     private static ASSETS_RIGHT_SCALE_BOUNDS;
+    private static HUD_RATIO;
+    static readonly MAX_DEPTH_METER = -12000;
+    private currentHudScale;
+    private currentHudBounds;
+    private leftSubBounds;
+    private rightSubBounds;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender
      */
-    beforeRender(_sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams): void;
+    beforeRender(_sceneContainer: ISceneContainer, data: HUDData, tweakParams: TweakParams): void;
+    private drawIndicator;
     /**
-     * @implement RenderableComponent.render
+     * @implement RenderableComponent.renderFragment
      */
     renderFragment(_renderer: THREE.WebGLRenderer): void;
+    /**
+     * @implement RenderableComponent.updateSize
+     */
+    updateSize(): void;
 }

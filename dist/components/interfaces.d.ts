@@ -72,4 +72,5 @@ export interface ISceneContainer {
 export interface RenderableComponent {
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     renderFragment(renderer: THREE.WebGLRenderer): void;
+    updateSize(): void;
 }

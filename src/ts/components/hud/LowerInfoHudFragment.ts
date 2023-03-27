@@ -70,9 +70,16 @@ export class LowerInfoHudFragment implements RenderableComponent {
   }
 
   /**
-   * @implement RenderableComponent.render
+   * @implement RenderableComponent.renderFragment
    */
   renderFragment(_renderer: THREE.WebGLRenderer): void {
     // NOOP
+  }
+
+  /**
+   * @implement RenderableComponent.updateSize
+   */
+  updateSize() {
+    // NOOP?
   }
 }

@@ -54,10 +54,17 @@ export class Compass implements RenderableComponent {
   }
 
   /**
-   * @implement RenderableComponent.render
+   * @implement RenderableComponent.renderFragment
    */
   renderFragment(_renderer: THREE.WebGLRenderer): void {
     // NOOP (nothing to render here)
     // The compass just updates its rotation/position
+  }
+
+  /**
+   * @implement RenderableComponent.updateSize
+   */
+  updateSize() {
+    // NOOP?
   }
 }

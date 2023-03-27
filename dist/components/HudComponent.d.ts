@@ -16,10 +16,15 @@ export declare class HudComponent implements RenderableComponent {
     constructor(width: number, height: number, primaryColor: THREE.Color);
     setHudSize(width: number, height: number): void;
     /**
-     * @implement RenderableComponent
+     * @implement RenderableComponent.beforeRender
      */
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
-    prepareLowerInfoDisplay(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
-    prepareDepthMeter(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
+    /**
+     * @implement RenderableComponent.renderFragment
+     */
     renderFragment(renderer: THREE.WebGLRenderer): void;
+    /**
+     * @implement RenderableComponent.updateSize
+     */
+    updateSize(): void;
 }
