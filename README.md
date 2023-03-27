@@ -67,6 +67,8 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Make hudData a globally available object?
 - HudComponent: buffer color style string in class variable (is rarely changed)
 - Compass: load compass texture from SVG?
+- Add floating particles (sprites?).
+- Bounds2Immutable: try function overloading with the new Typescript here (constructor).
 
 ## Credits
 

@@ -6,6 +6,7 @@
  */
 
 import * as THREE from "three";
+import { IBounds2Immutable, Rect, Tuple } from "../components/interfaces";
 
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -42,3 +43,62 @@ export const svg2texture = (svgPath: string, onTextureReady: (texture: THREE.Tex
   };
   svgImage.src = svgPath;
 };
+
+/**
+ * A simple immutable bounds class with helper functions for relative positioning.
+ */
+export class Bounds2Immutable implements IBounds2Immutable {
+  readonly min: Tuple<number>;
+  readonly max: Tuple<number>;
+  readonly width: number;
+  readonly height: number;
+
+  // TODO: try function overloading with the new Typescript here
+  constructor(x: number | Rect, y?: number, width?: number, height?: number) {
+    if (typeof x === "number") {
+      this.width = width ?? 0;
+      this.height = height ?? 0;
+      this.min = { x: x, y: y ?? 0 };
+      this.max = { x: this.min.x + this.width, y: this.min.y + this.height };
+    } else {
+      this.width = x.width ?? 0;
+      this.height = x.height ?? 0;
+      this.min = { x: x.x, y: x.y };
+      this.max = { x: x.x + this.width, y: x.y + this.height };
+    }
+  }
+
+  private getRelativeX(xFract: number) {
+    return this.min.x + this.width * xFract;
+  }
+
+  private getRelativeY(yFract: number) {
+    return this.min.y + this.height * yFract;
+  }
+
+  getRelativePos(xFract: number, yFract: number): Tuple<number> {
+    return { x: this.getRelativeX(xFract), y: this.getRelativeY(yFract) };
+  }
+  getRelativeBounds(minFracts: Tuple<number>, maxFracts: Tuple<number>): IBounds2Immutable {
+    const minAbs = this.getRelativePos(minFracts.x, minFracts.y);
+    const maxAbs = this.getRelativePos(maxFracts.x, maxFracts.y);
+    return new Bounds2Immutable(
+      Math.min(minAbs.x, maxAbs.x),
+      Math.min(minAbs.y, maxAbs.y),
+      Math.abs(maxAbs.x - minAbs.x),
+      Math.abs(maxAbs.y - minAbs.y)
+    );
+  }
+
+  scale(factor: number): Bounds2Immutable {
+    return new Bounds2Immutable(this.min.x * factor, this.min.y * factor, this.width * factor, this.height * factor);
+  }
+
+  move(amount: Tuple<number>) {
+    return new Bounds2Immutable(this.min.x + amount.x, this.min.y + amount.y, this.width, this.height);
+  }
+
+  static fromMinMax(min: Tuple<number>, max: Tuple<number>) {
+    return new Bounds2Immutable(min.x, min.y, max.x - min.x, max.y - min.y);
+  }
+}

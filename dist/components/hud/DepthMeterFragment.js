@@ -31,7 +31,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DepthMeterFragment = void 0;
 var THREE = __importStar(require("three"));
 var Helpers_1 = require("../../utils/Helpers");
-var constants_1 = require("../constants");
 var DepthMeterFragment = /** @class */ (function () {
     function DepthMeterFragment(hudComponent) {
         this.hudComponent = hudComponent;
@@ -41,35 +40,73 @@ var DepthMeterFragment = /** @class */ (function () {
      * @implement RenderableComponent.befoRerender
      */
     DepthMeterFragment.prototype.beforeRender = function (_sceneContainer, _data, tweakParams) {
+        var highlightHudFragments = true;
+        // This is rather an instance attriute
+        var hudRatio = DepthMeterFragment.ASSET_SIZE.width / DepthMeterFragment.ASSET_SIZE.height;
+        // Testing: move indicators over time
+        var time = _sceneContainer.clock.getElapsedTime();
+        var mPct = ((0.22 + time) % 10.0) / 10;
+        var kPct = ((0.22 + time) % 10.0) / 10;
         this.hudComponent.hudBitmap.save();
         // The lower right hud area
-        var desiredHeight = this.hudComponent.hudCanvas.height / 3.0;
-        var ratio = DepthMeterFragment.ASSET_SIZE.width / DepthMeterFragment.ASSET_SIZE.height;
-        var hudSize = {
+        var desiredHudHeight = this.hudComponent.hudCanvas.height / 3.0;
+        var curHudScale = desiredHudHeight / DepthMeterFragment.ASSET_SIZE.height;
+        // console.log("currentHudScale", curHudScale);
+        var curHudBounds = new Helpers_1.Bounds2Immutable({
             x: 30,
-            y: (this.hudComponent.hudCanvas.height - desiredHeight) / 2.0,
-            width: desiredHeight * ratio,
-            height: desiredHeight
+            y: (this.hudComponent.hudCanvas.height - desiredHudHeight) / 2.0,
+            width: desiredHudHeight * hudRatio,
+            height: desiredHudHeight
+        });
+        var triangleSize = {
+            height: curHudBounds.height / 20.0,
+            width: curHudBounds.height / 40.0
         };
+        var leftSubBounds = DepthMeterFragment.ASSETS_LEFT_SCALE_BOUNDS.scale(curHudScale).move(curHudBounds.min);
+        var rightSubBounds = DepthMeterFragment.ASSETS_RIGHT_SCALE_BOUNDS.scale(curHudScale).move(curHudBounds.min);
+        // TODO: store this
+        var triangleBoundsLeft = new Helpers_1.Bounds2Immutable({
+            x: leftSubBounds.max.x,
+            y: leftSubBounds.min.y + leftSubBounds.height * kPct - triangleSize.height / 2.0,
+            width: triangleSize.width,
+            height: triangleSize.height
+        });
+        var triangleBoundsRight = new Helpers_1.Bounds2Immutable({
+            x: rightSubBounds.min.x - triangleSize.width,
+            y: rightSubBounds.min.y + rightSubBounds.height * mPct - triangleSize.height / 2.0,
+            width: triangleSize.width,
+            height: triangleSize.height
+        });
+        if (tweakParams.highlightHudFragments) {
+            var colorStyleBg = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
+            this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
+            this.hudComponent.hudBitmap.fillRect(curHudBounds.min.x, curHudBounds.min.y, curHudBounds.width, curHudBounds.height);
+            this.hudComponent.hudBitmap.fillRect(leftSubBounds.min.x, leftSubBounds.min.y, leftSubBounds.width, leftSubBounds.height);
+        }
         // TODO: buffer color style string in class variable (is rarely changed)
         var colorStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
-        var mPct = 0.22;
-        var kPct = 0.56;
-        var mY = hudSize.y + hudSize.height * mPct;
-        var kY = hudSize.y + hudSize.height * kPct;
-        var mX = hudSize.x + hudSize.width / 2.0 - 10;
-        var kX = hudSize.x + hudSize.width / 2.0 + 10;
+        this.hudComponent.hudBitmap.fillStyle = colorStyle;
         // Draw indicators
         this.hudComponent.hudBitmap.beginPath();
-        this.hudComponent.hudBitmap.arc(mX, mY, 5, 0.0, constants_1.TAU);
-        this.hudComponent.hudBitmap.arc(kX, kY, 5, 0.0, constants_1.TAU);
-        this.hudComponent.hudBitmap.closePath();
+        this.hudComponent.hudBitmap.moveTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
+        // Left Triangle
+        this.hudComponent.hudBitmap.moveTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
+        this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.max.x, triangleBoundsLeft.max.y);
+        this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.min.x, triangleBoundsLeft.min.y + triangleBoundsLeft.height / 2.0);
+        this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
+        // Right Triangle
+        this.hudComponent.hudBitmap.moveTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
+        this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.max.y);
+        this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.max.x, triangleBoundsRight.min.y + triangleBoundsRight.height / 2.0);
+        this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
+        // this.hudComponent.hudBitmap.moveTo(rightX, rightY);
+        // this.hudComponent.hudBitmap.arc(rightX, rightY, 5, 0.0, TAU);
         this.hudComponent.hudBitmap.fill();
+        this.hudComponent.hudBitmap.closePath();
         // Draw texture with primary color (source-atop)
-        this.hudComponent.hudBitmap.drawImage(this.depthMeterTexture, hudSize.x, hudSize.y, hudSize.width, hudSize.height);
+        this.hudComponent.hudBitmap.drawImage(this.depthMeterTexture, curHudBounds.min.x, curHudBounds.min.y, curHudBounds.width, curHudBounds.height);
         this.hudComponent.hudBitmap.globalCompositeOperation = "source-atop";
-        this.hudComponent.hudBitmap.fillStyle = colorStyle;
-        this.hudComponent.hudBitmap.fillRect(hudSize.x, hudSize.y, hudSize.width, hudSize.height);
+        this.hudComponent.hudBitmap.fillRect(curHudBounds.min.x, curHudBounds.min.y, curHudBounds.width, curHudBounds.height);
         this.hudComponent.hudBitmap.restore();
     };
     /**
@@ -79,7 +116,10 @@ var DepthMeterFragment = /** @class */ (function () {
         // NOOP
     };
     DepthMeterFragment.ASSET_PATH = "img/depth-meter-a.png";
-    DepthMeterFragment.ASSET_SIZE = { width: 576, height: 1357 };
+    // static readonly ASSET_SIZE: IDimension2Immutable = { width: 600, height: 1347 };
+    DepthMeterFragment.ASSET_SIZE = new Helpers_1.Bounds2Immutable({ x: 0, y: 0, width: 600, height: 1347 });
+    DepthMeterFragment.ASSETS_LEFT_SCALE_BOUNDS = Helpers_1.Bounds2Immutable.fromMinMax({ x: 120, y: 192 }, { x: 222, y: 1156 });
+    DepthMeterFragment.ASSETS_RIGHT_SCALE_BOUNDS = Helpers_1.Bounds2Immutable.fromMinMax({ x: 356, y: 94 }, { x: 450, y: 1248 });
     return DepthMeterFragment;
 }());
 exports.DepthMeterFragment = DepthMeterFragment;

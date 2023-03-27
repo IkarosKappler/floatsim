@@ -51,7 +51,7 @@ export class SceneContainer {
         min: -500
       }
     };
-    this.tweakParams = { z: 0 };
+    this.tweakParams = { z: 0, isRendering: true, highlightHudFragments: false };
 
     // Initialize a new THREE renderer (you are also allowed
     // to pass an existing canvas for rendering).
@@ -182,31 +182,33 @@ export class SceneContainer {
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.
     const _render = () => {
-      // Pass the render function itself
-      let delta = this.clock.getDelta();
-      let elapsedTime = _self.clock.getElapsedTime();
+      if (this.tweakParams.isRendering) {
+        // Pass the render function itself
+        let delta = this.clock.getDelta();
+        let elapsedTime = _self.clock.getElapsedTime();
 
-      this.fogHandler.updateFogColor();
-      firstPersonControls.update(delta);
-      this.stats.update();
+        this.fogHandler.updateFogColor();
+        firstPersonControls.update(delta);
+        this.stats.update();
 
-      this.renderer.render(this.scene, this.camera);
+        this.renderer.render(this.scene, this.camera);
 
-      // Updat HUD data
-      hudData.shipRotation = this.camera.rotation;
-      hudData.depth = this.camera.position.y;
-      this.hud.beforeRender(this, hudData, this.tweakParams);
-      this.hud.renderFragment(this.renderer);
+        // Updat HUD data
+        hudData.shipRotation = this.camera.rotation;
+        hudData.depth = this.camera.position.y;
+        this.hud.beforeRender(this, hudData, this.tweakParams);
+        this.hud.renderFragment(this.renderer);
 
-      terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
+        terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
 
-      if (this.isGameRunning) {
-        // Let's animate the cube: a rotation.
-        this.cube.rotation.x += 0.05;
-        this.cube.rotation.y += 0.04;
+        if (this.isGameRunning) {
+          // Let's animate the cube: a rotation.
+          this.cube.rotation.x += 0.05;
+          this.cube.rotation.y += 0.04;
 
-        // Update physica
-        physicsHandler.render();
+          // Update physica
+          physicsHandler.render();
+        }
       }
 
       requestAnimationFrame(_render);

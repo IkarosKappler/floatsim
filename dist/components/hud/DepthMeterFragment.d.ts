@@ -5,12 +5,14 @@
  */
 import * as THREE from "three";
 import { HudComponent } from "../HudComponent";
-import { Dimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
+import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 export declare class DepthMeterFragment implements RenderableComponent {
     private hudComponent;
     private depthMeterTexture;
-    static readonly ASSET_PATH: string;
-    static readonly ASSET_SIZE: Dimension2Immutable;
+    private static ASSET_PATH;
+    private static ASSET_SIZE;
+    private static ASSETS_LEFT_SCALE_BOUNDS;
+    private static ASSETS_RIGHT_SCALE_BOUNDS;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender

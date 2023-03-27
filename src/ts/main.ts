@@ -22,13 +22,12 @@ globalThis.addEventListener("load", () => {
 
   console.log(TweakPane);
   const pane = new window["Tweakpane"].Pane() as TweakPane.Pane;
-  // const PARAMS = {
-  //   z: 0.5
-  // };
   pane.addInput(sceneContainer.tweakParams, "z", {
     min: -150,
     max: 150
   });
+  pane.addInput(sceneContainer.tweakParams, "isRendering");
+  pane.addInput(sceneContainer.tweakParams, "highlightHudFragments");
   pane.on("change", (ev: TweakPane.TpChangeEvent<number>) => {
     console.log("changed: " + JSON.stringify(ev.value));
   });

@@ -56,7 +56,7 @@ var SceneContainer = /** @class */ (function () {
                 min: -500
             }
         };
-        this.tweakParams = { z: 0 };
+        this.tweakParams = { z: 0, isRendering: true, highlightHudFragments: false };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -161,25 +161,27 @@ var SceneContainer = /** @class */ (function () {
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
-            // Pass the render function itself
-            var delta = _this.clock.getDelta();
-            var elapsedTime = _self.clock.getElapsedTime();
-            _this.fogHandler.updateFogColor();
-            firstPersonControls.update(delta);
-            _this.stats.update();
-            _this.renderer.render(_this.scene, _this.camera);
-            // Updat HUD data
-            hudData.shipRotation = _this.camera.rotation;
-            hudData.depth = _this.camera.position.y;
-            _this.hud.beforeRender(_this, hudData, _this.tweakParams);
-            _this.hud.renderFragment(_this.renderer);
-            terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
-            if (_this.isGameRunning) {
-                // Let's animate the cube: a rotation.
-                _this.cube.rotation.x += 0.05;
-                _this.cube.rotation.y += 0.04;
-                // Update physica
-                physicsHandler.render();
+            if (_this.tweakParams.isRendering) {
+                // Pass the render function itself
+                var delta = _this.clock.getDelta();
+                var elapsedTime = _self.clock.getElapsedTime();
+                _this.fogHandler.updateFogColor();
+                firstPersonControls.update(delta);
+                _this.stats.update();
+                _this.renderer.render(_this.scene, _this.camera);
+                // Updat HUD data
+                hudData.shipRotation = _this.camera.rotation;
+                hudData.depth = _this.camera.position.y;
+                _this.hud.beforeRender(_this, hudData, _this.tweakParams);
+                _this.hud.renderFragment(_this.renderer);
+                terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
+                if (_this.isGameRunning) {
+                    // Let's animate the cube: a rotation.
+                    _this.cube.rotation.x += 0.05;
+                    _this.cube.rotation.y += 0.04;
+                    // Update physica
+                    physicsHandler.render();
+                }
             }
             requestAnimationFrame(_render);
         };

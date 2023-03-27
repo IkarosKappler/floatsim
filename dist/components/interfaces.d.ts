@@ -3,23 +3,45 @@
  */
 export interface HUDData {
     depth: number;
-    shipRotation: NTriple;
+    shipRotation: Triple<number>;
 }
-export interface NTriple {
-    x: number;
-    y: number;
-    z: number;
+export interface Tuple<T> {
+    x: T;
+    y: T;
+}
+export interface TupleImmutable<T> {
+    readonly x: T;
+    readonly y: T;
+}
+export interface Triple<T> {
+    x: T;
+    y: T;
+    z: T;
 }
 export interface TweakParams {
     z: 0;
+    isRendering: boolean;
+    highlightHudFragments: boolean;
 }
-export interface Dimension2Immutable {
+export interface IDimension2Immutable {
     readonly width: number;
     readonly height: number;
 }
 export interface MinMax {
     min: number;
     max: number;
+}
+export interface Rect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+export interface IBounds2Immutable {
+    readonly min: TupleImmutable<number>;
+    readonly max: TupleImmutable<number>;
+    readonly width: number;
+    readonly height: number;
 }
 export interface SceneData {
     initialDepth: number;
@@ -45,6 +67,7 @@ export interface TextureData {
 }
 export interface ISceneContainer {
     readonly camera: THREE.PerspectiveCamera;
+    readonly clock: THREE.Clock;
 }
 export interface RenderableComponent {
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;

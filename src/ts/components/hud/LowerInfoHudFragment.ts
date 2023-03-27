@@ -8,7 +8,7 @@ import * as THREE from "three";
 import { getColorStyle } from "../../utils/Helpers";
 import { HudComponent } from "../HudComponent";
 
-import { Dimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
+import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 
 export class LowerInfoHudFragment implements RenderableComponent {
   private hudComponent: HudComponent;

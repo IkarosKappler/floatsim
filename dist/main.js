@@ -41,13 +41,12 @@ globalThis.addEventListener("load", function () {
     var sceneContainer = new SceneContainer_1.SceneContainer(params);
     console.log(TweakPane);
     var pane = new window["Tweakpane"].Pane();
-    // const PARAMS = {
-    //   z: 0.5
-    // };
     pane.addInput(sceneContainer.tweakParams, "z", {
         min: -150,
         max: 150
     });
+    pane.addInput(sceneContainer.tweakParams, "isRendering");
+    pane.addInput(sceneContainer.tweakParams, "highlightHudFragments");
     pane.on("change", function (ev) {
         console.log("changed: " + JSON.stringify(ev.value));
     });
