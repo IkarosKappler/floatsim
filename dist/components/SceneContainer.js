@@ -39,6 +39,7 @@ var FogHandler_1 = require("./FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
 var PerlinTexture_1 = require("../utils/texture/PerlinTexture");
 var AudioPlayer_1 = require("../utils/AudioPlayer");
+var FloatingParticles_1 = require("./FloatingParticles");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -59,7 +60,13 @@ var SceneContainer = /** @class */ (function () {
         this.tweakParams = { z: 0, isRendering: true, highlightHudFragments: false };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        var rendererOptions = {
+            // logarithmicDepthBuffer: true,  // Test for particles with alpha
+            // alpha: true,
+            antialias: true
+        };
+        this.renderer = new THREE.WebGLRenderer(rendererOptions);
+        // this.renderer.setPixelRatio(window.devicePixelRatio);
         // this.renderer.setClearColor(0xffffff, 0);
         this.renderer.autoClear = false;
         this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
@@ -225,6 +232,8 @@ var SceneContainer = /** @class */ (function () {
         this.onWindowResize();
         // Initialize physics
         var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
+        // Initialize particles
+        var particles = new FloatingParticles_1.FloatingParticles(this);
         var waitingFor = [
             // This will start the physics engine and them immediately begin rendering.
             physicsHandler.start().then(_render),

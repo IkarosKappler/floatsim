@@ -17,6 +17,7 @@ import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
 import { PerlinTexture } from "../utils/texture/PerlinTexture";
 import { AudioPlayer } from "../utils/AudioPlayer";
+import { FloatingParticles } from "./FloatingParticles";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -55,7 +56,13 @@ export class SceneContainer {
 
     // Initialize a new THREE renderer (you are also allowed
     // to pass an existing canvas for rendering).
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    const rendererOptions = {
+      // logarithmicDepthBuffer: true,  // Test for particles with alpha
+      // alpha: true,
+      antialias: true
+    };
+    this.renderer = new THREE.WebGLRenderer(rendererOptions);
+    // this.renderer.setPixelRatio(window.devicePixelRatio);
     // this.renderer.setClearColor(0xffffff, 0);
     this.renderer.autoClear = false;
     this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
@@ -262,6 +269,10 @@ export class SceneContainer {
 
     // Initialize physics
     const physicsHandler = new PhysicsHandler(this, terrain);
+
+    // Initialize particles
+    const particles = new FloatingParticles(this);
+
     const waitingFor = [
       // This will start the physics engine and them immediately begin rendering.
       physicsHandler.start().then(_render),
