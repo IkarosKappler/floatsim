@@ -6,64 +6,43 @@
 
 import * as THREE from "three";
 import { SceneContainer } from "./SceneContainer";
+// import { EffectComposer, Pass } from "three/examples/jsm/postprocessing/EffectComposer.js";
+// import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+// import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 
-const _VS = `
+const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
   varying float distRatio;
   varying float distance;
   uniform float pointMultiplier;
-  attribute float size;
+  `;
 
-  void main() {
+const distance_vertex = /* glsl */ `
+  // 'distance' void main() {
     float maxDistance = 10.0;
     vUv = uv;
-    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    // gl_PointSize = 0.0001 * size * pointMultiplier / gl_Position.w;
-    // gl_PointSize *= ( 4.0 / -mvPosition.z );
-    // gl_PointSize = 8.0;
-
-    // float distRatio = smoothstep(25., 75., -mvPosition.z);
-    // float distRatio = 1.0 / - mvPosition.z;
-    // if( distRatio < 0.5 ) discard;
-    // gl_PointSize = size * (1. + (1. - distRatio) * 5.);
-    // gl_PointSize = size * distRatio;
-
     distance = mvPosition.z;
-    // distRatio = smoothstep(25., 75., -mvPosition.z);
-    // gl_PointSize = size * (1. + (1. - distRatio) * 5.);
-    // distRatio = 4.0 - (maxDistance / (distance));
-    // gl_PointSize = size  * distRatio;
+    // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );
+    // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  // }
+  `;
 
-    gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-  }`;
-
-const _FS = `
+const distance_pars_fragment = /* glsl */ `
   varying vec2 vUv;
   uniform sampler2D velTex;
   uniform sampler2D posTex;
   varying float distRatio;
   varying float distance;
+`;
 
-  void main() {
-    // vec3 velocity = texture2D(velTex, vUv).rgb;
+const distance_fragment = /* glsl */ `
+  // 'distance' void main() {
     vec3 pos = texture2D(posTex, vUv).rgb;
-
-    vec2 uv = gl_PointCoord - 0.5;
-    float a = atan(uv.x,uv.y);
-    float r = 3.1415/float(3.);
-    float d1 = cos(floor(.5+a/r)*r-a)*length(uv) * 2.;
     
-    float d2 = length(uv);
-    
-    float d = mix(d1, d2, distRatio);
-    
-    // if(d > 0.5) discard;
-    // if( distance > 200.0 ) discard;
-    
-    gl_FragColor = vec4(1.0,1.0,1.0,1.0); // vec4( pos, 1.0 );
-  }`;
+    // gl_FragColor = vec4( pos, 1.0 );
+    // gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+  // }
+  `;
 
 export class FloatingParticles {
   private readonly sceneContainer: SceneContainer;
@@ -115,16 +94,76 @@ export class FloatingParticles {
       //   metalness: 1,
       //   blendDstAlpha: 5
     });
-    // const material = new THREE.MeshPhongMaterial({
-    //   //   color: new THREE.Color("rgba(255,255,255,0.5)"),
-    //   color: 0xffffff,
-    //   map: particleTexture,
-    //   transparent: true,
-    //   alphaTest: 0.5
-    // });
+    material.onBeforeCompile = (shader, renderer) => {
+      console.log("onBeforeCompile");
+      console.log(shader.fragmentShader);
+      console.log(shader.vertexShader);
+
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <clipping_planes_pars_fragment>",
+          ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n")
+        )
+        .replace(
+          "#include <premultiplied_alpha_fragment>",
+          ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n")
+        );
+
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          "#include <clipping_planes_pars_vertex>",
+          ["#include <clipping_planes_pars_vertex>", distance_pars_vertex].join("\n")
+        )
+        .replace("#include <fog_vertex>", ["#include <fog_vertex>", distance_vertex].join("\n"));
+    };
+
+    // https://stackoverflow.com/questions/67832321/how-to-reuse-the-three-js-fragment-shader-output
 
     const points = new THREE.Points(geometry, material);
 
     this.sceneContainer.scene.add(points);
+
+    // this.initRenderPass(geometry, points);
   }
+
+  /*
+  initRenderPass(geometry: THREE.BufferGeometry, mesh: THREE.Points) {
+    // const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    // const material = new THREE.MeshNormalMaterial();
+
+    // mesh = new THREE.Mesh(geometry, material);
+    // scene.add(mesh);
+
+    const customMaterial = new THREE.ShaderMaterial({
+      fragmentShader: _FS,
+      vertexShader: _VS
+    });
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const composer = new EffectComposer(renderer);
+
+    const renderPass = new RenderPass(this.sceneContainer.scene, this.sceneContainer.camera);
+
+    // const effectHBlur = new ShaderPass(THREE.HorizontalBlurShader);
+    // const effectVBlur = new ShaderPass(THREE.VerticalBlurShader);
+    // effectHBlur.uniforms['h'].value = 1 / window.innerWidth;
+    // effectVBlur.uniforms['v'].value = 1 / window.innerHeight;
+
+    const myShader : Pass = {
+      uniforms : {},
+
+      vertexShader: _VS,
+
+      fragmentShader: _FS };
+      
+
+    composer.addPass(renderPass);
+    // composer.addPass(effectHBlur);
+    // composer.addPass(effectVBlur);
+    composer.addPass(myShader);
+  }
+  */
 }

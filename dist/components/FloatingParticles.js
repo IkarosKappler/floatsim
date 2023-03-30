@@ -30,8 +30,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FloatingParticles = void 0;
 var THREE = __importStar(require("three"));
-var _VS = "\n  varying vec2 vUv;\n  varying float distRatio;\n  varying float distance;\n  uniform float pointMultiplier;\n  attribute float size;\n\n  void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\n    // gl_PointSize = 0.0001 * size * pointMultiplier / gl_Position.w;\n    // gl_PointSize *= ( 4.0 / -mvPosition.z );\n    // gl_PointSize = 8.0;\n\n    // float distRatio = smoothstep(25., 75., -mvPosition.z);\n    // float distRatio = 1.0 / - mvPosition.z;\n    // if( distRatio < 0.5 ) discard;\n    // gl_PointSize = size * (1. + (1. - distRatio) * 5.);\n    // gl_PointSize = size * distRatio;\n\n    distance = mvPosition.z;\n    // distRatio = smoothstep(25., 75., -mvPosition.z);\n    // gl_PointSize = size * (1. + (1. - distRatio) * 5.);\n    // distRatio = 4.0 - (maxDistance / (distance));\n    // gl_PointSize = size  * distRatio;\n\n    gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );\n\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n  }";
-var _FS = "\n  varying vec2 vUv;\n  uniform sampler2D velTex;\n  uniform sampler2D posTex;\n  varying float distRatio;\n  varying float distance;\n\n  void main() {\n    // vec3 velocity = texture2D(velTex, vUv).rgb;\n    vec3 pos = texture2D(posTex, vUv).rgb;\n\n    vec2 uv = gl_PointCoord - 0.5;\n    float a = atan(uv.x,uv.y);\n    float r = 3.1415/float(3.);\n    float d1 = cos(floor(.5+a/r)*r-a)*length(uv) * 2.;\n    \n    float d2 = length(uv);\n    \n    float d = mix(d1, d2, distRatio);\n    \n    // if(d > 0.5) discard;\n    // if( distance > 200.0 ) discard;\n    \n    gl_FragColor = vec4(1.0,1.0,1.0,1.0); // vec4( pos, 1.0 );\n  }";
+var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distRatio;\n  varying float distance;\n  uniform float pointMultiplier;\n  ";
+var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n    distance = mvPosition.z;\n    // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );\n    // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n  // }\n  ";
+var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  uniform sampler2D velTex;\n  uniform sampler2D posTex;\n  varying float distRatio;\n  varying float distance;\n";
+var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec3 pos = texture2D(posTex, vUv).rgb;\n    \n    // gl_FragColor = vec4( pos, 1.0 );\n    // gl_FragColor = vec4(1.0,1.0,1.0,1.0);\n  // }\n  ";
 var FloatingParticles = /** @class */ (function () {
     function FloatingParticles(sceneContainer) {
         this.sceneContainer = sceneContainer;
@@ -70,15 +72,21 @@ var FloatingParticles = /** @class */ (function () {
             //   metalness: 1,
             //   blendDstAlpha: 5
         });
-        // const material = new THREE.MeshPhongMaterial({
-        //   //   color: new THREE.Color("rgba(255,255,255,0.5)"),
-        //   color: 0xffffff,
-        //   map: particleTexture,
-        //   transparent: true,
-        //   alphaTest: 0.5
-        // });
+        material.onBeforeCompile = function (shader, renderer) {
+            console.log("onBeforeCompile");
+            console.log(shader.fragmentShader);
+            console.log(shader.vertexShader);
+            shader.fragmentShader = shader.fragmentShader
+                .replace("#include <clipping_planes_pars_fragment>", ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n"))
+                .replace("#include <premultiplied_alpha_fragment>", ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n"));
+            shader.vertexShader = shader.vertexShader
+                .replace("#include <clipping_planes_pars_vertex>", ["#include <clipping_planes_pars_vertex>", distance_pars_vertex].join("\n"))
+                .replace("#include <fog_vertex>", ["#include <fog_vertex>", distance_vertex].join("\n"));
+        };
+        // https://stackoverflow.com/questions/67832321/how-to-reuse-the-three-js-fragment-shader-output
         var points = new THREE.Points(geometry, material);
         this.sceneContainer.scene.add(points);
+        // this.initRenderPass(geometry, points);
     };
     return FloatingParticles;
 }());
