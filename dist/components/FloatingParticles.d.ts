@@ -7,6 +7,5 @@ import { SceneContainer } from "./SceneContainer";
 export declare class FloatingParticles {
     private readonly sceneContainer;
     constructor(sceneContainer: SceneContainer);
-    private testB;
-    private testA;
+    private init;
 }

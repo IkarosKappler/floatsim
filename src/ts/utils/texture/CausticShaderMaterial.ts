@@ -42,6 +42,7 @@ export class CausticShaderMaterial {
     // const fogFrag = THREE.ShaderChunk.fog_fragment;
     // const fogParsVert = THREE.ShaderChunk.fog_pars_vertex;
     // const fogVert = THREE.ShaderChunk.fog_vertex;
+    // const shadowVert = THREE.ShaderChunk.shadow_vert;
 
     var uniforms = THREE.UniformsUtils.merge([
       // THREE.UniformsLib["fog"],
@@ -78,16 +79,15 @@ export class CausticShaderMaterial {
       uniforms: uniforms,
       vertexShader: vertex,
       fragmentShader: fragment,
-      fog: true
+      fog: true,
+      transparent: false,
+      alphaToCoverage: true
     });
   }
 
   update(elapsedTime: number, fogColor: THREE.Color) {
     this.waterMaterial.uniforms.u_time.value = elapsedTime;
     this.waterMaterial.uniforms.fogColor.value = fogColor;
-    // if (this.loopNumber < 10) {
-    //   console.log("waterMaterial.uniforms", this.loopNumber, this.waterMaterial.uniforms.u_time.value);
-    // }
     this.waterMaterial.uniformsNeedUpdate = true;
     this.loopNumber++;
   }

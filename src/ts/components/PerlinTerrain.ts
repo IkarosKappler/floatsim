@@ -10,29 +10,16 @@ import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
 import { SceneContainer } from "./SceneContainer";
 
 export class PerlinTerrain {
-  // extends THREE.Mesh<THREE.PlaneGeometry> {
   readonly heightMap: PerlinHeightMap;
   // The size of a terrain segment is not intended to be changed. Use scale
   readonly worldSize: Size3Immutable;
   readonly texture: THREE.CanvasTexture;
   readonly geometry: THREE.PlaneGeometry;
-  // readonly material: THREE.Material;
   readonly mesh: THREE.Mesh;
 
   readonly causticShaderMaterial: CausticShaderMaterial;
 
   constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
-    // }, worldWidthSegments: number, worldDepthSegments: number) {
-    // TODO: solve subclassing problem with ES5
-    // super(
-    //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
-    //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
-    // );
-    // THREE.Mesh.call(
-    //   this,
-    //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
-    //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
-    // );
     this.heightMap = heightMap;
     this.worldSize = worldSize;
     this.geometry = new THREE.PlaneGeometry(
@@ -46,9 +33,6 @@ export class PerlinTerrain {
     this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
     this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
     this.geometry.rotateX(-Math.PI / 2);
-
-    // const canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
-    // const baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture, fog: true });
 
     this.causticShaderMaterial = new CausticShaderMaterial(baseTexture);
 

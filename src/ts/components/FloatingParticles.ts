@@ -7,82 +7,89 @@
 import * as THREE from "three";
 import { SceneContainer } from "./SceneContainer";
 
+const _VS = `
+  varying vec2 vUv;
+  varying float distRatio;
+  varying float distance;
+  uniform float pointMultiplier;
+  attribute float size;
+
+  void main() {
+    float maxDistance = 10.0;
+    vUv = uv;
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    // gl_PointSize = 0.0001 * size * pointMultiplier / gl_Position.w;
+    // gl_PointSize *= ( 4.0 / -mvPosition.z );
+    // gl_PointSize = 8.0;
+
+    // float distRatio = smoothstep(25., 75., -mvPosition.z);
+    // float distRatio = 1.0 / - mvPosition.z;
+    // if( distRatio < 0.5 ) discard;
+    // gl_PointSize = size * (1. + (1. - distRatio) * 5.);
+    // gl_PointSize = size * distRatio;
+
+    distance = mvPosition.z;
+    // distRatio = smoothstep(25., 75., -mvPosition.z);
+    // gl_PointSize = size * (1. + (1. - distRatio) * 5.);
+    // distRatio = 4.0 - (maxDistance / (distance));
+    // gl_PointSize = size  * distRatio;
+
+    gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  }`;
+
+const _FS = `
+  varying vec2 vUv;
+  uniform sampler2D velTex;
+  uniform sampler2D posTex;
+  varying float distRatio;
+  varying float distance;
+
+  void main() {
+    // vec3 velocity = texture2D(velTex, vUv).rgb;
+    vec3 pos = texture2D(posTex, vUv).rgb;
+
+    vec2 uv = gl_PointCoord - 0.5;
+    float a = atan(uv.x,uv.y);
+    float r = 3.1415/float(3.);
+    float d1 = cos(floor(.5+a/r)*r-a)*length(uv) * 2.;
+    
+    float d2 = length(uv);
+    
+    float d = mix(d1, d2, distRatio);
+    
+    // if(d > 0.5) discard;
+    // if( distance > 200.0 ) discard;
+    
+    gl_FragColor = vec4(1.0,1.0,1.0,1.0); // vec4( pos, 1.0 );
+  }`;
+
 export class FloatingParticles {
   private readonly sceneContainer: SceneContainer;
 
   constructor(sceneContainer: SceneContainer) {
     this.sceneContainer = sceneContainer;
 
-    this.testB();
+    console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
+
+    this.init();
   }
 
-  private testB() {
-    // From the demo
-    //    https://threejs.org/examples/?q=particles#webgl_points_sprites
-    let parameters;
-    const materials = [];
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
+  private init() {
+    // Found at
+    //    https://discourse.threejs.org/t/function-to-extend-materials/7882
 
-    const textureLoader = new THREE.TextureLoader();
+    const baseMaterial = new THREE.PointsMaterial();
+    // BEGIN extend-material
+    // END extend-material
 
-    const sprite1 = textureLoader.load("img/particle-a.png");
-    const sprite2 = textureLoader.load("img/particle-a.png");
-    const sprite3 = textureLoader.load("img/particle-a.png");
-    const sprite4 = textureLoader.load("img/particle-a.png");
-    const sprite5 = textureLoader.load("img/particle-a.png");
-
-    for (let i = 0; i < 1000; i++) {
-      const x = Math.random() * 2000 - 1000;
-      const y = Math.random() * 2000 - 1000;
-      const z = Math.random() * 2000 - 1000;
-
-      vertices.push(x, y, z);
-    }
-
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-
-    parameters = [
-      [[1.0, 0.2, 0.5], sprite2, 20 / 5],
-      [[0.95, 0.1, 0.5], sprite3, 15 / 5],
-      [[0.9, 0.05, 0.5], sprite1, 10 / 5],
-      [[0.85, 0, 0.5], sprite5, 8 / 5],
-      [[0.8, 0, 0.5], sprite4, 5 / 5]
-    ];
-
-    for (let i = 0; i < parameters.length; i++) {
-      const color = parameters[i][0];
-      const sprite = parameters[i][1];
-      const size = parameters[i][2];
-
-      materials[i] = new THREE.PointsMaterial({
-        // color: "rgba(255,255,255,0.5)",
-        size: size,
-        map: sprite,
-        blending: THREE.AdditiveBlending,
-        depthTest: false, // !!! Setting this to true produces flickering!
-        transparent: true,
-        blendDstAlpha: 1500
-      });
-      materials[i].color.setHSL(color[0], color[1], color[2]);
-
-      const particles = new THREE.Points(geometry, materials[i]);
-
-      particles.rotation.x = Math.random() * 6;
-      particles.rotation.y = Math.random() * 6;
-      particles.rotation.z = Math.random() * 6;
-
-      this.sceneContainer.scene.add(particles);
-    }
-  }
-
-  private testA() {
     const vertices = [];
 
     for (let i = 0; i < 1000; i++) {
-      const x = THREE.MathUtils.randFloatSpread(200);
-      const y = THREE.MathUtils.randFloatSpread(200);
-      const z = THREE.MathUtils.randFloatSpread(200);
+      const x = THREE.MathUtils.randFloatSpread(1000);
+      const y = THREE.MathUtils.randFloatSpread(1000);
+      const z = THREE.MathUtils.randFloatSpread(1000);
 
       vertices.push(x, y, z);
     }
@@ -90,13 +97,16 @@ export class FloatingParticles {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
 
-    const particleTexture = new THREE.TextureLoader().load("img/particle-a.png");
+    const particleTexture = new THREE.TextureLoader().load("img/particle-a-256.png");
 
     const material = new THREE.PointsMaterial({
-      color: new THREE.Color("rgba(255,255,255,0.5)"), // 0x888888,
+      color: new THREE.Color("rgba(255,255,255,0.2)"), // 0x888888,
       map: particleTexture,
       transparent: true,
-      depthTest: false
+      size: 5,
+      blending: THREE.AdditiveBlending,
+      depthTest: false, // !!! Setting this to true produces flickering!
+      blendDstAlpha: 1500
       //   alphaTest: 0.5
       //   alphaToCoverage: true,
       //   transmission: 1,

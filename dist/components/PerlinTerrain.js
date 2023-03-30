@@ -32,17 +32,6 @@ var perlin_1 = require("../utils/perlin");
 var CausticShaderMaterial_1 = require("../utils/texture/CausticShaderMaterial");
 var PerlinTerrain = /** @class */ (function () {
     function PerlinTerrain(heightMap, worldSize, baseTexture) {
-        // }, worldWidthSegments: number, worldDepthSegments: number) {
-        // TODO: solve subclassing problem with ES5
-        // super(
-        //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
-        //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
-        // );
-        // THREE.Mesh.call(
-        //   this,
-        //   new THREE.PlaneGeometry(7500, 7500, worldWidth - 1, worldDepth - 1),
-        //   PerlinTerrain.generateMeshMaterial(data, worldWidth, worldDepth)
-        // );
         this.heightMap = heightMap;
         this.worldSize = worldSize;
         this.geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1);
@@ -51,8 +40,6 @@ var PerlinTerrain = /** @class */ (function () {
         this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
         this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
         this.geometry.rotateX(-Math.PI / 2);
-        // const canvasTexture = new THREE.CanvasTexture(baseTexture.imageCanvas);
-        // const baseMaterial = new THREE.MeshBasicMaterial({ map: canvasTexture, fog: true });
         this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(baseTexture);
         this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
         // !!! TODO: check this
