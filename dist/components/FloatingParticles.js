@@ -30,10 +30,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FloatingParticles = void 0;
 var THREE = __importStar(require("three"));
-var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distRatio;\n  varying float distance;\n  uniform float pointMultiplier;\n  ";
-var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n    distance = mvPosition.z;\n    // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );\n    // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n  // }\n  ";
-var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  uniform sampler2D velTex;\n  uniform sampler2D posTex;\n  varying float distRatio;\n  varying float distance;\n";
-var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec3 pos = texture2D(posTex, vUv).rgb;\n    \n    // gl_FragColor = vec4( pos, 1.0 );\n    // gl_FragColor = vec4(1.0,1.0,1.0,1.0);\n  // }\n  ";
+var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distance;\n  uniform float pointMultiplier;\n\n  varying float particleDistFactor;\n  ";
+var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n\n    float size = 4.0;\n\n    float vParticleDensity = 0.0084;\n    distance = - mvPosition.z;\n    particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );\n    // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );\n    // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n\n    gl_PointSize = size / particleDistFactor;\n  // }\n  ";
+var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sampler2D velTex;\n  uniform sampler2D posTex;\n  varying float distance;\n\n  varying float particleDistFactor;\n";
+var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec3 pos = texture2D(posTex, vUv).rgb;\n\n    // float vParticleDensity = 0.0084;\n    float minAlpha = 0.0;\n    float maxAlpha = 0.33;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
 var FloatingParticles = /** @class */ (function () {
     function FloatingParticles(sceneContainer) {
         this.sceneContainer = sceneContainer;
@@ -47,7 +47,7 @@ var FloatingParticles = /** @class */ (function () {
         // BEGIN extend-material
         // END extend-material
         var vertices = [];
-        for (var i = 0; i < 1000; i++) {
+        for (var i = 0; i < 10000; i++) {
             var x = THREE.MathUtils.randFloatSpread(1000);
             var y = THREE.MathUtils.randFloatSpread(1000);
             var z = THREE.MathUtils.randFloatSpread(1000);
@@ -61,7 +61,7 @@ var FloatingParticles = /** @class */ (function () {
             map: particleTexture,
             transparent: true,
             size: 5,
-            blending: THREE.AdditiveBlending,
+            // blending: THREE.AdditiveBlending,
             depthTest: false,
             blendDstAlpha: 1500
             //   alphaTest: 0.5
@@ -86,7 +86,6 @@ var FloatingParticles = /** @class */ (function () {
         // https://stackoverflow.com/questions/67832321/how-to-reuse-the-three-js-fragment-shader-output
         var points = new THREE.Points(geometry, material);
         this.sceneContainer.scene.add(points);
-        // this.initRenderPass(geometry, points);
     };
     return FloatingParticles;
 }());

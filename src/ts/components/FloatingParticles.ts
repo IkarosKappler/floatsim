@@ -6,41 +6,52 @@
 
 import * as THREE from "three";
 import { SceneContainer } from "./SceneContainer";
-// import { EffectComposer, Pass } from "three/examples/jsm/postprocessing/EffectComposer.js";
-// import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-// import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 
 const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
-  varying float distRatio;
   varying float distance;
   uniform float pointMultiplier;
+
+  varying float particleDistFactor;
   `;
 
 const distance_vertex = /* glsl */ `
   // 'distance' void main() {
     float maxDistance = 10.0;
     vUv = uv;
-    distance = mvPosition.z;
+
+    float size = 4.0;
+
+    float vParticleDensity = 0.0084;
+    distance = - mvPosition.z;
+    particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );
     // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );
     // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+
+    gl_PointSize = size / particleDistFactor;
   // }
   `;
 
 const distance_pars_fragment = /* glsl */ `
   varying vec2 vUv;
-  uniform sampler2D velTex;
+  // uniform sampler2D velTex;
   uniform sampler2D posTex;
-  varying float distRatio;
   varying float distance;
+
+  varying float particleDistFactor;
 `;
 
 const distance_fragment = /* glsl */ `
   // 'distance' void main() {
     vec3 pos = texture2D(posTex, vUv).rgb;
+
+    // float vParticleDensity = 0.0084;
+    float minAlpha = 0.0;
+    float maxAlpha = 0.33;
     
-    // gl_FragColor = vec4( pos, 1.0 );
-    // gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );
+    gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );
+
   // }
   `;
 
@@ -65,7 +76,7 @@ export class FloatingParticles {
 
     const vertices = [];
 
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 10000; i++) {
       const x = THREE.MathUtils.randFloatSpread(1000);
       const y = THREE.MathUtils.randFloatSpread(1000);
       const z = THREE.MathUtils.randFloatSpread(1000);
@@ -83,7 +94,7 @@ export class FloatingParticles {
       map: particleTexture,
       transparent: true,
       size: 5,
-      blending: THREE.AdditiveBlending,
+      // blending: THREE.AdditiveBlending,
       depthTest: false, // !!! Setting this to true produces flickering!
       blendDstAlpha: 1500
       //   alphaTest: 0.5
@@ -122,48 +133,5 @@ export class FloatingParticles {
     const points = new THREE.Points(geometry, material);
 
     this.sceneContainer.scene.add(points);
-
-    // this.initRenderPass(geometry, points);
   }
-
-  /*
-  initRenderPass(geometry: THREE.BufferGeometry, mesh: THREE.Points) {
-    // const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    // const material = new THREE.MeshNormalMaterial();
-
-    // mesh = new THREE.Mesh(geometry, material);
-    // scene.add(mesh);
-
-    const customMaterial = new THREE.ShaderMaterial({
-      fragmentShader: _FS,
-      vertexShader: _VS
-    });
-
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    const composer = new EffectComposer(renderer);
-
-    const renderPass = new RenderPass(this.sceneContainer.scene, this.sceneContainer.camera);
-
-    // const effectHBlur = new ShaderPass(THREE.HorizontalBlurShader);
-    // const effectVBlur = new ShaderPass(THREE.VerticalBlurShader);
-    // effectHBlur.uniforms['h'].value = 1 / window.innerWidth;
-    // effectVBlur.uniforms['v'].value = 1 / window.innerHeight;
-
-    const myShader : Pass = {
-      uniforms : {},
-
-      vertexShader: _VS,
-
-      fragmentShader: _FS };
-      
-
-    composer.addPass(renderPass);
-    // composer.addPass(effectHBlur);
-    // composer.addPass(effectVBlur);
-    composer.addPass(myShader);
-  }
-  */
 }

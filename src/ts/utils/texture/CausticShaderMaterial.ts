@@ -81,7 +81,7 @@ export class CausticShaderMaterial {
       fragmentShader: fragment,
       fog: true,
       transparent: false,
-      alphaToCoverage: true
+      alphaToCoverage: false // true
     });
   }
 

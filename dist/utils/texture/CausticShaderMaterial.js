@@ -94,7 +94,7 @@ var CausticShaderMaterial = /** @class */ (function () {
             fragmentShader: caustic_shader_material_glsl_1.fragment,
             fog: true,
             transparent: false,
-            alphaToCoverage: true
+            alphaToCoverage: false // true
         });
     }
     CausticShaderMaterial.prototype.update = function (elapsedTime, fogColor) {
