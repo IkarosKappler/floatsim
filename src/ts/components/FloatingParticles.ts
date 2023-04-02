@@ -14,6 +14,7 @@ const distance_pars_vertex = /* glsl */ `
   varying float particleDistFactor;
 
   attribute float rotation;
+  attribute float aSize;
   varying float vRotation;
   `;
 
@@ -22,14 +23,14 @@ const distance_vertex = /* glsl */ `
     float maxDistance = 10.0;
     vUv = uv;
 
-    float size = 4.0;
+    // float size = 4.0;
 
     float vParticleDensity = 0.0084;
     distance = - mvPosition.z;
     particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );
 
     vRotation = rotation;
-    gl_PointSize = size / particleDistFactor;
+    gl_PointSize = aSize / particleDistFactor;
   // }
   `;
 
@@ -57,7 +58,7 @@ const distance_fragment = /* glsl */ `
     gl_FragColor = texture2D( map, uv );
 
     float minAlpha = 0.0;
-    float maxAlpha = 0.33;
+    float maxAlpha = 0.25;
     
     // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );
     gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );
@@ -95,7 +96,7 @@ export class FloatingParticles {
 
       const color = new THREE.Color(Math.random() * 0xffffff);
       const alpha = 0.0;
-      const size = 10.0;
+      const size = Math.random() * 5.0;
       const angle = Math.random() * Math.PI * 2.0;
 
       vertices.push(x, y, z);
@@ -107,12 +108,12 @@ export class FloatingParticles {
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+    geometry.setAttribute("aSize", new THREE.Float32BufferAttribute(sizes, 1));
     geometry.setAttribute("colour", new THREE.Float32BufferAttribute(colors, 4));
     geometry.setAttribute("rotation", new THREE.Float32BufferAttribute(angles, 1));
 
     geometry.attributes.position.needsUpdate = true;
-    geometry.attributes.size.needsUpdate = true;
+    geometry.attributes.aSize.needsUpdate = true;
     geometry.attributes.colour.needsUpdate = true;
     geometry.attributes.rotation.needsUpdate = true;
 
@@ -122,7 +123,7 @@ export class FloatingParticles {
       color: new THREE.Color("rgba(255,255,255,0.2)"), // 0x888888,
       map: particleTexture,
       transparent: true,
-      size: 5,
+      // size: 5,
       // blending: THREE.AdditiveBlending,
       depthTest: false, // !!! Setting this to true produces flickering!
       blendDstAlpha: 1500
