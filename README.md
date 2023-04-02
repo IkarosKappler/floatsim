@@ -14,6 +14,9 @@ Tweaking the fog colors when changing depth. Adding a depth display.
 Adding more HUD fragments: Depth meter and compass.
 ![Depth meter and compass](screenshots/screenshot-20230327-0.png)
 
+Adding floating particles.
+![Floating particles](screenshots/screenshot-20230402-0.png)
+
 ## Build THREE examples
 
 ```bash
