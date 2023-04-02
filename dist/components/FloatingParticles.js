@@ -30,10 +30,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FloatingParticles = void 0;
 var THREE = __importStar(require("three"));
-var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distance;\n  uniform float pointMultiplier;\n\n  varying float particleDistFactor;\n  ";
-var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n\n    float size = 4.0;\n\n    float vParticleDensity = 0.0084;\n    distance = - mvPosition.z;\n    particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );\n    // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );\n    // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n\n    gl_PointSize = size / particleDistFactor;\n  // }\n  ";
-var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sampler2D velTex;\n  uniform sampler2D posTex;\n  varying float distance;\n\n  varying float particleDistFactor;\n";
-var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec3 pos = texture2D(posTex, vUv).rgb;\n\n    // float vParticleDensity = 0.0084;\n    float minAlpha = 0.0;\n    float maxAlpha = 0.33;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
+var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distance;\n  uniform float pointMultiplier;\n  varying float particleDistFactor;\n\n  attribute float rotation;\n  varying float vRotation;\n  ";
+var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n\n    float size = 4.0;\n\n    float vParticleDensity = 0.0084;\n    distance = - mvPosition.z;\n    particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );\n\n    vRotation = rotation;\n    gl_PointSize = size / particleDistFactor;\n  // }\n  ";
+var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sampler2D velTex;\n  uniform sampler2D posTex; // TOTO: rename to tDiffuse\n  varying float distance;\n  varying float particleDistFactor;\n\n  varying float vRotation;\n";
+var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec3 color = vec3(1.0, 1.0, 1.0);\n    vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);\n\n    // Re-read from texture and apply rotation\n    float mid = 0.5;\n    uv = vec2(\n      cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,\n      cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid\n    );\n    gl_FragColor = texture2D( map, uv );\n\n    float minAlpha = 0.0;\n    float maxAlpha = 0.33;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
 var FloatingParticles = /** @class */ (function () {
     function FloatingParticles(sceneContainer) {
         this.sceneContainer = sceneContainer;
@@ -43,18 +43,35 @@ var FloatingParticles = /** @class */ (function () {
     FloatingParticles.prototype.init = function () {
         // Found at
         //    https://discourse.threejs.org/t/function-to-extend-materials/7882
-        var baseMaterial = new THREE.PointsMaterial();
-        // BEGIN extend-material
-        // END extend-material
+        // const baseMaterial = new THREE.PointsMaterial();
+        // TODO: rename to 'positions'
         var vertices = [];
+        var colors = []; // .push(p.colour.r, p.colour.g, p.colour.b, p.alpha);
+        var sizes = []; //.push(p.currentSize);
+        var angles = []; // .push(p.rotation);
         for (var i = 0; i < 10000; i++) {
             var x = THREE.MathUtils.randFloatSpread(1000);
             var y = THREE.MathUtils.randFloatSpread(1000);
             var z = THREE.MathUtils.randFloatSpread(1000);
+            var color = new THREE.Color(Math.random() * 0xffffff);
+            var alpha = 0.0;
+            var size = 10.0;
+            var angle = Math.random() * Math.PI * 2.0;
             vertices.push(x, y, z);
+            // positions.push(p.position.x, p.position.y, p.position.z);
+            colors.push(color.r, color.g, color.b, alpha); // color.alpha);
+            sizes.push(size);
+            angles.push(angle);
         }
         var geometry = new THREE.BufferGeometry();
         geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+        geometry.setAttribute("colour", new THREE.Float32BufferAttribute(colors, 4));
+        geometry.setAttribute("rotation", new THREE.Float32BufferAttribute(angles, 1));
+        geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.size.needsUpdate = true;
+        geometry.attributes.colour.needsUpdate = true;
+        geometry.attributes.rotation.needsUpdate = true;
         var particleTexture = new THREE.TextureLoader().load("img/particle-a-256.png");
         var material = new THREE.PointsMaterial({
             color: new THREE.Color("rgba(255,255,255,0.2)"),
@@ -64,13 +81,6 @@ var FloatingParticles = /** @class */ (function () {
             // blending: THREE.AdditiveBlending,
             depthTest: false,
             blendDstAlpha: 1500
-            //   alphaTest: 0.5
-            //   alphaToCoverage: true,
-            //   transmission: 1,
-            //   thickness: 0.2,
-            //   roughness: 0,
-            //   metalness: 1,
-            //   blendDstAlpha: 5
         });
         material.onBeforeCompile = function (shader, renderer) {
             console.log("onBeforeCompile");

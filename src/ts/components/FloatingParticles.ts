@@ -11,8 +11,10 @@ const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
   varying float distance;
   uniform float pointMultiplier;
-
   varying float particleDistFactor;
+
+  attribute float rotation;
+  varying float vRotation;
   `;
 
 const distance_vertex = /* glsl */ `
@@ -25,9 +27,8 @@ const distance_vertex = /* glsl */ `
     float vParticleDensity = 0.0084;
     distance = - mvPosition.z;
     particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );
-    // gl_PointSize = size; // ( size * (maxDistance/mvPosition.z) );
-    // gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
 
+    vRotation = rotation;
     gl_PointSize = size / particleDistFactor;
   // }
   `;
@@ -35,17 +36,26 @@ const distance_vertex = /* glsl */ `
 const distance_pars_fragment = /* glsl */ `
   varying vec2 vUv;
   // uniform sampler2D velTex;
-  uniform sampler2D posTex;
+  uniform sampler2D posTex; // TOTO: rename to tDiffuse
   varying float distance;
-
   varying float particleDistFactor;
+
+  varying float vRotation;
 `;
 
 const distance_fragment = /* glsl */ `
   // 'distance' void main() {
-    vec3 pos = texture2D(posTex, vUv).rgb;
+    vec3 color = vec3(1.0, 1.0, 1.0);
+    vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);
 
-    // float vParticleDensity = 0.0084;
+    // Re-read from texture and apply rotation
+    float mid = 0.5;
+    uv = vec2(
+      cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,
+      cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid
+    );
+    gl_FragColor = texture2D( map, uv );
+
     float minAlpha = 0.0;
     float maxAlpha = 0.33;
     
@@ -70,22 +80,41 @@ export class FloatingParticles {
     // Found at
     //    https://discourse.threejs.org/t/function-to-extend-materials/7882
 
-    const baseMaterial = new THREE.PointsMaterial();
-    // BEGIN extend-material
-    // END extend-material
+    // const baseMaterial = new THREE.PointsMaterial();
 
+    // TODO: rename to 'positions'
     const vertices = [];
+    const colors = []; // .push(p.colour.r, p.colour.g, p.colour.b, p.alpha);
+    const sizes = []; //.push(p.currentSize);
+    const angles = []; // .push(p.rotation);
 
     for (let i = 0; i < 10000; i++) {
       const x = THREE.MathUtils.randFloatSpread(1000);
       const y = THREE.MathUtils.randFloatSpread(1000);
       const z = THREE.MathUtils.randFloatSpread(1000);
 
+      const color = new THREE.Color(Math.random() * 0xffffff);
+      const alpha = 0.0;
+      const size = 10.0;
+      const angle = Math.random() * Math.PI * 2.0;
+
       vertices.push(x, y, z);
+      // positions.push(p.position.x, p.position.y, p.position.z);
+      colors.push(color.r, color.g, color.b, alpha); // color.alpha);
+      sizes.push(size);
+      angles.push(angle);
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+    geometry.setAttribute("colour", new THREE.Float32BufferAttribute(colors, 4));
+    geometry.setAttribute("rotation", new THREE.Float32BufferAttribute(angles, 1));
+
+    geometry.attributes.position.needsUpdate = true;
+    geometry.attributes.size.needsUpdate = true;
+    geometry.attributes.colour.needsUpdate = true;
+    geometry.attributes.rotation.needsUpdate = true;
 
     const particleTexture = new THREE.TextureLoader().load("img/particle-a-256.png");
 
@@ -97,13 +126,6 @@ export class FloatingParticles {
       // blending: THREE.AdditiveBlending,
       depthTest: false, // !!! Setting this to true produces flickering!
       blendDstAlpha: 1500
-      //   alphaTest: 0.5
-      //   alphaToCoverage: true,
-      //   transmission: 1,
-      //   thickness: 0.2,
-      //   roughness: 0,
-      //   metalness: 1,
-      //   blendDstAlpha: 5
     });
     material.onBeforeCompile = (shader, renderer) => {
       console.log("onBeforeCompile");
