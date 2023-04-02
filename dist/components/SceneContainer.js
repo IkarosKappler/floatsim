@@ -165,16 +165,23 @@ var SceneContainer = /** @class */ (function () {
             depth: this.camera.position.y,
             shipRotation: this.camera.rotation
         };
+        var updateables = [];
+        // Initialize particles
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png"));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png"));
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
             if (_this.tweakParams.isRendering) {
                 // Pass the render function itself
-                var delta = _this.clock.getDelta();
+                var deltaTime = _this.clock.getDelta();
                 var elapsedTime = _self.clock.getElapsedTime();
                 _this.fogHandler.updateFogColor();
-                firstPersonControls.update(delta);
+                firstPersonControls.update(deltaTime);
                 _this.stats.update();
+                for (var i in updateables) {
+                    updateables[i].update(elapsedTime, deltaTime);
+                }
                 _this.renderer.render(_this.scene, _this.camera);
                 // Updat HUD data
                 hudData.shipRotation = _this.camera.rotation;
@@ -232,9 +239,6 @@ var SceneContainer = /** @class */ (function () {
         this.onWindowResize();
         // Initialize physics
         var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
-        // Initialize particles
-        var particles1 = new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png");
-        var particles2 = new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png");
         var waitingFor = [
             // This will start the physics engine and them immediately begin rendering.
             physicsHandler.start().then(_render),

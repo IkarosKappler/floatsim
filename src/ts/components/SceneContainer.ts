@@ -11,7 +11,7 @@ import { Stats } from "../Stats";
 import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { HUDData, PerlinHeightMap, SceneData, Size3Immutable, TweakParams } from "./interfaces";
+import { HUDData, PerlinHeightMap, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
 import { FogHandler } from "./FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
@@ -186,17 +186,25 @@ export class SceneContainer {
       shipRotation: this.camera.rotation
     };
 
+    const updateables: Array<UpdateableComponent> = [];
+    // Initialize particles
+    updateables.push(new FloatingParticles(this, "img/particle-a-256.png"));
+    updateables.push(new FloatingParticles(this, "img/particle-b-256.png"));
+
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.
     const _render = () => {
       if (this.tweakParams.isRendering) {
         // Pass the render function itself
-        let delta = this.clock.getDelta();
+        let deltaTime = this.clock.getDelta();
         let elapsedTime = _self.clock.getElapsedTime();
 
         this.fogHandler.updateFogColor();
-        firstPersonControls.update(delta);
+        firstPersonControls.update(deltaTime);
         this.stats.update();
+        for (var i in updateables) {
+          updateables[i].update(elapsedTime, deltaTime);
+        }
 
         this.renderer.render(this.scene, this.camera);
 
@@ -269,10 +277,6 @@ export class SceneContainer {
 
     // Initialize physics
     const physicsHandler = new PhysicsHandler(this, terrain);
-
-    // Initialize particles
-    const particles1 = new FloatingParticles(this, "img/particle-a-256.png");
-    const particles2 = new FloatingParticles(this, "img/particle-b-256.png");
 
     const waitingFor = [
       // This will start the physics engine and them immediately begin rendering.

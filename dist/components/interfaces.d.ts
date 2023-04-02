@@ -73,6 +73,9 @@ export interface ISceneContainer {
     readonly camera: THREE.PerspectiveCamera;
     readonly clock: THREE.Clock;
 }
+export interface UpdateableComponent {
+    update(elapsedTime: number, deltaTime: number): any;
+}
 export interface RenderableComponent {
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     renderFragment(renderer: THREE.WebGLRenderer): void;

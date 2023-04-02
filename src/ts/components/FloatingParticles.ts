@@ -6,6 +6,7 @@
 
 import * as THREE from "three";
 import { SceneContainer } from "./SceneContainer";
+import { HUDData, ISceneContainer, TweakParams, UpdateableComponent } from "./interfaces";
 
 const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
@@ -67,9 +68,16 @@ const distance_fragment = /* glsl */ `
   // }
   `;
 
-export class FloatingParticles {
+interface IParticle {
+  velocity: THREE.Vector3;
+  position: THREE.Vector3;
+}
+
+export class FloatingParticles implements UpdateableComponent {
   private readonly sceneContainer: SceneContainer;
   readonly texturePath: string;
+  private readonly geometry: THREE.BufferGeometry;
+  private readonly particles: Array<IParticle>;
 
   constructor(sceneContainer: SceneContainer, texturePath: string) {
     this.sceneContainer = sceneContainer;
@@ -77,6 +85,8 @@ export class FloatingParticles {
 
     console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
 
+    this.geometry = new THREE.BufferGeometry();
+    this.particles = [];
     this.init();
   }
 
@@ -108,18 +118,23 @@ export class FloatingParticles {
 
       sizes.push(size);
       angles.push(angle);
+
+      this.particles.push({
+        position: new THREE.Vector3(x, y, z),
+        velocity: new THREE.Vector3(1.0 + Math.random() * 2, 0.0, 1.0 + Math.random() * 2)
+      });
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute("aSize", new THREE.Float32BufferAttribute(sizes, 1));
-    geometry.setAttribute("aColor", new THREE.Float32BufferAttribute(colors, 4));
-    geometry.setAttribute("aRotation", new THREE.Float32BufferAttribute(angles, 1));
+    // this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    this.geometry.setAttribute("aSize", new THREE.Float32BufferAttribute(sizes, 1));
+    this.geometry.setAttribute("aColor", new THREE.Float32BufferAttribute(colors, 4));
+    this.geometry.setAttribute("aRotation", new THREE.Float32BufferAttribute(angles, 1));
 
-    geometry.attributes.position.needsUpdate = true;
-    geometry.attributes.aSize.needsUpdate = true;
-    geometry.attributes.aColor.needsUpdate = true;
-    geometry.attributes.aRotation.needsUpdate = true;
+    this.geometry.attributes.position.needsUpdate = true;
+    this.geometry.attributes.aSize.needsUpdate = true;
+    this.geometry.attributes.aColor.needsUpdate = true;
+    this.geometry.attributes.aRotation.needsUpdate = true;
 
     const particleTexture = new THREE.TextureLoader().load(this.texturePath);
 
@@ -157,8 +172,20 @@ export class FloatingParticles {
 
     // https://stackoverflow.com/questions/67832321/how-to-reuse-the-three-js-fragment-shader-output
 
-    const points = new THREE.Points(geometry, material);
+    const points = new THREE.Points(this.geometry, material);
 
     this.sceneContainer.scene.add(points);
+  }
+
+  // @implement UpdateableComponent
+  update(elapsedTime: number, _deltaTime: number): void {
+    const positions = [];
+    for (var i = 0; i < this.particles.length; i++) {
+      positions.push(this.particles[i].position.x + this.particles[i].velocity.x * elapsedTime);
+      positions.push(this.particles[i].position.y + this.particles[i].velocity.y * elapsedTime);
+      positions.push(this.particles[i].position.z + this.particles[i].velocity.z * elapsedTime);
+    }
+    this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    this.geometry.attributes.position.needsUpdate = true;
   }
 }

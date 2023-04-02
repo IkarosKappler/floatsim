@@ -69,6 +69,7 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Compass: load compass texture from SVG?
 - Add floating particles (sprites?).
 - Bounds2Immutable: try function overloading with the new Typescript here (constructor).
+- Add bounds + respawn for particles.
 
 ## Credits
 
