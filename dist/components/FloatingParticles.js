@@ -33,17 +33,17 @@ var THREE = __importStar(require("three"));
 var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distance;\n  uniform float pointMultiplier;\n  varying float particleDistFactor;\n\n  attribute float aRotation;\n  attribute float aSize;\n  attribute vec4 aColor;\n  varying float vRotation;\n  varying vec4 vColor;\n  ";
 var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n\n    float vParticleDensity = 0.0084;\n    distance = - mvPosition.z;\n    particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );\n\n    vRotation = aRotation;\n    vColor = aColor;\n    gl_PointSize = aSize / particleDistFactor;\n  // }\n  ";
 var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sampler2D velTex;\n  uniform sampler2D posTex; // TOTO: rename to tDiffuse\n  varying float distance;\n  varying float particleDistFactor;\n\n  varying float vRotation;\n  varying vec4 vColor;\n";
-var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);\n\n    // Re-read from texture and apply rotation\n    float mid = 0.5;\n    uv = vec2(\n      cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,\n      cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid\n    );\n    gl_FragColor = texture2D( map, uv ) * vColor; // vec4( vColor.rgb, 1.0 );\n\n    float minAlpha = 0.0;\n    float maxAlpha = 0.25;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
+var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);\n\n    // Re-read from texture and apply rotation\n    float mid = 0.5;\n    uv = vec2(\n      cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,\n      cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid\n    );\n    gl_FragColor = texture2D( map, uv ) * vColor; // vec4( vColor.rgb, 1.0 );\n\n    float minAlphaModifyer = 0.0;\n    float maxAlphaModifyer = 0.25;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlphaModifyer + (maxAlphaModifyer-minAlphaModifyer)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
 var FloatingParticles = /** @class */ (function () {
-    function FloatingParticles(sceneContainer, texturePath) {
+    function FloatingParticles(sceneContainer, texturePath, initialPosition) {
         this.sceneContainer = sceneContainer;
         this.texturePath = texturePath;
         console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
         this.geometry = new THREE.BufferGeometry();
         this.particles = [];
-        this.init();
+        this.init(initialPosition);
     }
-    FloatingParticles.prototype.init = function () {
+    FloatingParticles.prototype.init = function (initialPosition) {
         // Inspired by
         //    https://discourse.threejs.org/t/function-to-extend-materials/7882
         var positions = [];
@@ -51,9 +51,9 @@ var FloatingParticles = /** @class */ (function () {
         var sizes = [];
         var angles = [];
         for (var i = 0; i < 10000; i++) {
-            var x = THREE.MathUtils.randFloatSpread(1000);
-            var y = THREE.MathUtils.randFloatSpread(1000);
-            var z = THREE.MathUtils.randFloatSpread(1000);
+            var x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
+            var y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
+            var z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
             var color = new THREE.Color(128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127));
             var alpha = 0.5 + Math.random() * 0.5;
             var size = Math.random() * 5.0;

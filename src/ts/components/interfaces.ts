@@ -19,6 +19,12 @@ export interface TupleImmutable<T> {
   readonly y: T;
 }
 
+export interface TripleImmutable<T> {
+  readonly x: T;
+  readonly y: T;
+  readonly z: T;
+}
+
 export interface Triple<T> {
   x: T;
   y: T;

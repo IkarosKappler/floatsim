@@ -188,8 +188,9 @@ export class SceneContainer {
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
-    updateables.push(new FloatingParticles(this, "img/particle-a-256.png"));
-    updateables.push(new FloatingParticles(this, "img/particle-b-256.png"));
+    const initialParticlePosition = { x: 0, y: this.sceneData.initialDepth, z: 0 };
+    updateables.push(new FloatingParticles(this, "img/particle-a-256.png", initialParticlePosition));
+    updateables.push(new FloatingParticles(this, "img/particle-b-256.png", initialParticlePosition));
 
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.

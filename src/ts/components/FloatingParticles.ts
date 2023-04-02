@@ -6,7 +6,7 @@
 
 import * as THREE from "three";
 import { SceneContainer } from "./SceneContainer";
-import { HUDData, ISceneContainer, TweakParams, UpdateableComponent } from "./interfaces";
+import { HUDData, ISceneContainer, TripleImmutable, TweakParams, UpdateableComponent } from "./interfaces";
 
 const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
@@ -59,11 +59,11 @@ const distance_fragment = /* glsl */ `
     );
     gl_FragColor = texture2D( map, uv ) * vColor; // vec4( vColor.rgb, 1.0 );
 
-    float minAlpha = 0.0;
-    float maxAlpha = 0.25;
+    float minAlphaModifyer = 0.0;
+    float maxAlphaModifyer = 0.25;
     
     // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );
-    gl_FragColor.a = minAlpha + (maxAlpha-minAlpha)*mix( gl_FragColor.a, 0.0, particleDistFactor );
+    gl_FragColor.a = minAlphaModifyer + (maxAlphaModifyer-minAlphaModifyer)*mix( gl_FragColor.a, 0.0, particleDistFactor );
 
   // }
   `;
@@ -79,7 +79,7 @@ export class FloatingParticles implements UpdateableComponent {
   private readonly geometry: THREE.BufferGeometry;
   private readonly particles: Array<IParticle>;
 
-  constructor(sceneContainer: SceneContainer, texturePath: string) {
+  constructor(sceneContainer: SceneContainer, texturePath: string, initialPosition: TripleImmutable<number>) {
     this.sceneContainer = sceneContainer;
     this.texturePath = texturePath;
 
@@ -87,10 +87,10 @@ export class FloatingParticles implements UpdateableComponent {
 
     this.geometry = new THREE.BufferGeometry();
     this.particles = [];
-    this.init();
+    this.init(initialPosition);
   }
 
-  private init() {
+  private init(initialPosition: TripleImmutable<number>) {
     // Inspired by
     //    https://discourse.threejs.org/t/function-to-extend-materials/7882
 
@@ -100,9 +100,9 @@ export class FloatingParticles implements UpdateableComponent {
     const angles = [];
 
     for (let i = 0; i < 10000; i++) {
-      const x = THREE.MathUtils.randFloatSpread(1000);
-      const y = THREE.MathUtils.randFloatSpread(1000);
-      const z = THREE.MathUtils.randFloatSpread(1000);
+      const x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
+      const y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
+      const z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
 
       const color = new THREE.Color(
         128 + Math.floor(Math.random() * 127),

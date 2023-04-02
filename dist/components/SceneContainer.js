@@ -167,8 +167,9 @@ var SceneContainer = /** @class */ (function () {
         };
         var updateables = [];
         // Initialize particles
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png"));
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png"));
+        var initialParticlePosition = { x: 0, y: this.sceneData.initialDepth, z: 0 };
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png", initialParticlePosition));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png", initialParticlePosition));
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
