@@ -271,7 +271,8 @@ export class SceneContainer {
     const physicsHandler = new PhysicsHandler(this, terrain);
 
     // Initialize particles
-    const particles = new FloatingParticles(this);
+    const particles1 = new FloatingParticles(this, "img/particle-a-256.png");
+    const particles2 = new FloatingParticles(this, "img/particle-b-256.png");
 
     const waitingFor = [
       // This will start the physics engine and them immediately begin rendering.

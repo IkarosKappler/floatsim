@@ -13,9 +13,11 @@ const distance_pars_vertex = /* glsl */ `
   uniform float pointMultiplier;
   varying float particleDistFactor;
 
-  attribute float rotation;
+  attribute float aRotation;
   attribute float aSize;
+  attribute vec4 aColor;
   varying float vRotation;
+  varying vec4 vColor;
   `;
 
 const distance_vertex = /* glsl */ `
@@ -23,13 +25,12 @@ const distance_vertex = /* glsl */ `
     float maxDistance = 10.0;
     vUv = uv;
 
-    // float size = 4.0;
-
     float vParticleDensity = 0.0084;
     distance = - mvPosition.z;
     particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );
 
-    vRotation = rotation;
+    vRotation = aRotation;
+    vColor = aColor;
     gl_PointSize = aSize / particleDistFactor;
   // }
   `;
@@ -42,11 +43,11 @@ const distance_pars_fragment = /* glsl */ `
   varying float particleDistFactor;
 
   varying float vRotation;
+  varying vec4 vColor;
 `;
 
 const distance_fragment = /* glsl */ `
   // 'distance' void main() {
-    vec3 color = vec3(1.0, 1.0, 1.0);
     vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);
 
     // Re-read from texture and apply rotation
@@ -55,7 +56,7 @@ const distance_fragment = /* glsl */ `
       cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,
       cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid
     );
-    gl_FragColor = texture2D( map, uv );
+    gl_FragColor = texture2D( map, uv ) * vColor; // vec4( vColor.rgb, 1.0 );
 
     float minAlpha = 0.0;
     float maxAlpha = 0.25;
@@ -68,9 +69,11 @@ const distance_fragment = /* glsl */ `
 
 export class FloatingParticles {
   private readonly sceneContainer: SceneContainer;
+  readonly texturePath: string;
 
-  constructor(sceneContainer: SceneContainer) {
+  constructor(sceneContainer: SceneContainer, texturePath: string) {
     this.sceneContainer = sceneContainer;
+    this.texturePath = texturePath;
 
     console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
 
@@ -78,46 +81,47 @@ export class FloatingParticles {
   }
 
   private init() {
-    // Found at
+    // Inspired by
     //    https://discourse.threejs.org/t/function-to-extend-materials/7882
 
-    // const baseMaterial = new THREE.PointsMaterial();
-
-    // TODO: rename to 'positions'
-    const vertices = [];
-    const colors = []; // .push(p.colour.r, p.colour.g, p.colour.b, p.alpha);
-    const sizes = []; //.push(p.currentSize);
-    const angles = []; // .push(p.rotation);
+    const positions = [];
+    const colors = [];
+    const sizes = [];
+    const angles = [];
 
     for (let i = 0; i < 10000; i++) {
       const x = THREE.MathUtils.randFloatSpread(1000);
       const y = THREE.MathUtils.randFloatSpread(1000);
       const z = THREE.MathUtils.randFloatSpread(1000);
 
-      const color = new THREE.Color(Math.random() * 0xffffff);
-      const alpha = 0.0;
+      const color = new THREE.Color(
+        128 + Math.floor(Math.random() * 127),
+        128 + Math.floor(Math.random() * 127),
+        128 + Math.floor(Math.random() * 127)
+      );
+      const alpha = 0.5 + Math.random() * 0.5;
       const size = Math.random() * 5.0;
       const angle = Math.random() * Math.PI * 2.0;
 
-      vertices.push(x, y, z);
-      // positions.push(p.position.x, p.position.y, p.position.z);
-      colors.push(color.r, color.g, color.b, alpha); // color.alpha);
+      positions.push(x, y, z);
+      colors.push(color.r, color.g, color.b, alpha);
+
       sizes.push(size);
       angles.push(angle);
     }
 
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     geometry.setAttribute("aSize", new THREE.Float32BufferAttribute(sizes, 1));
-    geometry.setAttribute("colour", new THREE.Float32BufferAttribute(colors, 4));
-    geometry.setAttribute("rotation", new THREE.Float32BufferAttribute(angles, 1));
+    geometry.setAttribute("aColor", new THREE.Float32BufferAttribute(colors, 4));
+    geometry.setAttribute("aRotation", new THREE.Float32BufferAttribute(angles, 1));
 
     geometry.attributes.position.needsUpdate = true;
     geometry.attributes.aSize.needsUpdate = true;
-    geometry.attributes.colour.needsUpdate = true;
-    geometry.attributes.rotation.needsUpdate = true;
+    geometry.attributes.aColor.needsUpdate = true;
+    geometry.attributes.aRotation.needsUpdate = true;
 
-    const particleTexture = new THREE.TextureLoader().load("img/particle-a-256.png");
+    const particleTexture = new THREE.TextureLoader().load(this.texturePath);
 
     const material = new THREE.PointsMaterial({
       color: new THREE.Color("rgba(255,255,255,0.2)"), // 0x888888,

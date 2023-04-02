@@ -233,7 +233,8 @@ var SceneContainer = /** @class */ (function () {
         // Initialize physics
         var physicsHandler = new PhysicsHandler_1.PhysicsHandler(this, terrain);
         // Initialize particles
-        var particles = new FloatingParticles_1.FloatingParticles(this);
+        var particles1 = new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png");
+        var particles2 = new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png");
         var waitingFor = [
             // This will start the physics engine and them immediately begin rendering.
             physicsHandler.start().then(_render),

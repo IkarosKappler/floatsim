@@ -6,6 +6,7 @@
 import { SceneContainer } from "./SceneContainer";
 export declare class FloatingParticles {
     private readonly sceneContainer;
-    constructor(sceneContainer: SceneContainer);
+    readonly texturePath: string;
+    constructor(sceneContainer: SceneContainer, texturePath: string);
     private init;
 }
