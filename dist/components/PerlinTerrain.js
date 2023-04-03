@@ -76,33 +76,36 @@ var PerlinTerrain = /** @class */ (function () {
         // Todo: keep track of the height data and find min/max
         var minHeightValue = Number.MAX_VALUE;
         var maxHeightvalue = Number.MIN_VALUE;
-        if (useCustomNoise) {
-            var z = this.customRandom(seed) * 100;
-            var quality = initialQuality; // 1.5;
-            var depthFactor = 0.15;
-            for (var j = 0; j < iterations; j++) {
-                for (var i = 0; i < size; i++) {
-                    var x = i % widthSegments, y = ~~(i / widthSegments);
-                    data[i] += Math.abs(perlin_1.noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
-                }
-                quality *= 5;
+        var perlin = new ImprovedNoise_js_1.ImprovedNoise();
+        var getHeight = function (x, y, z) {
+            if (useCustomNoise) {
+                return perlin_1.noise.perlin3(x, y, z);
             }
-        }
-        else {
-            console.log("Improved Noise: ", ImprovedNoise_js_1.ImprovedNoise);
-            var perlin = new ImprovedNoise_js_1.ImprovedNoise();
-            //   z = Math.random() * 100;
-            var z = this.customRandom(seed) * 100;
-            var quality = initialQuality; //1.5;
-            var depthFactor = 0.25;
-            for (var j = 0; j < iterations; j++) {
-                for (var i = 0; i < size; i++) {
-                    var x = i % widthSegments, y = ~~(i / widthSegments);
-                    data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * depthFactor);
-                }
-                quality *= 5;
+            else {
+                return perlin.noise(x, y, z);
             }
+        };
+        var z = this.customRandom(seed) * 100;
+        var quality = initialQuality; // 1.5;
+        // const depthFactor = 0.15; // 0.15 for custom noise
+        var depthFactor = 0.12; // 0.15 for custom noise
+        var qualityFactor = 5.0;
+        for (var j = 0; j < iterations; j++) {
+            for (var i = 0; i < size; i++) {
+                var x = i % widthSegments, y = ~~(i / widthSegments);
+                var pValue = getHeight(x / quality, y / quality, z);
+                // if (i > 2 * widthSegments && i < 4 * widthSegments) {
+                //   console.log("pValue", pValue);
+                // }
+                minHeightValue = Math.min(minHeightValue, pValue);
+                maxHeightvalue = Math.max(maxHeightvalue, pValue);
+                data[i] += Math.abs(pValue * quality * depthFactor); // Math.pow(depthFactor, iterations - j));
+                // data[i] += Math.abs((pValue * 2.0) / quality);
+            }
+            quality *= qualityFactor;
+            // quality *= quality;
         }
+        console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightvalue);
         return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
     };
     return PerlinTerrain;

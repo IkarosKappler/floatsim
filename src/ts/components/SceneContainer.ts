@@ -336,11 +336,11 @@ export class SceneContainer {
 
   makeTerrain(): PerlinTerrain {
     //--- MAKE TERRAIN ---
-    // const zStartOffset = 800.0; // for ImprovedNoise
-    const zStartOffset = 300.0; // for Custom noise
+    const zStartOffset = 450.0; // for ImprovedNoise
+    // const zStartOffset = 300.0; // for Custom noise
     const worldWidthSegments = 256;
     const worldDepthSegments = 256;
-    const perlinOptions = { iterations: 5, quality: 1.5 };
+    const perlinOptions = { iterations: 5, quality: 2.5 };
     const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
       worldWidthSegments,
       worldDepthSegments,

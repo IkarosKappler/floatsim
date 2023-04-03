@@ -70,46 +70,46 @@ export class PerlinTerrain {
     const initialQuality: number = options?.quality ?? 1.5;
     console.log("iterations", iterations, "initialQuality", initialQuality);
     const useCustomNoise = true;
-    let seed = Math.PI / 4;
+    const seed = Math.PI / 4;
     const size = widthSegments * depthSegments;
     const data = new Uint8Array(size);
     // Todo: keep track of the height data and find min/max
     let minHeightValue = Number.MAX_VALUE;
     let maxHeightvalue = Number.MIN_VALUE;
-    if (useCustomNoise) {
-      const z = this.customRandom(seed) * 100;
 
-      let quality = initialQuality; // 1.5;
-      const depthFactor = 0.15;
-
-      for (let j = 0; j < iterations; j++) {
-        for (let i = 0; i < size; i++) {
-          const x = i % widthSegments,
-            y = ~~(i / widthSegments);
-          data[i] += Math.abs(noise.perlin3(x / quality, y / quality, z) * quality * depthFactor);
-        }
-
-        quality *= 5;
+    const perlin = new ImprovedNoise();
+    const getHeight = (x, y, z): number => {
+      if (useCustomNoise) {
+        return noise.perlin3(x, y, z);
+      } else {
+        return perlin.noise(x, y, z);
       }
-    } else {
-      console.log("Improved Noise: ", ImprovedNoise);
-      const perlin = new ImprovedNoise();
-      //   z = Math.random() * 100;
-      const z = this.customRandom(seed) * 100;
+    };
 
-      let quality = initialQuality; //1.5;
-      const depthFactor = 0.25;
+    const z = this.customRandom(seed) * 100;
 
-      for (let j = 0; j < iterations; j++) {
-        for (let i = 0; i < size; i++) {
-          const x = i % widthSegments,
-            y = ~~(i / widthSegments);
-          data[i] += Math.abs(perlin.noise(x / quality, y / quality, z) * quality * depthFactor);
-        }
+    let quality = initialQuality; // 1.5;
+    // const depthFactor = 0.15; // 0.15 for custom noise
+    const depthFactor = 0.12; // 0.15 for custom noise
+    const qualityFactor = 5.0;
 
-        quality *= 5;
+    for (let j = 0; j < iterations; j++) {
+      for (let i = 0; i < size; i++) {
+        const x = i % widthSegments,
+          y = ~~(i / widthSegments);
+        const pValue = getHeight(x / quality, y / quality, z);
+        // if (i > 2 * widthSegments && i < 4 * widthSegments) {
+        //   console.log("pValue", pValue);
+        // }
+        minHeightValue = Math.min(minHeightValue, pValue);
+        maxHeightvalue = Math.max(maxHeightvalue, pValue);
+        data[i] += Math.abs(pValue * quality * depthFactor); // Math.pow(depthFactor, iterations - j));
+        // data[i] += Math.abs((pValue * 2.0) / quality);
       }
+      quality *= qualityFactor;
+      // quality *= quality;
     }
+    console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightvalue);
 
     return { data, widthSegments, depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
   }

@@ -297,11 +297,11 @@ var SceneContainer = /** @class */ (function () {
     }
     SceneContainer.prototype.makeTerrain = function () {
         //--- MAKE TERRAIN ---
-        // const zStartOffset = 800.0; // for ImprovedNoise
-        var zStartOffset = 300.0; // for Custom noise
+        var zStartOffset = 450.0; // for ImprovedNoise
+        // const zStartOffset = 300.0; // for Custom noise
         var worldWidthSegments = 256;
         var worldDepthSegments = 256;
-        var perlinOptions = { iterations: 5, quality: 1.5 };
+        var perlinOptions = { iterations: 5, quality: 2.5 };
         var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
         var terrainSize = { width: 2048, depth: 2048, height: 100 };
         var terrainCenter = new THREE.Vector3(0, 0, 0);
