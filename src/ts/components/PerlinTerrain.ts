@@ -75,7 +75,7 @@ export class PerlinTerrain {
     const data = new Uint8Array(size);
     // Todo: keep track of the height data and find min/max
     let minHeightValue = Number.MAX_VALUE;
-    let maxHeightvalue = Number.MIN_VALUE;
+    let maxHeightValue = Number.MIN_VALUE;
 
     const perlin = new ImprovedNoise();
     const getHeight = (x, y, z): number => {
@@ -88,29 +88,29 @@ export class PerlinTerrain {
 
     const z = this.customRandom(seed) * 100;
 
-    let quality = initialQuality; // 1.5;
+    let resolution = initialQuality; // 1.5;
     // const depthFactor = 0.15; // 0.15 for custom noise
     const depthFactor = 0.12; // 0.15 for custom noise
-    const qualityFactor = 5.0;
+    const qualityFactor = 4.0;
 
     for (let j = 0; j < iterations; j++) {
       for (let i = 0; i < size; i++) {
         const x = i % widthSegments,
           y = ~~(i / widthSegments);
-        const pValue = getHeight(x / quality, y / quality, z);
+        const pValue = getHeight(x / resolution, y / resolution, z);
         // if (i > 2 * widthSegments && i < 4 * widthSegments) {
         //   console.log("pValue", pValue);
         // }
         minHeightValue = Math.min(minHeightValue, pValue);
-        maxHeightvalue = Math.max(maxHeightvalue, pValue);
-        data[i] += Math.abs(pValue * quality * depthFactor); // Math.pow(depthFactor, iterations - j));
+        maxHeightValue = Math.max(maxHeightValue, pValue);
+        data[i] += Math.abs(pValue * resolution * depthFactor); // Math.pow(depthFactor, iterations - j));
         // data[i] += Math.abs((pValue * 2.0) / quality);
       }
-      quality *= qualityFactor;
+      resolution *= qualityFactor;
       // quality *= quality;
     }
-    console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightvalue);
+    console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
 
-    return { data, widthSegments, depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
+    return { data, widthSegments, depthSegments, minHeightValue, maxHeightValue };
   }
 }

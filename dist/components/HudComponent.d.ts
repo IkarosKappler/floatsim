@@ -11,9 +11,11 @@ export declare class HudComponent implements RenderableComponent {
     private plane;
     private compass;
     readonly primaryColor: THREE.Color;
+    readonly warningColor: THREE.Color;
     private depthMeter;
     private lowerInfoHud;
-    constructor(width: number, height: number, primaryColor: THREE.Color);
+    private variometer;
+    constructor(width: number, height: number, primaryColor: THREE.Color, warningColor: THREE.Color);
     /**
      * @implement RenderableComponent.beforeRender
      */

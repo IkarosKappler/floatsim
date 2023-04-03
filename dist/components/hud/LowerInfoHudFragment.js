@@ -7,6 +7,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LowerInfoHudFragment = void 0;
 var Helpers_1 = require("../../utils/Helpers");
+var constants_1 = require("../constants");
 var LowerInfoHudFragment = /** @class */ (function () {
     //   private depthMeterTexture: HTMLImageElement;
     //   readonly ASSET_SIZE: Dimension2Immutable = { width: 576, height: 1357 };
@@ -54,8 +55,10 @@ var LowerInfoHudFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.stroke();
         // Draw HUD in the lower right corner
         this.hudComponent.hudBitmap.fillStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.75);
-        var hudText = "Depth: ".concat(hudData.depth.toFixed(1), "m");
-        this.hudComponent.hudBitmap.fillText(hudText, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2);
+        var hudTextA = "Depth: ".concat(hudData.depth.toFixed(1), "m\n");
+        this.hudComponent.hudBitmap.fillText(hudTextA, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 - 12);
+        var hudTextB = "Angle(z): ".concat((hudData.shipRotation.z * constants_1.RAD2DEG).toFixed(1));
+        this.hudComponent.hudBitmap.fillText(hudTextB, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 + 12);
         this.hudComponent.hudBitmap.restore();
     };
     /**

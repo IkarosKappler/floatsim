@@ -6,7 +6,6 @@
 
 import * as THREE from "three";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
-import { TAU } from "../constants";
 import { HudComponent } from "../HudComponent";
 
 import { IDimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
@@ -138,6 +137,7 @@ export class DepthMeterFragment implements RenderableComponent {
    * @implement RenderableComponent.updateSize
    */
   updateSize(width: number, height: number) {
+    // TODO: use params here
     console.log("Resized", this.hudComponent.hudCanvas.width);
     // When the viewport sizes changes then then the HUD fragment bounds
     // need to be re-calculated as well.

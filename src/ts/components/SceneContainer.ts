@@ -142,7 +142,14 @@ export class SceneContainer {
     this.camera.add(this.cockpit.mesh);
 
     const hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
-    this.hud = new HudComponent(this.renderer.domElement.width, this.renderer.domElement.height, hudPrimaryColor);
+    const hudWarningColor = new THREE.Color(params.getString("hudWarningColor", "#c88800"));
+
+    this.hud = new HudComponent(
+      this.renderer.domElement.width,
+      this.renderer.domElement.height,
+      hudPrimaryColor,
+      hudWarningColor
+    );
 
     // To get the Cockpit visible we also need to add the camera to the scene
     this.scene.add(this.camera);
@@ -253,7 +260,28 @@ export class SceneContainer {
         this.renderer.render(this.scene, this.camera);
 
         // Updat HUD data
-        hudData.shipRotation = this.camera.rotation;
+        // hudData.shipRotation = this.camera.rotation;
+        // hudData.shipRotation = this.camera.getWorldDirection(new THREE.Vector3());
+        hudData.shipRotation = { x: 0, y: 0, z: 0 };
+        const euler = new THREE.Euler();
+        euler.order = "XYZ";
+        const rotation = euler.setFromQuaternion(this.camera.quaternion);
+        // console.log(rotation);
+        // const radians = rotation.x > 0 ? rotation.x : 2 * Math.PI + rotation.x;
+        // // const degrees = THREE.Math.radToDeg(radians);
+        // hudData.shipRotation.z = radians;
+        // hudData.shipRotation.z = rotation.z;
+
+        // Azimuth angle is  acos from camera direction
+        // acos(dir.y)
+        // const worldDirection = this.camera.getWorldDirection(new THREE.Vector3());
+        // // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
+        // hudData.shipRotation.z = Math.atan2(worldDirection.x, worldDirection.z);
+
+        const worldDirection = this.camera.getWorldQuaternion(new THREE.Quaternion());
+        // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
+        hudData.shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
+
         hudData.depth = this.camera.position.y;
         this.hud.beforeRender(this, hudData, this.tweakParams);
         this.hud.renderFragment(this.renderer);
@@ -336,7 +364,7 @@ export class SceneContainer {
 
   makeTerrain(): PerlinTerrain {
     //--- MAKE TERRAIN ---
-    const zStartOffset = 450.0; // for ImprovedNoise
+    const zStartOffset = -200.0; // for ImprovedNoise
     // const zStartOffset = 300.0; // for Custom noise
     const worldWidthSegments = 256;
     const worldDepthSegments = 256;
@@ -365,7 +393,7 @@ export class SceneContainer {
     const terrain = new PerlinTerrain(terrainData, terrainBounds, terrainTexture);
 
     console.log("terrainData", terrainData);
-    terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
+    terrain.mesh.position.y = this.sceneData.initialDepth + zStartOffset;
     this.scene.add(terrain.mesh);
 
     var imageData = terrainTexture.imageData;

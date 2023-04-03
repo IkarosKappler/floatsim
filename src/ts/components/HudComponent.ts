@@ -3,6 +3,7 @@ import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./in
 import { Compass } from "./hud/Compass";
 import { DepthMeterFragment } from "./hud/DepthMeterFragment";
 import { LowerInfoHudFragment } from "./hud/LowerInfoHudFragment";
+import { VariometerFragment } from "./hud/VariometerFragment";
 
 export class HudComponent implements RenderableComponent {
   readonly hudCanvas: HTMLCanvasElement;
@@ -15,13 +16,18 @@ export class HudComponent implements RenderableComponent {
   private plane: THREE.Mesh;
 
   private compass: Compass;
+
+  // TODO: convert to color palette with objects
   readonly primaryColor: THREE.Color;
+  readonly warningColor: THREE.Color;
 
   private depthMeter: DepthMeterFragment;
   private lowerInfoHud: LowerInfoHudFragment;
+  private variometer: VariometerFragment;
 
-  constructor(width: number, height: number, primaryColor: THREE.Color) {
+  constructor(width: number, height: number, primaryColor: THREE.Color, warningColor: THREE.Color) {
     this.primaryColor = primaryColor;
+    this.warningColor = warningColor;
     // We will use 2D canvas element to render our HUD.
     this.hudCanvas = document.createElement("canvas");
     // Again, set dimensions to fit the screen.
@@ -71,18 +77,10 @@ export class HudComponent implements RenderableComponent {
 
     // Create the lower info hud fragment
     this.lowerInfoHud = new LowerInfoHudFragment(this);
-  }
 
-  // setHudSize(width: number, height: number) {
-  //   this.hudCanvas.width = width;
-  //   this.hudCanvas.height = height;
-  //   this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
-  //   this.hudDynamicTexture.needsUpdate = true;
-  //   this.hudMaterial.map = this.hudDynamicTexture;
-  //   this.plane.scale.set(width / 100, height / 100, 1);
-  //   this.lowerInfoHud.updateSize();
-  //   this.depthMeter.updateSize();
-  // }
+    // Create the Variometer
+    this.variometer = new VariometerFragment(this);
+  }
 
   /**
    * @implement RenderableComponent.beforeRender
@@ -92,6 +90,7 @@ export class HudComponent implements RenderableComponent {
     this.compass.beforeRender(sceneContainer, hudData, tweakParams);
     this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
     this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
+    this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
     this.hudDynamicTexture.needsUpdate = true;
   }
 
@@ -116,5 +115,6 @@ export class HudComponent implements RenderableComponent {
     this.plane.scale.set(width / 100, height / 100, 1);
     this.lowerInfoHud.updateSize(width, height);
     this.depthMeter.updateSize(width, height);
+    this.variometer.updateSize(width, height);
   }
 }

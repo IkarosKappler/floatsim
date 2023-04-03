@@ -75,7 +75,7 @@ var PerlinTerrain = /** @class */ (function () {
         var data = new Uint8Array(size);
         // Todo: keep track of the height data and find min/max
         var minHeightValue = Number.MAX_VALUE;
-        var maxHeightvalue = Number.MIN_VALUE;
+        var maxHeightValue = Number.MIN_VALUE;
         var perlin = new ImprovedNoise_js_1.ImprovedNoise();
         var getHeight = function (x, y, z) {
             if (useCustomNoise) {
@@ -86,27 +86,27 @@ var PerlinTerrain = /** @class */ (function () {
             }
         };
         var z = this.customRandom(seed) * 100;
-        var quality = initialQuality; // 1.5;
+        var resolution = initialQuality; // 1.5;
         // const depthFactor = 0.15; // 0.15 for custom noise
         var depthFactor = 0.12; // 0.15 for custom noise
-        var qualityFactor = 5.0;
+        var qualityFactor = 4.0;
         for (var j = 0; j < iterations; j++) {
             for (var i = 0; i < size; i++) {
                 var x = i % widthSegments, y = ~~(i / widthSegments);
-                var pValue = getHeight(x / quality, y / quality, z);
+                var pValue = getHeight(x / resolution, y / resolution, z);
                 // if (i > 2 * widthSegments && i < 4 * widthSegments) {
                 //   console.log("pValue", pValue);
                 // }
                 minHeightValue = Math.min(minHeightValue, pValue);
-                maxHeightvalue = Math.max(maxHeightvalue, pValue);
-                data[i] += Math.abs(pValue * quality * depthFactor); // Math.pow(depthFactor, iterations - j));
+                maxHeightValue = Math.max(maxHeightValue, pValue);
+                data[i] += Math.abs(pValue * resolution * depthFactor); // Math.pow(depthFactor, iterations - j));
                 // data[i] += Math.abs((pValue * 2.0) / quality);
             }
-            quality *= qualityFactor;
+            resolution *= qualityFactor;
             // quality *= quality;
         }
-        console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightvalue);
-        return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: 0.0, maxHeightValue: 0.0 };
+        console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
+        return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: minHeightValue, maxHeightValue: maxHeightValue };
     };
     return PerlinTerrain;
 }());

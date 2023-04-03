@@ -53,12 +53,12 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - [DONE] Add cockpit (image).
 - Add cockpit (mesh?).
 - Make fancy scene blending effect (like in Archimedean Dynasty cutscenes).
-- Add floating particles (sprites?).
-- Add ambient sound (liiek water bubbling/streaming).
+- [DONE] Add floating particles (sprites?).
+- [DONE] Add ambient sound (like water bubbling/streaming).
 - Add collision sounds. Each "material" should have its own sound (sand, metal, stone, organic?).
 - [DONE] Add a depth measure (to the ground and to the surface). Add a "pressure" HUD.
 - Add a system alarm to warn for "radiation" and "high pressure".
-- Add add compass HUD. (use OrbitControls.getAzimuthalAngle() ?)
+- [DONE] Add add compass HUD. (use OrbitControls.getAzimuthalAngle() ?)
 - Add water plants.
 - Add a sonar HUD.
 - [DONE] Let initial settings being passed by GET parameters.
@@ -72,7 +72,9 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Compass: load compass texture from SVG?
 - Add floating particles (sprites?).
 - Bounds2Immutable: try function overloading with the new Typescript here (constructor).
-- Add bounds + respawn for particles.
+- Add terrain bounds + respawn for particles.
+- Add variometer HUD for displaying current ship angle (up/down).
+- Pick a nice font to use in all HUDs.
 
 ## Credits
 

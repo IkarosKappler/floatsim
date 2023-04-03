@@ -9,6 +9,7 @@ import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
 import { HudComponent } from "../HudComponent";
 
 import { HUDData, IDimension2, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
+import { RAD2DEG } from "../constants";
 
 export class LowerInfoHudFragment implements RenderableComponent {
   private hudComponent: HudComponent;
@@ -71,11 +72,17 @@ export class LowerInfoHudFragment implements RenderableComponent {
     // Draw HUD in the lower right corner
     this.hudComponent.hudBitmap.fillStyle = getColorStyle(this.hudComponent.primaryColor, 0.75);
 
-    const hudText: string = `Depth: ${hudData.depth.toFixed(1)}m`;
+    const hudTextA: string = `Depth: ${hudData.depth.toFixed(1)}m\n`;
     this.hudComponent.hudBitmap.fillText(
-      hudText,
+      hudTextA,
       this.hudComponent.hudCanvas.width - hudBounds.width / 2,
-      this.hudComponent.hudCanvas.height - hudBounds.height / 2
+      this.hudComponent.hudCanvas.height - hudBounds.height / 2 - 12
+    );
+    const hudTextB: string = `Angle(z): ${(hudData.shipRotation.z * RAD2DEG).toFixed(1)}`;
+    this.hudComponent.hudBitmap.fillText(
+      hudTextB,
+      this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+      this.hudComponent.hudCanvas.height - hudBounds.height / 2 + 12
     );
 
     this.hudComponent.hudBitmap.restore();

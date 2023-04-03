@@ -28,9 +28,11 @@ var THREE = __importStar(require("three"));
 var Compass_1 = require("./hud/Compass");
 var DepthMeterFragment_1 = require("./hud/DepthMeterFragment");
 var LowerInfoHudFragment_1 = require("./hud/LowerInfoHudFragment");
+var VariometerFragment_1 = require("./hud/VariometerFragment");
 var HudComponent = /** @class */ (function () {
-    function HudComponent(width, height, primaryColor) {
+    function HudComponent(width, height, primaryColor, warningColor) {
         this.primaryColor = primaryColor;
+        this.warningColor = warningColor;
         // We will use 2D canvas element to render our HUD.
         this.hudCanvas = document.createElement("canvas");
         // Again, set dimensions to fit the screen.
@@ -72,17 +74,9 @@ var HudComponent = /** @class */ (function () {
         this.depthMeter = new DepthMeterFragment_1.DepthMeterFragment(this);
         // Create the lower info hud fragment
         this.lowerInfoHud = new LowerInfoHudFragment_1.LowerInfoHudFragment(this);
+        // Create the Variometer
+        this.variometer = new VariometerFragment_1.VariometerFragment(this);
     }
-    // setHudSize(width: number, height: number) {
-    //   this.hudCanvas.width = width;
-    //   this.hudCanvas.height = height;
-    //   this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
-    //   this.hudDynamicTexture.needsUpdate = true;
-    //   this.hudMaterial.map = this.hudDynamicTexture;
-    //   this.plane.scale.set(width / 100, height / 100, 1);
-    //   this.lowerInfoHud.updateSize();
-    //   this.depthMeter.updateSize();
-    // }
     /**
      * @implement RenderableComponent.beforeRender
      */
@@ -91,6 +85,7 @@ var HudComponent = /** @class */ (function () {
         this.compass.beforeRender(sceneContainer, hudData, tweakParams);
         this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
         this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
+        this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
         this.hudDynamicTexture.needsUpdate = true;
     };
     /**
@@ -113,6 +108,7 @@ var HudComponent = /** @class */ (function () {
         this.plane.scale.set(width / 100, height / 100, 1);
         this.lowerInfoHud.updateSize(width, height);
         this.depthMeter.updateSize(width, height);
+        this.variometer.updateSize(width, height);
     };
     return HudComponent;
 }());

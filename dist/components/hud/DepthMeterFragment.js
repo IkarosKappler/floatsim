@@ -113,6 +113,7 @@ var DepthMeterFragment = /** @class */ (function () {
      * @implement RenderableComponent.updateSize
      */
     DepthMeterFragment.prototype.updateSize = function (width, height) {
+        // TODO: use params here
         console.log("Resized", this.hudComponent.hudCanvas.width);
         // When the viewport sizes changes then then the HUD fragment bounds
         // need to be re-calculated as well.
