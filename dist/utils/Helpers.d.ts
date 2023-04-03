@@ -14,6 +14,12 @@ import { IBounds2Immutable, Rect, Tuple } from "../components/interfaces";
  */
 export declare const getColorStyle: (color: THREE.RGB, alpha: number) => string;
 /**
+ * Convert bounds of form THREE.Box3 to a Vector3 containing the size.
+ * @param bounds
+ * @returns
+ */
+export declare const bounds2size: (bounds: THREE.Box3) => THREE.Vector3;
+/**
  * Fetch the SVG at the given path and convert it to a THREE.Texture.
  * @param {string} svgPath
  * @param {function} onTextureReady

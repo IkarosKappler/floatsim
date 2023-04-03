@@ -186,54 +186,54 @@ export class SceneContainer {
       shipRotation: this.camera.rotation
     };
 
-    //--- MAKE TERRAIN ---
-    // const zStartOffset = 800.0; // for ImprovedNoise
-    const zStartOffset = 300.0; // for Custom noise
-    const worldWidthSegments = 256;
-    const worldDepthSegments = 256;
-    const perlinOptions = { iterations: 5, quality: 1.5 };
-    const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
-      worldWidthSegments,
-      worldDepthSegments,
-      perlinOptions
-    );
-    const terrainSize: Size3Immutable = { width: 2048, depth: 2048, height: 100 };
-    const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-    const terrainBounds: THREE.Box3 = new THREE.Box3(
-      new THREE.Vector3(
-        terrainCenter.x - terrainSize.width / 2.0,
-        terrainCenter.y - terrainSize.height / 2.0,
-        terrainCenter.z - terrainSize.depth / 2.0
-      ),
-      new THREE.Vector3(
-        terrainCenter.x + terrainSize.width / 2.0,
-        terrainCenter.y + terrainSize.height / 2.0,
-        terrainCenter.z + terrainSize.depth / 2.0
-      )
-    );
-    const terrainTexture = new PerlinTexture(terrainData, terrainSize);
-    const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
-    console.log("terrainData", terrainData);
-    terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
-    this.scene.add(terrain.mesh);
+    // //--- MAKE TERRAIN ---
+    // // const zStartOffset = 800.0; // for ImprovedNoise
+    // const zStartOffset = 300.0; // for Custom noise
+    // const worldWidthSegments = 256;
+    // const worldDepthSegments = 256;
+    // const perlinOptions = { iterations: 5, quality: 1.5 };
+    // const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
+    //   worldWidthSegments,
+    //   worldDepthSegments,
+    //   perlinOptions
+    // );
+    // const terrainSize: Size3Immutable = { width: 2048, depth: 2048, height: 100 };
+    // const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+    // const terrainBounds: THREE.Box3 = new THREE.Box3(
+    //   new THREE.Vector3(
+    //     terrainCenter.x - terrainSize.width / 2.0,
+    //     terrainCenter.y - terrainSize.height / 2.0,
+    //     terrainCenter.z - terrainSize.depth / 2.0
+    //   ),
+    //   new THREE.Vector3(
+    //     terrainCenter.x + terrainSize.width / 2.0,
+    //     terrainCenter.y + terrainSize.height / 2.0,
+    //     terrainCenter.z + terrainSize.depth / 2.0
+    //   )
+    // );
+    // const terrainTexture = new PerlinTexture(terrainData, terrainSize);
+    // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
+    // console.log("terrainData", terrainData);
+    // terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
+    // this.scene.add(terrain.mesh);
 
-    var imageData = terrainTexture.imageData;
-    var buffer = imageData.data.buffer; // ArrayBuffer
-    var arrayBuffer = new ArrayBuffer(imageData.data.length);
-    var binary = new Uint8Array(arrayBuffer);
-    for (var i = 0; i < binary.length; i++) {
-      binary[i] = imageData.data[i];
-    }
-    var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-    //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-    dTex.needsUpdate = true;
-    //---END--- MAKE TERRAIN
+    // var imageData = terrainTexture.imageData;
+    // var buffer = imageData.data.buffer; // ArrayBuffer
+    // var arrayBuffer = new ArrayBuffer(imageData.data.length);
+    // var binary = new Uint8Array(arrayBuffer);
+    // for (var i = 0; i < binary.length; i++) {
+    //   binary[i] = imageData.data[i];
+    // }
+    // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+    // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+    // dTex.needsUpdate = true;
+    const terrain = this.makeTerrain();
+    // //---END--- MAKE TERRAIN
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
-    const initialParticlePosition = { x: 0, y: this.sceneData.initialDepth, z: 0 };
-    updateables.push(new FloatingParticles(this, `img/particle-a-256.png`, terrainBounds, 0.00001));
-    updateables.push(new FloatingParticles(this, `img/particle-b-256.png`, terrainBounds, 0.00001));
+    updateables.push(new FloatingParticles(this, `img/particle-a-256.png`, terrain.bounds, 0.00001));
+    updateables.push(new FloatingParticles(this, `img/particle-b-256.png`, terrain.bounds, 0.00001));
 
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.
@@ -332,6 +332,55 @@ export class SceneContainer {
     Promise.all(waitingFor).then(() => {
       this.isGameRunning = true;
     });
+  }
+
+  makeTerrain(): PerlinTerrain {
+    //--- MAKE TERRAIN ---
+    // const zStartOffset = 800.0; // for ImprovedNoise
+    const zStartOffset = 300.0; // for Custom noise
+    const worldWidthSegments = 256;
+    const worldDepthSegments = 256;
+    const perlinOptions = { iterations: 5, quality: 1.5 };
+    const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
+      worldWidthSegments,
+      worldDepthSegments,
+      perlinOptions
+    );
+    const terrainSize: Size3Immutable = { width: 2048, depth: 2048, height: 100 };
+    const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+    const terrainBounds: THREE.Box3 = new THREE.Box3(
+      new THREE.Vector3(
+        terrainCenter.x - terrainSize.width / 2.0,
+        terrainCenter.y - terrainSize.height / 2.0,
+        terrainCenter.z - terrainSize.depth / 2.0
+      ),
+      new THREE.Vector3(
+        terrainCenter.x + terrainSize.width / 2.0,
+        terrainCenter.y + terrainSize.height / 2.0,
+        terrainCenter.z + terrainSize.depth / 2.0
+      )
+    );
+    const terrainTexture = new PerlinTexture(terrainData, terrainSize);
+    // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
+    const terrain = new PerlinTerrain(terrainData, terrainBounds, terrainTexture);
+
+    console.log("terrainData", terrainData);
+    terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
+    this.scene.add(terrain.mesh);
+
+    var imageData = terrainTexture.imageData;
+    var buffer = imageData.data.buffer; // ArrayBuffer
+    var arrayBuffer = new ArrayBuffer(imageData.data.length);
+    var binary = new Uint8Array(arrayBuffer);
+    for (var i = 0; i < binary.length; i++) {
+      binary[i] = imageData.data[i];
+    }
+    var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+    //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+    dTex.needsUpdate = true;
+    //---END--- MAKE TERRAIN
+
+    return terrain;
   }
 
   initializeAudio(): Promise<void> {

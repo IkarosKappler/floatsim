@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
+import { PerlinTerrain } from "./PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
 import { SceneData, TweakParams } from "./interfaces";
@@ -27,6 +28,7 @@ export declare class SceneContainer {
     private isGameRunning;
     cube: THREE.Mesh;
     constructor(params: Params);
+    makeTerrain(): PerlinTerrain;
     initializeAudio(): Promise<void>;
     onWindowResize(): void;
 }

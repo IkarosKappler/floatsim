@@ -1,30 +1,33 @@
 import * as THREE from "three";
 
-// import Stats from 'three/addons/libs/stats.module.js';
-
-// import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise.js";
 import { noise } from "../utils/perlin";
 import { CausticShaderMaterial } from "../utils/texture/CausticShaderMaterial";
 import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
-import { SceneContainer } from "./SceneContainer";
+import { bounds2size } from "../utils/Helpers";
 
 export class PerlinTerrain {
   readonly heightMap: PerlinHeightMap;
+
   // The size of a terrain segment is not intended to be changed. Use scale
   readonly worldSize: Size3Immutable;
+  readonly bounds: THREE.Box3;
   readonly texture: THREE.CanvasTexture;
   readonly geometry: THREE.PlaneGeometry;
   readonly mesh: THREE.Mesh;
 
   readonly causticShaderMaterial: CausticShaderMaterial;
 
-  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
+  // constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
+  constructor(heightMap: PerlinHeightMap, worldBunds: THREE.Box3, baseTexture: TextureData) {
     this.heightMap = heightMap;
-    this.worldSize = worldSize;
+    // this.worldSize = worldSize;
+    this.bounds = worldBunds;
+
+    const worldSize = bounds2size(worldBunds);
     this.geometry = new THREE.PlaneGeometry(
-      worldSize.width,
-      worldSize.depth,
+      worldSize.x, // width,
+      worldSize.z, // depth,
       heightMap.widthSegments - 1,
       heightMap.depthSegments - 1
     );

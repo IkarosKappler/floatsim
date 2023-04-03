@@ -29,7 +29,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bounds2Immutable = exports.svg2texture = exports.getColorStyle = void 0;
+exports.Bounds2Immutable = exports.svg2texture = exports.bounds2size = exports.getColorStyle = void 0;
 var THREE = __importStar(require("three"));
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -41,6 +41,17 @@ var getColorStyle = function (color, alpha) {
     return "rgba(".concat(Math.floor(color.r * 255), ", ").concat(Math.floor(color.g * 255), ", ").concat(Math.floor(color.b * 255), ", ").concat(alpha, ")");
 };
 exports.getColorStyle = getColorStyle;
+/**
+ * Convert bounds of form THREE.Box3 to a Vector3 containing the size.
+ * @param bounds
+ * @returns
+ */
+var bounds2size = function (bounds) {
+    var size = new THREE.Vector3();
+    bounds.getSize(size);
+    return size;
+};
+exports.bounds2size = bounds2size;
 /**
  * Fetch the SVG at the given path and convert it to a THREE.Texture.
  * @param {string} svgPath

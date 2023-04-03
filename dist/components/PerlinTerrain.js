@@ -25,16 +25,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PerlinTerrain = void 0;
 var THREE = __importStar(require("three"));
-// import Stats from 'three/addons/libs/stats.module.js';
-// import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 var ImprovedNoise_js_1 = require("three/examples/jsm/math/ImprovedNoise.js");
 var perlin_1 = require("../utils/perlin");
 var CausticShaderMaterial_1 = require("../utils/texture/CausticShaderMaterial");
+var Helpers_1 = require("../utils/Helpers");
 var PerlinTerrain = /** @class */ (function () {
-    function PerlinTerrain(heightMap, worldSize, baseTexture) {
+    // constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
+    function PerlinTerrain(heightMap, worldBunds, baseTexture) {
         this.heightMap = heightMap;
-        this.worldSize = worldSize;
-        this.geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1);
+        // this.worldSize = worldSize;
+        this.bounds = worldBunds;
+        var worldSize = (0, Helpers_1.bounds2size)(worldBunds);
+        this.geometry = new THREE.PlaneGeometry(worldSize.x, // width,
+        worldSize.z, // depth,
+        heightMap.widthSegments - 1, heightMap.depthSegments - 1);
         // Add to layers: base texture and caustic effect layer
         this.geometry.clearGroups();
         this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 0);

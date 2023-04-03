@@ -19,6 +19,17 @@ export const getColorStyle = (color: THREE.RGB, alpha: number): string => {
 };
 
 /**
+ * Convert bounds of form THREE.Box3 to a Vector3 containing the size.
+ * @param bounds
+ * @returns
+ */
+export const bounds2size = (bounds: THREE.Box3): THREE.Vector3 => {
+  const size = new THREE.Vector3();
+  bounds.getSize(size);
+  return size;
+};
+
+/**
  * Fetch the SVG at the given path and convert it to a THREE.Texture.
  * @param {string} svgPath
  * @param {function} onTextureReady

@@ -4,11 +4,12 @@ import { PerlinHeightMap, Size3Immutable, TextureData } from "./interfaces";
 export declare class PerlinTerrain {
     readonly heightMap: PerlinHeightMap;
     readonly worldSize: Size3Immutable;
+    readonly bounds: THREE.Box3;
     readonly texture: THREE.CanvasTexture;
     readonly geometry: THREE.PlaneGeometry;
     readonly mesh: THREE.Mesh;
     readonly causticShaderMaterial: CausticShaderMaterial;
-    constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData);
+    constructor(heightMap: PerlinHeightMap, worldBunds: THREE.Box3, baseTexture: TextureData);
     private static customRandom;
     /**
      * Create the raw perlin terrain data.
