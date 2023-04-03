@@ -15,10 +15,10 @@ export class Compass implements RenderableComponent {
     //  - option two: load and convert SVG
     // const compassTexture = new THREE.TextureLoader().load("img/compass-texture-d.png");
     const compassTexture: THREE.Texture | null = null;
-    const radiusTop: number = 100;
-    const radiuBottom: number = 100;
-    const height: number = 75;
-    const compassGeometry = new THREE.CylinderGeometry(radiusTop, radiuBottom, height, 32, 2, true);
+    const radiusTop: number = hudComponent.hudCanvas.width / 10.0; // 100;
+    const radiusBottom: number = radiusTop; // 100;
+    const height: number = radiusTop * 0.75; // 75;
+    const compassGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 32, 2, true);
     const compassMaterial = new THREE.MeshStandardMaterial({
       // Make the cockpit a bit darker
       color: 0xff0000,
@@ -37,7 +37,7 @@ export class Compass implements RenderableComponent {
     const onTextureReady = (texture: THREE.Texture) => {
       compassMaterial.map = texture;
     };
-    svg2texture("img/compass-texture-d.svg", onTextureReady);
+    svg2texture(`img/compass-texture-d.svg?time=${new Date().getTime()}`, onTextureReady);
   }
 
   /**

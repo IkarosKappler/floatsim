@@ -7,6 +7,7 @@
 import * as THREE from "three";
 import { SceneContainer } from "./SceneContainer";
 import { HUDData, ISceneContainer, TripleImmutable, TweakParams, UpdateableComponent } from "./interfaces";
+import { Bounds2Immutable } from "../utils/Helpers";
 
 const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
@@ -75,22 +76,26 @@ interface IParticle {
 
 export class FloatingParticles implements UpdateableComponent {
   private readonly sceneContainer: SceneContainer;
-  readonly texturePath: string;
+  // readonly texturePath: string;
   private readonly geometry: THREE.BufferGeometry;
   private readonly particles: Array<IParticle>;
+  private containingBox: THREE.Box3;
 
-  constructor(sceneContainer: SceneContainer, texturePath: string, initialPosition: TripleImmutable<number>) {
+  constructor(sceneContainer: SceneContainer, texturePath: string, containingBox: THREE.Box3, particleDensity: number) {
+    // } initialPosition: TripleImmutable<number>) {
     this.sceneContainer = sceneContainer;
-    this.texturePath = texturePath;
+    // this.texturePath = texturePath;
+    this.containingBox = containingBox;
 
     console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
 
     this.geometry = new THREE.BufferGeometry();
     this.particles = [];
-    this.init(initialPosition);
+    this.init(texturePath, particleDensity); // initialPosition);
   }
 
-  private init(initialPosition: TripleImmutable<number>) {
+  private init(texturePath: string, particleDensity: number) {
+    // initialPosition: TripleImmutable<number>) {
     // Inspired by
     //    https://discourse.threejs.org/t/function-to-extend-materials/7882
 
@@ -99,10 +104,20 @@ export class FloatingParticles implements UpdateableComponent {
     const sizes = [];
     const angles = [];
 
-    for (let i = 0; i < 10000; i++) {
-      const x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
-      const y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
-      const z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
+    // Compute particle count from particle density and size
+    const boundingBoxSize = new THREE.Vector3();
+    this.containingBox.getSize(boundingBoxSize);
+    // Limit the particle count to one million
+    const particleCount: number = Math.min(boundingBoxSize.x * boundingBoxSize.y * boundingBoxSize.z * particleDensity, 1000000);
+    console.log("particleCount", particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      // const x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
+      // const y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
+      // const z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
+      const x = this.containingBox.min.x + Math.random() * boundingBoxSize.x;
+      const y = this.containingBox.min.y + Math.random() * boundingBoxSize.y;
+      const z = this.containingBox.min.z + Math.random() * boundingBoxSize.z;
 
       const color = new THREE.Color(
         128 + Math.floor(Math.random() * 127),
@@ -136,7 +151,7 @@ export class FloatingParticles implements UpdateableComponent {
     this.geometry.attributes.aColor.needsUpdate = true;
     this.geometry.attributes.aRotation.needsUpdate = true;
 
-    const particleTexture = new THREE.TextureLoader().load(this.texturePath);
+    const particleTexture = new THREE.TextureLoader().load(texturePath);
 
     const material = new THREE.PointsMaterial({
       color: new THREE.Color("rgba(255,255,255,0.2)"), // 0x888888,

@@ -165,11 +165,37 @@ var SceneContainer = /** @class */ (function () {
             depth: this.camera.position.y,
             shipRotation: this.camera.rotation
         };
+        //--- MAKE TERRAIN ---
+        // const zStartOffset = 800.0; // for ImprovedNoise
+        var zStartOffset = 300.0; // for Custom noise
+        var worldWidthSegments = 256;
+        var worldDepthSegments = 256;
+        var perlinOptions = { iterations: 5, quality: 1.5 };
+        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
+        var terrainSize = { width: 2048, depth: 2048, height: 100 };
+        var terrainCenter = new THREE.Vector3(0, 0, 0);
+        var terrainBounds = new THREE.Box3(new THREE.Vector3(terrainCenter.x - terrainSize.width / 2.0, terrainCenter.y - terrainSize.height / 2.0, terrainCenter.z - terrainSize.depth / 2.0), new THREE.Vector3(terrainCenter.x + terrainSize.width / 2.0, terrainCenter.y + terrainSize.height / 2.0, terrainCenter.z + terrainSize.depth / 2.0));
+        var terrainTexture = new PerlinTexture_1.PerlinTexture(terrainData, terrainSize);
+        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize, terrainTexture);
+        console.log("terrainData", terrainData);
+        terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
+        this.scene.add(terrain.mesh);
+        var imageData = terrainTexture.imageData;
+        var buffer = imageData.data.buffer; // ArrayBuffer
+        var arrayBuffer = new ArrayBuffer(imageData.data.length);
+        var binary = new Uint8Array(arrayBuffer);
+        for (var i = 0; i < binary.length; i++) {
+            binary[i] = imageData.data[i];
+        }
+        var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+        //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+        dTex.needsUpdate = true;
+        //---END--- MAKE TERRAIN
         var updateables = [];
         // Initialize particles
         var initialParticlePosition = { x: 0, y: this.sceneData.initialDepth, z: 0 };
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png", initialParticlePosition));
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png", initialParticlePosition));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png", terrainBounds, 0.00001));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png", terrainBounds, 0.00001));
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
@@ -200,28 +226,32 @@ var SceneContainer = /** @class */ (function () {
             }
             requestAnimationFrame(_render);
         };
-        // const zStartOffset = 800.0; // for ImprovedNoise
-        var zStartOffset = 300.0; // for Custom noise
-        var worldWidthSegments = 256;
-        var worldDepthSegments = 256;
-        var perlinOptions = { iterations: 5, quality: 1.5 };
-        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
-        var terrainSize = { width: 7500, depth: 7500, height: 0 };
-        var terrainTexture = new PerlinTexture_1.PerlinTexture(terrainData, terrainSize);
-        var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainSize, terrainTexture); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
-        console.log("terrainData", terrainData);
-        terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
-        this.scene.add(terrain.mesh);
-        var imageData = terrainTexture.imageData;
-        var buffer = imageData.data.buffer; // ArrayBuffer
-        var arrayBuffer = new ArrayBuffer(imageData.data.length);
-        var binary = new Uint8Array(arrayBuffer);
-        for (var i = 0; i < binary.length; i++) {
-            binary[i] = imageData.data[i];
-        }
-        var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        dTex.needsUpdate = true;
+        // // const zStartOffset = 800.0; // for ImprovedNoise
+        // const zStartOffset = 300.0; // for Custom noise
+        // const worldWidthSegments = 256;
+        // const worldDepthSegments = 256;
+        // const perlinOptions = { iterations: 5, quality: 1.5 };
+        // const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
+        //   worldWidthSegments,
+        //   worldDepthSegments,
+        //   perlinOptions
+        // );
+        // const terrainSize: Size3Immutable = { width: 7500, depth: 7500, height: 0 };
+        // const terrainTexture = new PerlinTexture(terrainData, terrainSize);
+        // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
+        // console.log("terrainData", terrainData);
+        // terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
+        // this.scene.add(terrain.mesh);
+        // var imageData = terrainTexture.imageData;
+        // var buffer = imageData.data.buffer; // ArrayBuffer
+        // var arrayBuffer = new ArrayBuffer(imageData.data.length);
+        // var binary = new Uint8Array(arrayBuffer);
+        // for (var i = 0; i < binary.length; i++) {
+        //   binary[i] = imageData.data[i];
+        // }
+        // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+        // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
+        // dTex.needsUpdate = true;
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });

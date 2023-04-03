@@ -35,25 +35,37 @@ var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float max
 var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sampler2D velTex;\n  uniform sampler2D posTex; // TOTO: rename to tDiffuse\n  varying float distance;\n  varying float particleDistFactor;\n\n  varying float vRotation;\n  varying vec4 vColor;\n";
 var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);\n\n    // Re-read from texture and apply rotation\n    float mid = 0.5;\n    uv = vec2(\n      cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,\n      cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid\n    );\n    gl_FragColor = texture2D( map, uv ) * vColor; // vec4( vColor.rgb, 1.0 );\n\n    float minAlphaModifyer = 0.0;\n    float maxAlphaModifyer = 0.25;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlphaModifyer + (maxAlphaModifyer-minAlphaModifyer)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
 var FloatingParticles = /** @class */ (function () {
-    function FloatingParticles(sceneContainer, texturePath, initialPosition) {
+    function FloatingParticles(sceneContainer, texturePath, containingBox, particleDensity) {
+        // } initialPosition: TripleImmutable<number>) {
         this.sceneContainer = sceneContainer;
-        this.texturePath = texturePath;
+        // this.texturePath = texturePath;
+        this.containingBox = containingBox;
         console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
         this.geometry = new THREE.BufferGeometry();
         this.particles = [];
-        this.init(initialPosition);
+        this.init(texturePath, particleDensity); // initialPosition);
     }
-    FloatingParticles.prototype.init = function (initialPosition) {
+    FloatingParticles.prototype.init = function (texturePath, particleDensity) {
+        // initialPosition: TripleImmutable<number>) {
         // Inspired by
         //    https://discourse.threejs.org/t/function-to-extend-materials/7882
         var positions = [];
         var colors = [];
         var sizes = [];
         var angles = [];
-        for (var i = 0; i < 10000; i++) {
-            var x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
-            var y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
-            var z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
+        // Compute particle count from particle density and size
+        var boundingBoxSize = new THREE.Vector3();
+        this.containingBox.getSize(boundingBoxSize);
+        // Limit the particle count to one million
+        var particleCount = Math.min(boundingBoxSize.x * boundingBoxSize.y * boundingBoxSize.z * particleDensity, 1000000);
+        console.log("particleCount", particleCount);
+        for (var i = 0; i < particleCount; i++) {
+            // const x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
+            // const y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
+            // const z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
+            var x = this.containingBox.min.x + Math.random() * boundingBoxSize.x;
+            var y = this.containingBox.min.y + Math.random() * boundingBoxSize.y;
+            var z = this.containingBox.min.z + Math.random() * boundingBoxSize.z;
             var color = new THREE.Color(128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127));
             var alpha = 0.5 + Math.random() * 0.5;
             var size = Math.random() * 5.0;
@@ -76,7 +88,7 @@ var FloatingParticles = /** @class */ (function () {
         this.geometry.attributes.aSize.needsUpdate = true;
         this.geometry.attributes.aColor.needsUpdate = true;
         this.geometry.attributes.aRotation.needsUpdate = true;
-        var particleTexture = new THREE.TextureLoader().load(this.texturePath);
+        var particleTexture = new THREE.TextureLoader().load(texturePath);
         var material = new THREE.PointsMaterial({
             color: new THREE.Color("rgba(255,255,255,0.2)"),
             map: particleTexture,
