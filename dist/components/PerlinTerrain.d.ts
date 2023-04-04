@@ -23,4 +23,5 @@ export declare class PerlinTerrain {
         iterations?: number;
         quality?: number;
     }): PerlinHeightMap;
+    static heightMapToPlaneGeometry(heightMap: PerlinHeightMap, worldSize: THREE.Vector3): THREE.PlaneGeometry;
 }

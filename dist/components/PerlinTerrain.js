@@ -36,21 +36,9 @@ var PerlinTerrain = /** @class */ (function () {
         // this.worldSize = worldSize;
         this.bounds = worldBunds;
         var worldSize = (0, Helpers_1.bounds2size)(worldBunds);
-        this.geometry = new THREE.PlaneGeometry(worldSize.x, // width,
-        worldSize.z, // depth,
-        heightMap.widthSegments - 1, heightMap.depthSegments - 1);
-        // Add to layers: base texture and caustic effect layer
-        this.geometry.clearGroups();
-        this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
-        this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
-        this.geometry.rotateX(-Math.PI / 2);
+        this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
         this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(baseTexture);
         this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
-        // !!! TODO: check this
-        var vertices = this.geometry.attributes.position.array;
-        for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-            vertices[j + 1] = this.heightMap.data[i] * 10;
-        }
     }
     PerlinTerrain.customRandom = function (seed) {
         var x = Math.sin(seed++) * 10000;
@@ -107,6 +95,20 @@ var PerlinTerrain = /** @class */ (function () {
         }
         console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
         return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: minHeightValue, maxHeightValue: maxHeightValue };
+    }; // END generatePerlinHeight
+    PerlinTerrain.heightMapToPlaneGeometry = function (heightMap, worldSize) {
+        var geometry = new THREE.PlaneGeometry(worldSize.x, // width,
+        worldSize.z, // depth,
+        heightMap.widthSegments - 1, heightMap.depthSegments - 1);
+        geometry.rotateX(-Math.PI / 2);
+        // !!! TODO: check this
+        var vertices = geometry.attributes.position.array;
+        for (var i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
+            vertices[j + 1] = heightMap.data[i] * 10;
+        }
+        geometry.attributes.position.needsUpdate = true;
+        geometry.computeVertexNormals();
+        return geometry;
     };
     return PerlinTerrain;
 }());

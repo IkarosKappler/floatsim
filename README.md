@@ -75,6 +75,7 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Add terrain bounds + respawn for particles.
 - Add variometer HUD for displaying current ship angle (up/down).
 - Pick a nice font to use in all HUDs.
+- Bring the variometer to correct display (measure up/down angle of ship).
 
 ## Credits
 

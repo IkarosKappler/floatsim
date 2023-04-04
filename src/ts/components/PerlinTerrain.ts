@@ -23,29 +23,10 @@ export class PerlinTerrain {
     this.heightMap = heightMap;
     // this.worldSize = worldSize;
     this.bounds = worldBunds;
-
-    const worldSize = bounds2size(worldBunds);
-    this.geometry = new THREE.PlaneGeometry(
-      worldSize.x, // width,
-      worldSize.z, // depth,
-      heightMap.widthSegments - 1,
-      heightMap.depthSegments - 1
-    );
-    // Add to layers: base texture and caustic effect layer
-    this.geometry.clearGroups();
-    this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
-    this.geometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
-    this.geometry.rotateX(-Math.PI / 2);
-
+    const worldSize: THREE.Vector3 = bounds2size(worldBunds);
+    this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
     this.causticShaderMaterial = new CausticShaderMaterial(baseTexture);
-
     this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
-
-    // !!! TODO: check this
-    const vertices: Array<number> = (this.geometry.attributes.position as any).array;
-    for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-      vertices[j + 1] = this.heightMap.data[i] * 10;
-    }
   }
 
   private static customRandom(seed: number) {
@@ -112,5 +93,26 @@ export class PerlinTerrain {
     console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
 
     return { data, widthSegments, depthSegments, minHeightValue, maxHeightValue };
+  } // END generatePerlinHeight
+
+  static heightMapToPlaneGeometry(heightMap: PerlinHeightMap, worldSize: THREE.Vector3) {
+    const geometry = new THREE.PlaneGeometry(
+      worldSize.x, // width,
+      worldSize.z, // depth,
+      heightMap.widthSegments - 1,
+      heightMap.depthSegments - 1
+    );
+    geometry.rotateX(-Math.PI / 2);
+
+    // !!! TODO: check this
+    const vertices: Array<number> = (geometry.attributes.position as any).array;
+    for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
+      vertices[j + 1] = heightMap.data[i] * 10;
+    }
+
+    geometry.attributes.position.needsUpdate = true;
+    geometry.computeVertexNormals();
+
+    return geometry;
   }
 }
