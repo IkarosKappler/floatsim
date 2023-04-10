@@ -40,6 +40,7 @@ var PhysicsHandler_1 = require("./PhysicsHandler");
 var PerlinTexture_1 = require("../utils/texture/PerlinTexture");
 var AudioPlayer_1 = require("../utils/AudioPlayer");
 var FloatingParticles_1 = require("./FloatingParticles");
+var Concrete_1 = require("./environment/Concrete");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -166,52 +167,11 @@ var SceneContainer = /** @class */ (function () {
             depth: this.camera.position.y,
             shipRotation: this.camera.rotation
         };
-        // //--- MAKE TERRAIN ---
-        // // const zStartOffset = 800.0; // for ImprovedNoise
-        // const zStartOffset = 300.0; // for Custom noise
-        // const worldWidthSegments = 256;
-        // const worldDepthSegments = 256;
-        // const perlinOptions = { iterations: 5, quality: 1.5 };
-        // const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
-        //   worldWidthSegments,
-        //   worldDepthSegments,
-        //   perlinOptions
-        // );
-        // const terrainSize: Size3Immutable = { width: 2048, depth: 2048, height: 100 };
-        // const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-        // const terrainBounds: THREE.Box3 = new THREE.Box3(
-        //   new THREE.Vector3(
-        //     terrainCenter.x - terrainSize.width / 2.0,
-        //     terrainCenter.y - terrainSize.height / 2.0,
-        //     terrainCenter.z - terrainSize.depth / 2.0
-        //   ),
-        //   new THREE.Vector3(
-        //     terrainCenter.x + terrainSize.width / 2.0,
-        //     terrainCenter.y + terrainSize.height / 2.0,
-        //     terrainCenter.z + terrainSize.depth / 2.0
-        //   )
-        // );
-        // const terrainTexture = new PerlinTexture(terrainData, terrainSize);
-        // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
-        // console.log("terrainData", terrainData);
-        // terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
-        // this.scene.add(terrain.mesh);
-        // var imageData = terrainTexture.imageData;
-        // var buffer = imageData.data.buffer; // ArrayBuffer
-        // var arrayBuffer = new ArrayBuffer(imageData.data.length);
-        // var binary = new Uint8Array(arrayBuffer);
-        // for (var i = 0; i < binary.length; i++) {
-        //   binary[i] = imageData.data[i];
-        // }
-        // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        // dTex.needsUpdate = true;
         var terrain = this.makeTerrain();
-        // //---END--- MAKE TERRAIN
         var updateables = [];
         // Initialize particles
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-a-256.png", terrain.bounds, 0.00001));
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "img/particle-b-256.png", terrain.bounds, 0.00001));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", terrain.bounds, 0.00001));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-b-256.png", terrain.bounds, 0.00001));
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
@@ -233,19 +193,18 @@ var SceneContainer = /** @class */ (function () {
                 var euler = new THREE.Euler();
                 euler.order = "XYZ";
                 var rotation = euler.setFromQuaternion(_this.camera.quaternion);
-                // console.log(rotation);
-                // const radians = rotation.x > 0 ? rotation.x : 2 * Math.PI + rotation.x;
-                // // const degrees = THREE.Math.radToDeg(radians);
-                // hudData.shipRotation.z = radians;
-                // hudData.shipRotation.z = rotation.z;
-                // Azimuth angle is  acos from camera direction
-                // acos(dir.y)
-                // const worldDirection = this.camera.getWorldDirection(new THREE.Vector3());
-                // // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
-                // hudData.shipRotation.z = Math.atan2(worldDirection.x, worldDirection.z);
                 var worldDirection = _this.camera.getWorldQuaternion(new THREE.Quaternion());
                 // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
                 hudData.shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
+                var rot2polar = function (euler) {
+                    // Euler to polar
+                    //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
+                    var length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
+                    var theta = Math.acos(euler.z / length);
+                    var phi = Math.atan(euler.y / euler.x);
+                    return { theta: theta, phi: phi };
+                };
+                hudData.shipRotation.z = rot2polar(rotation).theta;
                 hudData.depth = _this.camera.position.y;
                 _this.hud.beforeRender(_this, hudData, _this.tweakParams);
                 _this.hud.renderFragment(_this.renderer);
@@ -286,6 +245,12 @@ var SceneContainer = /** @class */ (function () {
         // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
         // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
         // dTex.needsUpdate = true;
+        // Load some "concrete" asset
+        var basePath = "resources/meshes/wavefront/concrete-ring/";
+        var objFileName = "newscene.obj";
+        var targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+        var targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
+        new Concrete_1.Concrete(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition });
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });
@@ -345,7 +310,7 @@ var SceneContainer = /** @class */ (function () {
         return terrain;
     };
     SceneContainer.prototype.initializeAudio = function () {
-        var audioPlayer = new AudioPlayer_1.AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+        var audioPlayer = new AudioPlayer_1.AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
         return new Promise(function (accept, _reject) {
             var startButton = document.querySelector("#button-start");
             startButton.addEventListener("click", function () {

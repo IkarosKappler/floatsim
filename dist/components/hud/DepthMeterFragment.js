@@ -130,7 +130,7 @@ var DepthMeterFragment = /** @class */ (function () {
         this.leftSubBounds = DepthMeterFragment.ASSETS_LEFT_SCALE_BOUNDS.scale(this.currentHudScale).move(this.currentHudBounds.min);
         this.rightSubBounds = DepthMeterFragment.ASSETS_RIGHT_SCALE_BOUNDS.scale(this.currentHudScale).move(this.currentHudBounds.min);
     };
-    DepthMeterFragment.ASSET_PATH = "img/depth-meter-a.png";
+    DepthMeterFragment.ASSET_PATH = "resources/img/depth-meter-a.png";
     DepthMeterFragment.ASSET_SIZE = new Helpers_1.Bounds2Immutable({ x: 0, y: 0, width: 600, height: 1347 });
     DepthMeterFragment.ASSETS_LEFT_SCALE_BOUNDS = Helpers_1.Bounds2Immutable.fromMinMax({ x: 150, y: 192 }, { x: 252, y: 1156 });
     DepthMeterFragment.ASSETS_RIGHT_SCALE_BOUNDS = Helpers_1.Bounds2Immutable.fromMinMax({ x: 386, y: 94 }, { x: 480, y: 1248 });

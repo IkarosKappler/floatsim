@@ -13,8 +13,8 @@ export class CockpitPlane {
   readonly mesh: THREE.Mesh;
 
   constructor() {
-    const cockpitTexture = new THREE.TextureLoader().load("img/cockpit-nasa.png");
-    const cockpitAlpahMap = new THREE.TextureLoader().load("img/cockpit-nasa-alphamap.png");
+    const cockpitTexture = new THREE.TextureLoader().load("resources/img/cockpit-nasa.png");
+    const cockpitAlpahMap = new THREE.TextureLoader().load("resources/img/cockpit-nasa-alphamap.png");
     var material = new THREE.MeshBasicMaterial({
       color: 0x888888, // Make the cockpit a bit darker
       map: cockpitTexture,

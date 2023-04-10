@@ -18,6 +18,7 @@ import { Params } from "../utils/Params";
 import { PerlinTexture } from "../utils/texture/PerlinTexture";
 import { AudioPlayer } from "../utils/AudioPlayer";
 import { FloatingParticles } from "./FloatingParticles";
+import { Concrete } from "./environment/Concrete";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -193,54 +194,12 @@ export class SceneContainer {
       shipRotation: this.camera.rotation
     };
 
-    // //--- MAKE TERRAIN ---
-    // // const zStartOffset = 800.0; // for ImprovedNoise
-    // const zStartOffset = 300.0; // for Custom noise
-    // const worldWidthSegments = 256;
-    // const worldDepthSegments = 256;
-    // const perlinOptions = { iterations: 5, quality: 1.5 };
-    // const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
-    //   worldWidthSegments,
-    //   worldDepthSegments,
-    //   perlinOptions
-    // );
-    // const terrainSize: Size3Immutable = { width: 2048, depth: 2048, height: 100 };
-    // const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-    // const terrainBounds: THREE.Box3 = new THREE.Box3(
-    //   new THREE.Vector3(
-    //     terrainCenter.x - terrainSize.width / 2.0,
-    //     terrainCenter.y - terrainSize.height / 2.0,
-    //     terrainCenter.z - terrainSize.depth / 2.0
-    //   ),
-    //   new THREE.Vector3(
-    //     terrainCenter.x + terrainSize.width / 2.0,
-    //     terrainCenter.y + terrainSize.height / 2.0,
-    //     terrainCenter.z + terrainSize.depth / 2.0
-    //   )
-    // );
-    // const terrainTexture = new PerlinTexture(terrainData, terrainSize);
-    // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
-    // console.log("terrainData", terrainData);
-    // terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
-    // this.scene.add(terrain.mesh);
-
-    // var imageData = terrainTexture.imageData;
-    // var buffer = imageData.data.buffer; // ArrayBuffer
-    // var arrayBuffer = new ArrayBuffer(imageData.data.length);
-    // var binary = new Uint8Array(arrayBuffer);
-    // for (var i = 0; i < binary.length; i++) {
-    //   binary[i] = imageData.data[i];
-    // }
-    // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-    // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-    // dTex.needsUpdate = true;
     const terrain = this.makeTerrain();
-    // //---END--- MAKE TERRAIN
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
-    updateables.push(new FloatingParticles(this, `img/particle-a-256.png`, terrain.bounds, 0.00001));
-    updateables.push(new FloatingParticles(this, `img/particle-b-256.png`, terrain.bounds, 0.00001));
+    updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, terrain.bounds, 0.00001));
+    updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, terrain.bounds, 0.00001));
 
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.
@@ -266,21 +225,19 @@ export class SceneContainer {
         const euler = new THREE.Euler();
         euler.order = "XYZ";
         const rotation = euler.setFromQuaternion(this.camera.quaternion);
-        // console.log(rotation);
-        // const radians = rotation.x > 0 ? rotation.x : 2 * Math.PI + rotation.x;
-        // // const degrees = THREE.Math.radToDeg(radians);
-        // hudData.shipRotation.z = radians;
-        // hudData.shipRotation.z = rotation.z;
-
-        // Azimuth angle is  acos from camera direction
-        // acos(dir.y)
-        // const worldDirection = this.camera.getWorldDirection(new THREE.Vector3());
-        // // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
-        // hudData.shipRotation.z = Math.atan2(worldDirection.x, worldDirection.z);
-
         const worldDirection = this.camera.getWorldQuaternion(new THREE.Quaternion());
         // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
         hudData.shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
+
+        const rot2polar = (euler: THREE.Euler) => {
+          // Euler to polar
+          //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
+          const length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
+          const theta = Math.acos(euler.z / length);
+          const phi = Math.atan(euler.y / euler.x);
+          return { theta, phi };
+        };
+        hudData.shipRotation.z = rot2polar(rotation).theta;
 
         hudData.depth = this.camera.position.y;
         this.hud.beforeRender(this, hudData, this.tweakParams);
@@ -328,6 +285,13 @@ export class SceneContainer {
     // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
     // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
     // dTex.needsUpdate = true;
+
+    // Load some "concrete" asset
+    const basePath = "resources/meshes/wavefront/concrete-ring/";
+    const objFileName = "newscene.obj";
+    const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+    const targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
+    new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition });
 
     window.addEventListener("resize", () => {
       _self.onWindowResize();
@@ -412,7 +376,7 @@ export class SceneContainer {
   }
 
   initializeAudio(): Promise<void> {
-    const audioPlayer = new AudioPlayer("audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+    const audioPlayer = new AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
     return new Promise<void>((accept, _reject) => {
       const startButton = document.querySelector("#button-start");
       startButton.addEventListener("click", () => {

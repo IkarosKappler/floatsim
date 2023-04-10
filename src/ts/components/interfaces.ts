@@ -2,8 +2,6 @@
  * Global interfaces.
  */
 
-import { SceneContainer } from "./SceneContainer";
-
 export interface HUDData {
   depth: number;
   shipRotation: Triple<number>;

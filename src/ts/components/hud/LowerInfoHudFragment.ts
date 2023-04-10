@@ -48,7 +48,7 @@ export class LowerInfoHudFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.beginPath();
 
     if (tweakParams.highlightHudFragments) {
-      console.log("RENDER HIGHLIGHTS");
+      // console.log("RENDER HIGHLIGHTS");
       const colorStyleBg = getColorStyle(this.hudComponent.primaryColor, 0.25);
       this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
       this.hudComponent.hudBitmap.fillRect(hudBounds.min.x, hudBounds.min.y, hudBounds.width, hudBounds.height);

@@ -44,7 +44,7 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - [DONE] Build first person view.
 - [DONE] Build controls (forward, backward, up, down, left, right).
 - Add damping to the controls.
-- Add a non-terrain object (a building or so).
+- [DONE] Add a non-terrain object (a building or so). Added an OBJ concrete cylinder.
 - Build collision detection with non-terrain objects.
 - [DONE] Add FPS stats.
 - Limit upper depth at 0 (or less). Vessel must never go over zero (which would be above the sea level).

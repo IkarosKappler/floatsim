@@ -34,7 +34,7 @@ var Compass = /** @class */ (function () {
         //  - option two: load and convert SVG
         // const compassTexture = new THREE.TextureLoader().load("img/compass-texture-d.png");
         var compassTexture = null;
-        var radiusTop = hudComponent.hudCanvas.width / 10.0; // 100;
+        var radiusTop = hudComponent.hudCanvas.width / 8.0; // 100;
         var radiusBottom = radiusTop; // 100;
         var height = radiusTop * 0.75; // 75;
         var compassGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 32, 2, true);
@@ -54,7 +54,7 @@ var Compass = /** @class */ (function () {
         var onTextureReady = function (texture) {
             compassMaterial.map = texture;
         };
-        (0, Helpers_1.svg2texture)("img/compass-texture-d.svg?time=".concat(new Date().getTime()), onTextureReady);
+        (0, Helpers_1.svg2texture)("resources/img/compass-texture-d.svg?time=".concat(new Date().getTime()), onTextureReady);
     }
     /**
      * @implement RenderableComponent.befoRerender

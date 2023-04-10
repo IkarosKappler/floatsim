@@ -35,8 +35,8 @@ exports.CockpitPlane = void 0;
 var THREE = __importStar(require("three"));
 var CockpitPlane = /** @class */ (function () {
     function CockpitPlane() {
-        var cockpitTexture = new THREE.TextureLoader().load("img/cockpit-nasa.png");
-        var cockpitAlpahMap = new THREE.TextureLoader().load("img/cockpit-nasa-alphamap.png");
+        var cockpitTexture = new THREE.TextureLoader().load("resources/img/cockpit-nasa.png");
+        var cockpitAlpahMap = new THREE.TextureLoader().load("resources/img/cockpit-nasa-alphamap.png");
         var material = new THREE.MeshBasicMaterial({
             color: 0x888888,
             map: cockpitTexture,

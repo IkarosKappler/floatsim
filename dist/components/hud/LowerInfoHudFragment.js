@@ -38,7 +38,7 @@ var LowerInfoHudFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.clearRect(0, 0, this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
         this.hudComponent.hudBitmap.beginPath();
         if (tweakParams.highlightHudFragments) {
-            console.log("RENDER HIGHLIGHTS");
+            // console.log("RENDER HIGHLIGHTS");
             var colorStyleBg = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
             this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
             this.hudComponent.hudBitmap.fillRect(hudBounds.min.x, hudBounds.min.y, hudBounds.width, hudBounds.height);

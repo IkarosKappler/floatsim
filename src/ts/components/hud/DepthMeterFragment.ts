@@ -14,7 +14,7 @@ export class DepthMeterFragment implements RenderableComponent {
   private hudComponent: HudComponent;
 
   private depthMeterTexture: HTMLImageElement;
-  private static ASSET_PATH: string = "img/depth-meter-a.png";
+  private static ASSET_PATH: string = "resources/img/depth-meter-a.png";
   private static ASSET_SIZE = new Bounds2Immutable({ x: 0, y: 0, width: 600, height: 1347 });
   private static ASSETS_LEFT_SCALE_BOUNDS = Bounds2Immutable.fromMinMax({ x: 150, y: 192 }, { x: 252, y: 1156 });
   private static ASSETS_RIGHT_SCALE_BOUNDS = Bounds2Immutable.fromMinMax({ x: 386, y: 94 }, { x: 480, y: 1248 });
