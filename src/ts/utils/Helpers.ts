@@ -6,7 +6,7 @@
  */
 
 import * as THREE from "three";
-import { IBounds2Immutable, Rect, Tuple } from "../components/interfaces";
+import { IBounds2Immutable, Rect, Size3Immutable, Tuple } from "../components/interfaces";
 
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -23,10 +23,12 @@ export const getColorStyle = (color: THREE.RGB, alpha: number): string => {
  * @param bounds
  * @returns
  */
-export const bounds2size = (bounds: THREE.Box3): THREE.Vector3 => {
+export const bounds2size = (bounds: THREE.Box3): Size3Immutable => {
+  // THREE.Vector3 => {
   const size = new THREE.Vector3();
   bounds.getSize(size);
-  return size;
+  // return size;
+  return { width: size.x, height: size.y, depth: size.z };
 };
 
 /**

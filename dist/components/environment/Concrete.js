@@ -38,49 +38,55 @@ var Concrete = /** @class */ (function () {
     function Concrete(sceneContainer) {
         this.sceneContainer = sceneContainer;
     }
+    /**
+     * Try to load a Wavefront object file from the specific path. The function
+     * will also try to load the MTL materials (if defined in the file).
+     *
+     * @param {string} basePath - The path muse end with the file system delimiter (usually '/' or '\').
+     * @param {string} objFileName
+     * @param {Size3Immutable} options.targetBounds
+     * @param {TripleImmutable<number>} options.targetPosition
+     */
     Concrete.prototype.loadObjFile = function (basePath, objFileName, options) {
         var _this = this;
+        // Try loading the object
         this.loadObj(basePath, objFileName).then(function (object) {
             console.log("object", object);
-            // (object.children[0] as THREE.Mesh).material = material
             var materialFileNames = object.materialLibraries;
-            _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
-                console.log("Materials", materials);
-                object.traverse(function (child) {
-                    if (child.isMesh) {
-                        var childMesh = child;
-                        // TODO: check type
-                        //   this.loadMaterials((childMesh as any).materialLibraries).then(materials => {
-                        //
-                        childMesh.geometry.computeVertexNormals();
-                        _this.locateMaterial(childMesh, materials);
-                        if (options && options.targetBounds) {
-                            _this.applyScale(object, options.targetBounds);
+            if (materialFileNames) {
+                _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
+                    console.log("Materials", materials);
+                    object.traverse(function (child) {
+                        if (child.isMesh) {
+                            // TODO: check type
+                            var childMesh = child;
+                            childMesh.geometry.computeVertexNormals();
+                            _this.locateMaterial(childMesh, materials);
                         }
-                        if (options && options.targetPosition) {
-                            object.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
-                        }
-                        _this.sceneContainer.scene.add(object);
-                        //   });
-                        //   (child as THREE.Mesh).material = material;
-                    }
+                    });
                 });
-            });
+            } // END if
+            if (options && options.targetBounds) {
+                _this.applyScale(object, options.targetBounds);
+            }
+            if (options && options.targetPosition) {
+                object.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
+            }
+            _this.sceneContainer.scene.add(object);
         });
     };
+    /**
+     * This private helper function loads the OBJ file using THREE's OBJLoader.
+     *
+     * @param {string} basePath - The path muse end with the file system delimiter (usually '/' or '\').
+     * @param {string} objFileName - Usually an *.obj file name.
+     * @returns {Promise<THREE.Group>} The object group from the file.
+     */
     Concrete.prototype.loadObj = function (basePath, objFileName) {
         var objLoader = new OBJLoader_1.OBJLoader();
         return new Promise(function (accept, reject) {
-            objLoader.load(
-            // "resources/meshes/wavefront/concrete-ring/newscene.obj",
-            basePath + objFileName, function (object) {
-                // (object.children[0] as THREE.Mesh).material = material
-                // object.traverse(function (child) {
-                //     if ((child as THREE.Mesh).isMesh) {
-                //         (child as THREE.Mesh).material = material
-                //     }
-                // })
-                // sceneHandler.scene.add(object);
+            objLoader.load(basePath + objFileName, // An *.obj file
+            function (object) {
                 accept(object);
             }, function (xhr) {
                 console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
@@ -90,6 +96,13 @@ var Concrete = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Try to load the MTL material files from the given path.
+     *
+     * @param {string} basePath - The path muse end with the file system delimiter (usually '/' or '\').
+     * @param {string[]} materialLibraries - Usually an array of *.mtl file names that are located in the given base path.
+     * @returns
+     */
     Concrete.prototype.loadMaterials = function (basePath, materialLibraries) {
         var promises = [];
         for (var i = 0; i < materialLibraries.length; i++) {
@@ -97,6 +110,13 @@ var Concrete = /** @class */ (function () {
         }
         return Promise.all(promises);
     };
+    /**
+     * Load a single material from the specific MTL file.
+     *
+     * @param {string} basePath - The path muse end with the file system delimiter (usually '/' or '\').
+     * @param {string} materialFileName - This should be an *.mtl file.
+     * @returns
+     */
     Concrete.prototype.loadMaterial = function (basePath, materialFileName) {
         var mtlLoader = new MTLLoader_1.MTLLoader();
         return new Promise(function (accept, reject) {
@@ -132,6 +152,7 @@ var Concrete = /** @class */ (function () {
                 //   console.log("key", key);
                 if (material) {
                     console.log("Material found", material);
+                    //   material.receiveShadows
                     object.material = material;
                     return;
                 }

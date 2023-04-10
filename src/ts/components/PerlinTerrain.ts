@@ -18,15 +18,22 @@ export class PerlinTerrain {
 
   readonly causticShaderMaterial: CausticShaderMaterial;
 
-  // constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
   constructor(heightMap: PerlinHeightMap, worldBunds: THREE.Box3, baseTexture: TextureData) {
     this.heightMap = heightMap;
-    // this.worldSize = worldSize;
     this.bounds = worldBunds;
-    const worldSize: THREE.Vector3 = bounds2size(worldBunds);
-    this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
+    this.worldSize = bounds2size(worldBunds);
+    this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, this.worldSize);
     this.causticShaderMaterial = new CausticShaderMaterial(baseTexture);
     this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
+  }
+
+  getHeightAt(x: number, y: number): number {
+    // Convert absolute positions inside [0..x..width] and [0..y..depth]
+    // to relative values inside the height map.
+    const xRel = Math.floor((x / this.worldSize.width) * this.heightMap.widthSegments);
+    const yRel = Math.floor((y / this.worldSize.depth) * this.heightMap.depthSegments);
+    const i = yRel * this.heightMap.widthSegments + xRel;
+    return this.heightMap.data[i];
   }
 
   private static customRandom(seed: number) {
@@ -95,10 +102,11 @@ export class PerlinTerrain {
     return { data, widthSegments, depthSegments, minHeightValue, maxHeightValue };
   } // END generatePerlinHeight
 
-  static heightMapToPlaneGeometry(heightMap: PerlinHeightMap, worldSize: THREE.Vector3) {
+  static heightMapToPlaneGeometry(heightMap: PerlinHeightMap, worldSize: Size3Immutable) {
+    //THREE.Vector3) {
     const geometry = new THREE.PlaneGeometry(
-      worldSize.x, // width,
-      worldSize.z, // depth,
+      worldSize.width,
+      worldSize.depth,
       heightMap.widthSegments - 1,
       heightMap.depthSegments - 1
     );

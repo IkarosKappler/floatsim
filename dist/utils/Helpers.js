@@ -47,9 +47,11 @@ exports.getColorStyle = getColorStyle;
  * @returns
  */
 var bounds2size = function (bounds) {
+    // THREE.Vector3 => {
     var size = new THREE.Vector3();
     bounds.getSize(size);
-    return size;
+    // return size;
+    return { width: size.x, height: size.y, depth: size.z };
 };
 exports.bounds2size = bounds2size;
 /**

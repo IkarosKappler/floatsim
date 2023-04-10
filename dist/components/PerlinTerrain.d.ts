@@ -10,6 +10,7 @@ export declare class PerlinTerrain {
     readonly mesh: THREE.Mesh;
     readonly causticShaderMaterial: CausticShaderMaterial;
     constructor(heightMap: PerlinHeightMap, worldBunds: THREE.Box3, baseTexture: TextureData);
+    getHeightAt(x: number, y: number): number;
     private static customRandom;
     /**
      * Create the raw perlin terrain data.
@@ -23,5 +24,5 @@ export declare class PerlinTerrain {
         iterations?: number;
         quality?: number;
     }): PerlinHeightMap;
-    static heightMapToPlaneGeometry(heightMap: PerlinHeightMap, worldSize: THREE.Vector3): THREE.PlaneGeometry;
+    static heightMapToPlaneGeometry(heightMap: PerlinHeightMap, worldSize: Size3Immutable): THREE.PlaneGeometry;
 }

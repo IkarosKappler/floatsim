@@ -30,16 +30,22 @@ var perlin_1 = require("../utils/perlin");
 var CausticShaderMaterial_1 = require("../utils/texture/CausticShaderMaterial");
 var Helpers_1 = require("../utils/Helpers");
 var PerlinTerrain = /** @class */ (function () {
-    // constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable, baseTexture: TextureData) {
     function PerlinTerrain(heightMap, worldBunds, baseTexture) {
         this.heightMap = heightMap;
-        // this.worldSize = worldSize;
         this.bounds = worldBunds;
-        var worldSize = (0, Helpers_1.bounds2size)(worldBunds);
-        this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
+        this.worldSize = (0, Helpers_1.bounds2size)(worldBunds);
+        this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, this.worldSize);
         this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(baseTexture);
         this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
     }
+    PerlinTerrain.prototype.getHeightAt = function (x, y) {
+        // Convert absolute positions inside [0..x..width] and [0..y..depth]
+        // to relative values inside the height map.
+        var xRel = Math.floor((x / this.worldSize.width) * this.heightMap.widthSegments);
+        var yRel = Math.floor((y / this.worldSize.depth) * this.heightMap.depthSegments);
+        var i = yRel * this.heightMap.widthSegments + xRel;
+        return this.heightMap.data[i];
+    };
     PerlinTerrain.customRandom = function (seed) {
         var x = Math.sin(seed++) * 10000;
         return x - Math.floor(x);
@@ -97,9 +103,8 @@ var PerlinTerrain = /** @class */ (function () {
         return { data: data, widthSegments: widthSegments, depthSegments: depthSegments, minHeightValue: minHeightValue, maxHeightValue: maxHeightValue };
     }; // END generatePerlinHeight
     PerlinTerrain.heightMapToPlaneGeometry = function (heightMap, worldSize) {
-        var geometry = new THREE.PlaneGeometry(worldSize.x, // width,
-        worldSize.z, // depth,
-        heightMap.widthSegments - 1, heightMap.depthSegments - 1);
+        //THREE.Vector3) {
+        var geometry = new THREE.PlaneGeometry(worldSize.width, worldSize.depth, heightMap.widthSegments - 1, heightMap.depthSegments - 1);
         geometry.rotateX(-Math.PI / 2);
         // !!! TODO: check this
         var vertices = geometry.attributes.position.array;

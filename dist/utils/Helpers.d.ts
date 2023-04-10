@@ -5,7 +5,7 @@
  * @date    2023-03-26
  */
 import * as THREE from "three";
-import { IBounds2Immutable, Rect, Tuple } from "../components/interfaces";
+import { IBounds2Immutable, Rect, Size3Immutable, Tuple } from "../components/interfaces";
 /**
  * Get the CSS colors string with adjustable alpha value.
  * @param {THREE.Color} color
@@ -18,7 +18,7 @@ export declare const getColorStyle: (color: THREE.RGB, alpha: number) => string;
  * @param bounds
  * @returns
  */
-export declare const bounds2size: (bounds: THREE.Box3) => THREE.Vector3;
+export declare const bounds2size: (bounds: THREE.Box3) => Size3Immutable;
 /**
  * Fetch the SVG at the given path and convert it to a THREE.Texture.
  * @param {string} svgPath

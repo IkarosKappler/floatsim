@@ -293,6 +293,34 @@ export class SceneContainer {
     const targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
     new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition });
 
+    // Test x-y- height positioning in the terrain class
+    const steps = 50;
+    const stepSizeX = terrain.worldSize.width / steps;
+    const stepSizeY = terrain.worldSize.depth / steps;
+    console.log(
+      "terrain.worldSize.width",
+      terrain.worldSize.width,
+      "terrain.worldSize.depth",
+      terrain.worldSize.depth,
+      "stepSizeX",
+      stepSizeX,
+      "stepSizeY",
+      stepSizeY,
+      "terrain.bounds",
+      terrain.bounds
+    );
+    for (var x = 0; x < terrain.worldSize.width; x += stepSizeX) {
+      for (var y = 0; y < terrain.worldSize.depth; y += stepSizeY) {
+        const heightValue = terrain.getHeightAt(x, y);
+        if (x === 0) {
+          console.log("x", y, "y", y, "heightValue", heightValue);
+        }
+        const bouy = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshPhongMaterial({ color: 0xff0000 }));
+        bouy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.z + y, terrain.bounds.min.y + heightValue);
+        this.scene.add(bouy);
+      }
+    }
+
     window.addEventListener("resize", () => {
       _self.onWindowResize();
     });
