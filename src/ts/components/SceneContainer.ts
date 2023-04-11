@@ -85,11 +85,6 @@ export class SceneContainer {
     // Pick a material, something like MeshBasicMaterial, PhongMaterial,
     var cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
-    // const layerMaterial = new THREE.Layers();
-    // cubeGeometry.clearGroups();
-    // cubeGeometry.addGroup( 0, Number.POSITIVE_INFINITY, 0 );
-    // cubeGeometry.addGroup( 0, Number.POSITIVE_INFINITY, 1 );
-
     // Create the cube from the geometry and the material ...
     this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
@@ -241,7 +236,7 @@ export class SceneContainer {
       requestAnimationFrame(_render);
     }; // END render
 
-    this.loadConcrete();
+    this.loadConcrete(terrain);
     this.addGroundBuoys(terrain);
 
     window.addEventListener("resize", () => {
@@ -324,13 +319,19 @@ export class SceneContainer {
     return terrain;
   }
 
-  loadConcrete() {
+  loadConcrete(terrain: PerlinTerrain) {
     // Load some "concrete" asset
     const basePath = "resources/meshes/wavefront/concrete-ring/";
     const objFileName = "newscene.obj";
     const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
-    const targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
-    new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition });
+    const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
+    targetPosition.y = terrain.getHeightAt(targetPosition.x, targetPosition.z);
+    targetPosition.y += terrain.bounds.min.y;
+    console.log("targetPosition", targetPosition);
+    const callback = (loadedObject: THREE.Object3D) => {
+      this.addVisibleBoundingBox(loadedObject);
+    };
+    new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
   addGroundBuoys(terrain: PerlinTerrain) {
@@ -387,6 +388,11 @@ export class SceneContainer {
     };
     shipRotation.z = rot2polar(rotation).theta;
     return shipRotation;
+  }
+
+  addVisibleBoundingBox(object: THREE.Object3D) {
+    const box = new THREE.BoxHelper(object, 0x000000);
+    this.scene.add(box);
   }
 
   initializeAudio(): Promise<void> {

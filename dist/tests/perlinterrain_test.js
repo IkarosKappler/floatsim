@@ -64,7 +64,7 @@ globalThis.addEventListener("load", function () {
   var worldDepthSegments = 256;
   var perlinOptions = { iterations: 5, quality: 2.5 };
   var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
-  heightMap.bilinearSmoothstep(4);
+  heightMap.bilinearSmoothstep(2);
 
   var geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
   // const terrain = new PerlinTerrain(heightMap, terrainBounds, terrainTexture);

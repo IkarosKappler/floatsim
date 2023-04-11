@@ -17,6 +17,10 @@ Adding more HUD fragments: Depth meter and compass.
 Adding floating particles.
 ![Floating particles](screenshots/screenshot-20230402-0.png)
 
+Bilinear terrain smoothin. Approach for a variometer. Loading ob OBJ files with materials.
+![Bilinear terrain smoothing](screenshots/screenshot-20230411-0.png)
+screenshot-20230411-0.png
+
 ## Coordinates
 
 ```

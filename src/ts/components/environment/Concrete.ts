@@ -31,16 +31,17 @@ export class Concrete {
   loadObjFile(
     basePath: string,
     objFileName: string,
-    options?: { targetBounds?: Size3Immutable; targetPosition?: TripleImmutable<number> }
+    options?: { targetBounds?: Size3Immutable; targetPosition?: TripleImmutable<number> },
+    callback?: (loadedObject: THREE.Object3D) => void
   ) {
     // Try loading the object
-    this.loadObj(basePath, objFileName).then((object: THREE.Group) => {
-      console.log("object", object);
-      const materialFileNames: Array<string> = (object as any).materialLibraries;
+    this.loadObj(basePath, objFileName).then((loadedObject: THREE.Group) => {
+      console.log("object", loadedObject);
+      const materialFileNames: Array<string> = (loadedObject as any).materialLibraries;
       if (materialFileNames) {
         this.loadMaterials(basePath, materialFileNames).then((materials: Record<string, THREE.Material>[]) => {
           console.log("Materials", materials);
-          object.traverse((child: THREE.Object3D<THREE.Event>) => {
+          loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
             if ((child as THREE.Mesh).isMesh) {
               // TODO: check type
               const childMesh = child as THREE.Mesh;
@@ -52,12 +53,15 @@ export class Concrete {
       } // END if
 
       if (options && options.targetBounds) {
-        this.applyScale(object, options.targetBounds);
+        this.applyScale(loadedObject, options.targetBounds);
       }
       if (options && options.targetPosition) {
-        object.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
+        loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
       }
-      this.sceneContainer.scene.add(object);
+      this.sceneContainer.scene.add(loadedObject);
+      if (callback) {
+        callback(loadedObject);
+      }
     });
   }
 

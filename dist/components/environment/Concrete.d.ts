@@ -5,6 +5,7 @@
  * @version 1.0.0
  * @date    2023-04-10 (Happy Easter)
  */
+import * as THREE from "three";
 import { SceneContainer } from "../SceneContainer";
 import { Size3Immutable, TripleImmutable } from "../interfaces";
 export declare class Concrete {
@@ -22,7 +23,7 @@ export declare class Concrete {
     loadObjFile(basePath: string, objFileName: string, options?: {
         targetBounds?: Size3Immutable;
         targetPosition?: TripleImmutable<number>;
-    }): void;
+    }, callback?: (loadedObject: THREE.Object3D) => void): void;
     /**
      * This private helper function loads the OBJ file using THREE's OBJLoader.
      *

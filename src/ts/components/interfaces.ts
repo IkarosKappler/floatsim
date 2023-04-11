@@ -81,7 +81,7 @@ export interface IHeightMap {
   depthSegments: number;
   minHeightValue: number;
   maxHeightValue: number;
-  data: Uint8Array;
+  data: Float32Array | Uint8Array;
   /**
    * Convert a position on the heightmap's x-y-grid to an offset inside the
    * underlying data array.

@@ -7,7 +7,7 @@ export declare class PerlinHeightMap implements IHeightMap {
     readonly depthSegments: number;
     readonly minHeightValue: number;
     readonly maxHeightValue: number;
-    readonly data: Uint8Array;
+    readonly data: Float32Array;
     /**
      * Create the raw perlin terrain data.
      *

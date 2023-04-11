@@ -11,7 +11,7 @@ export class PerlinHeightMap implements IHeightMap {
   readonly depthSegments: number;
   readonly minHeightValue: number;
   readonly maxHeightValue: number;
-  readonly data: Uint8Array;
+  readonly data: Float32Array; //  Uint8Array;
 
   /**
    * Create the raw perlin terrain data.
@@ -32,7 +32,8 @@ export class PerlinHeightMap implements IHeightMap {
     const seed: number = Math.PI / 4;
     const size: number = widthSegments * depthSegments;
 
-    this.data = new Uint8Array(size);
+    // this.data = new Uint8Array(size);
+    this.data = new Float32Array(size);
 
     // Todo: keep track of the height data and find min/max
     let minHeightValue = Number.MAX_VALUE;

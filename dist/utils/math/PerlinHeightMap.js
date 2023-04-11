@@ -26,7 +26,8 @@ var PerlinHeightMap = /** @class */ (function () {
         var useCustomNoise = true;
         var seed = Math.PI / 4;
         var size = widthSegments * depthSegments;
-        this.data = new Uint8Array(size);
+        // this.data = new Uint8Array(size);
+        this.data = new Float32Array(size);
         // Todo: keep track of the height data and find min/max
         var minHeightValue = Number.MAX_VALUE;
         var maxHeightValue = Number.MIN_VALUE;

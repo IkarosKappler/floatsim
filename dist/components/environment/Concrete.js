@@ -47,16 +47,16 @@ var Concrete = /** @class */ (function () {
      * @param {Size3Immutable} options.targetBounds
      * @param {TripleImmutable<number>} options.targetPosition
      */
-    Concrete.prototype.loadObjFile = function (basePath, objFileName, options) {
+    Concrete.prototype.loadObjFile = function (basePath, objFileName, options, callback) {
         var _this = this;
         // Try loading the object
-        this.loadObj(basePath, objFileName).then(function (object) {
-            console.log("object", object);
-            var materialFileNames = object.materialLibraries;
+        this.loadObj(basePath, objFileName).then(function (loadedObject) {
+            console.log("object", loadedObject);
+            var materialFileNames = loadedObject.materialLibraries;
             if (materialFileNames) {
                 _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
                     console.log("Materials", materials);
-                    object.traverse(function (child) {
+                    loadedObject.traverse(function (child) {
                         if (child.isMesh) {
                             // TODO: check type
                             var childMesh = child;
@@ -67,12 +67,15 @@ var Concrete = /** @class */ (function () {
                 });
             } // END if
             if (options && options.targetBounds) {
-                _this.applyScale(object, options.targetBounds);
+                _this.applyScale(loadedObject, options.targetBounds);
             }
             if (options && options.targetPosition) {
-                object.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
+                loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
             }
-            _this.sceneContainer.scene.add(object);
+            _this.sceneContainer.scene.add(loadedObject);
+            if (callback) {
+                callback(loadedObject);
+            }
         });
     };
     /**

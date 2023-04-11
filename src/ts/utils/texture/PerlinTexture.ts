@@ -23,7 +23,7 @@ export class PerlinTexture implements TextureData {
     this.material = new THREE.MeshBasicMaterial({ map: texture });
   }
 
-  public static generateTexture(data: Uint8Array, width: number, height: number): TextureData {
+  public static generateTexture(data: Float32Array | Uint8Array, width: number, height: number): TextureData {
     let context: CanvasRenderingContext2D;
     let imageData: ImageData;
     let imageDataArray: Uint8ClampedArray;

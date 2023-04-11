@@ -29,13 +29,14 @@ export declare class SceneContainer {
     cube: THREE.Mesh;
     constructor(params: Params);
     makeTerrain(): PerlinTerrain;
-    loadConcrete(): void;
+    loadConcrete(terrain: PerlinTerrain): void;
     addGroundBuoys(terrain: PerlinTerrain): void;
     getShipRotation(): {
         x: number;
         y: number;
         z: number;
     };
+    addVisibleBoundingBox(object: THREE.Object3D): void;
     initializeAudio(): Promise<void>;
     onWindowResize(): void;
 }
