@@ -68,6 +68,15 @@ export interface IHeightMap {
     minHeightValue: number;
     maxHeightValue: number;
     data: Uint8Array;
+    /**
+     * Convert a position on the heightmap's x-y-grid to an offset inside the
+     * underlying data array.
+     *
+     * @param {number} x - The x position in 0 <= x < widthSegments.
+     * @param {number} z - The z position in 0 <= z < depthSegments.
+     * @returns {number} The array offset (index) of the grid value in the data array.
+     */
+    getOffset(x: number, z: number): number;
 }
 export interface TextureData {
     readonly imageData: ImageData;

@@ -21,5 +21,12 @@ export declare class PerlinTerrain {
      * @returns {number} The height value along the `height` (=y) axis relative to bounds.min.y.
      */
     getHeightAt(x: number, z: number): number;
+    /**
+     * A static helper function to convert a heightmap to a plane geometry. Useful if
+     * you need the geometry without the specific terrain material.
+     * @param heightMap
+     * @param worldSize
+     * @returns
+     */
     static heightMapToPlaneGeometry(heightMap: IHeightMap, worldSize: Size3Immutable): THREE.PlaneGeometry;
 }

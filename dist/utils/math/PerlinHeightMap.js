@@ -61,9 +61,51 @@ var PerlinHeightMap = /** @class */ (function () {
         this.minHeightValue = minHeightValue;
         this.maxHeightValue = maxHeightValue;
     } // END constructor
-    PerlinHeightMap.prototype.bilinearSmoothStep = function () {
-        // ...
+    /**
+     * Convert a position on the heightmap's x-y-grid to an offset inside the
+     * underlying data array.
+     *
+     * @param {number} x - The x position in 0 <= x < widthSegments.
+     * @param {number} z - The z position in 0 <= z < depthSegments.
+     * @returns {number} The array offset (index) of the grid value in the data array.
+     */
+    PerlinHeightMap.prototype.getOffset = function (x, z) {
+        return Math.max(0, Math.min(z * this.depthSegments + x, this.data.length - 1));
+    };
+    PerlinHeightMap.prototype.getValueAt = function (x, z) {
+        return this.data[this.getOffset(x, z)];
+    };
+    PerlinHeightMap.prototype.setValueAt = function (x, z, newValue) {
+        var index = this.getOffset(x, z);
+        this.data[index] = newValue;
+    };
+    PerlinHeightMap.prototype.bilinearSmoothstep = function (squareSize) {
+        // const squareArea = squareSize * squareSize;
+        for (var x = 0; x < this.widthSegments; x++) {
+            for (var z = 0; z < this.depthSegments; z++) {
+                // const values = [
+                //   [this.getValueAt(x, z), z + 1 < this.depthSegments ? this.getValueAt(x, z + 1) : this.getValueAt(x, z)],
+                //   [
+                //     x + 1 < this.widthSegments ? this.getValueAt(x + 1, z) : this.getValueAt(x, z),
+                //     x + 1 < this.widthSegments && z + 1 < this.depthSegments ? this.getValueAt(x + 1, z + 1) : this.getValueAt(x, z)
+                //   ]
+                // ];
+                // this.setValueAt(x, z, (values[0][0] + values[0][1] + values[1][0] + values[1][1]) / 4.0);
+                this.setValueAt(x, z, this.aggregateNeightbourValues(x, z, squareSize));
+            }
+        }
         return this;
+    };
+    PerlinHeightMap.prototype.aggregateNeightbourValues = function (x, z, squareSize) {
+        var value = 0;
+        var count = 0;
+        for (var i = 0; i < squareSize && x + i < this.widthSegments; i++) {
+            for (var j = 0; j < squareSize && z + j < this.depthSegments; j++) {
+                value += this.getValueAt(x + i, z + j);
+                count++;
+            }
+        }
+        return value / count;
     };
     return PerlinHeightMap;
 }());
