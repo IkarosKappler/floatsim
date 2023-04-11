@@ -32,15 +32,16 @@ exports.SceneContainer = void 0;
 var THREE = __importStar(require("three"));
 var FirstPersonControls_js_1 = require("three/examples/jsm/controls/FirstPersonControls.js");
 var Stats_1 = require("../Stats");
-var PerlinTerrain_1 = require("./PerlinTerrain");
+var PerlinTerrain_1 = require("./environment/PerlinTerrain");
 var CockpitPlane_1 = require("./CockpitPlane");
 var HudComponent_1 = require("./HudComponent");
-var FogHandler_1 = require("./FogHandler");
+var FogHandler_1 = require("./environment/FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
 var PerlinTexture_1 = require("../utils/texture/PerlinTexture");
 var AudioPlayer_1 = require("../utils/AudioPlayer");
-var FloatingParticles_1 = require("./FloatingParticles");
+var FloatingParticles_1 = require("./environment/FloatingParticles");
 var Concrete_1 = require("./environment/Concrete");
+var PerlinHeightMap_1 = require("../utils/math/PerlinHeightMap");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -186,25 +187,8 @@ var SceneContainer = /** @class */ (function () {
                     updateables[i].update(elapsedTime, deltaTime);
                 }
                 _this.renderer.render(_this.scene, _this.camera);
-                // Updat HUD data
-                // hudData.shipRotation = this.camera.rotation;
-                // hudData.shipRotation = this.camera.getWorldDirection(new THREE.Vector3());
-                hudData.shipRotation = { x: 0, y: 0, z: 0 };
-                var euler = new THREE.Euler();
-                euler.order = "XYZ";
-                var rotation = euler.setFromQuaternion(_this.camera.quaternion);
-                var worldDirection = _this.camera.getWorldQuaternion(new THREE.Quaternion());
-                // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
-                hudData.shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
-                var rot2polar = function (euler) {
-                    // Euler to polar
-                    //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
-                    var length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
-                    var theta = Math.acos(euler.z / length);
-                    var phi = Math.atan(euler.y / euler.x);
-                    return { theta: theta, phi: phi };
-                };
-                hudData.shipRotation.z = rot2polar(rotation).theta;
+                // Update HUD data
+                hudData.shipRotation = _this.getShipRotation();
                 hudData.depth = _this.camera.position.y;
                 _this.hud.beforeRender(_this, hudData, _this.tweakParams);
                 _this.hud.renderFragment(_this.renderer);
@@ -218,55 +202,9 @@ var SceneContainer = /** @class */ (function () {
                 }
             }
             requestAnimationFrame(_render);
-        };
-        // // const zStartOffset = 800.0; // for ImprovedNoise
-        // const zStartOffset = 300.0; // for Custom noise
-        // const worldWidthSegments = 256;
-        // const worldDepthSegments = 256;
-        // const perlinOptions = { iterations: 5, quality: 1.5 };
-        // const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
-        //   worldWidthSegments,
-        //   worldDepthSegments,
-        //   perlinOptions
-        // );
-        // const terrainSize: Size3Immutable = { width: 7500, depth: 7500, height: 0 };
-        // const terrainTexture = new PerlinTexture(terrainData, terrainSize);
-        // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
-        // console.log("terrainData", terrainData);
-        // terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
-        // this.scene.add(terrain.mesh);
-        // var imageData = terrainTexture.imageData;
-        // var buffer = imageData.data.buffer; // ArrayBuffer
-        // var arrayBuffer = new ArrayBuffer(imageData.data.length);
-        // var binary = new Uint8Array(arrayBuffer);
-        // for (var i = 0; i < binary.length; i++) {
-        //   binary[i] = imageData.data[i];
-        // }
-        // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-        // dTex.needsUpdate = true;
-        // Load some "concrete" asset
-        var basePath = "resources/meshes/wavefront/concrete-ring/";
-        var objFileName = "newscene.obj";
-        var targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
-        var targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
-        new Concrete_1.Concrete(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition });
-        // Test x-y- height positioning in the terrain class
-        var steps = 50;
-        var stepSizeX = terrain.worldSize.width / steps;
-        var stepSizeY = terrain.worldSize.depth / steps;
-        console.log("terrain.worldSize.width", terrain.worldSize.width, "terrain.worldSize.depth", terrain.worldSize.depth, "stepSizeX", stepSizeX, "stepSizeY", stepSizeY, "terrain.bounds", terrain.bounds);
-        for (var x = 0; x < terrain.worldSize.width; x += stepSizeX) {
-            for (var y = 0; y < terrain.worldSize.depth; y += stepSizeY) {
-                var heightValue = terrain.getHeightAt(x, y);
-                if (x === 0) {
-                    console.log("x", y, "y", y, "heightValue", heightValue);
-                }
-                var bouy = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshPhongMaterial({ color: 0xff0000 }));
-                bouy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.z + y, terrain.bounds.min.y + heightValue);
-                this.scene.add(bouy);
-            }
-        }
+        }; // END render
+        this.loadConcrete();
+        this.addGroundBuoys(terrain);
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });
@@ -297,13 +235,14 @@ var SceneContainer = /** @class */ (function () {
     }
     SceneContainer.prototype.makeTerrain = function () {
         //--- MAKE TERRAIN ---
-        var zStartOffset = -200.0; // for ImprovedNoise
+        var zStartOffset = -320.0; // for ImprovedNoise
         // const zStartOffset = 300.0; // for Custom noise
         var worldWidthSegments = 256;
         var worldDepthSegments = 256;
         var perlinOptions = { iterations: 5, quality: 2.5 };
-        var terrainData = PerlinTerrain_1.PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
-        var terrainSize = { width: 2048, depth: 2048, height: 100 };
+        // const terrainData: IHeightMap = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
+        var terrainData = new PerlinHeightMap_1.PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
+        var terrainSize = { width: 2048.0, depth: 2048.0, height: 10.0 };
         var terrainCenter = new THREE.Vector3(0, 0, 0);
         var terrainBounds = new THREE.Box3(new THREE.Vector3(terrainCenter.x - terrainSize.width / 2.0, terrainCenter.y - terrainSize.height / 2.0, terrainCenter.z - terrainSize.depth / 2.0), new THREE.Vector3(terrainCenter.x + terrainSize.width / 2.0, terrainCenter.y + terrainSize.height / 2.0, terrainCenter.z + terrainSize.depth / 2.0));
         var terrainTexture = new PerlinTexture_1.PerlinTexture(terrainData, terrainSize);
@@ -324,6 +263,54 @@ var SceneContainer = /** @class */ (function () {
         dTex.needsUpdate = true;
         //---END--- MAKE TERRAIN
         return terrain;
+    };
+    SceneContainer.prototype.loadConcrete = function () {
+        // Load some "concrete" asset
+        var basePath = "resources/meshes/wavefront/concrete-ring/";
+        var objFileName = "newscene.obj";
+        var targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+        var targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
+        new Concrete_1.Concrete(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition });
+    };
+    SceneContainer.prototype.addGroundBuoys = function (terrain) {
+        // Test x-y- height positioning in the terrain class
+        var countPerAxis = 25;
+        var stepSizeX = terrain.worldSize.width / countPerAxis;
+        var stepSizeY = terrain.worldSize.depth / countPerAxis;
+        console.log("terrain.worldSize.width", terrain.worldSize.width, "terrain.worldSize.depth", terrain.worldSize.depth, "terrain.worldSize.height", terrain.worldSize.height, "stepSizeX", stepSizeX, "stepSizeY", stepSizeY, "terrain.bounds", terrain.bounds);
+        var buoyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        for (var x = 0; x < terrain.worldSize.width; x += stepSizeX) {
+            for (var y = 0; y < terrain.worldSize.depth; y += stepSizeY) {
+                var heightValue = terrain.getHeightAt(x, y);
+                var buoy = new THREE.Mesh(new THREE.SphereGeometry(1.5), buoyMaterial);
+                buoy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.y + heightValue, terrain.bounds.min.z + y);
+                buoy.position.add(terrain.mesh.position);
+                buoy.position.y += 2 * 3.0;
+                this.scene.add(buoy);
+            }
+        }
+    };
+    SceneContainer.prototype.getShipRotation = function () {
+        // Updat HUD data
+        // hudData.shipRotation = this.camera.rotation;
+        // hudData.shipRotation = this.camera.getWorldDirection(new THREE.Vector3());
+        var shipRotation = { x: 0, y: 0, z: 0 };
+        var euler = new THREE.Euler();
+        euler.order = "XYZ";
+        var rotation = euler.setFromQuaternion(this.camera.quaternion);
+        var worldDirection = this.camera.getWorldQuaternion(new THREE.Quaternion());
+        // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
+        shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
+        var rot2polar = function (euler) {
+            // Euler to polar
+            //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
+            var length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
+            var theta = Math.acos(euler.z / length);
+            var phi = Math.atan(euler.y / euler.x);
+            return { theta: theta, phi: phi };
+        };
+        shipRotation.z = rot2polar(rotation).theta;
+        return shipRotation;
     };
     SceneContainer.prototype.initializeAudio = function () {
         var audioPlayer = new AudioPlayer_1.AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");

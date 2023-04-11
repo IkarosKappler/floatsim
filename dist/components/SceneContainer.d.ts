@@ -7,11 +7,11 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
-import { PerlinTerrain } from "./PerlinTerrain";
+import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
 import { SceneData, TweakParams } from "./interfaces";
-import { FogHandler } from "./FogHandler";
+import { FogHandler } from "./environment/FogHandler";
 import { Params } from "../utils/Params";
 export declare class SceneContainer {
     readonly scene: THREE.Scene;
@@ -29,6 +29,13 @@ export declare class SceneContainer {
     cube: THREE.Mesh;
     constructor(params: Params);
     makeTerrain(): PerlinTerrain;
+    loadConcrete(): void;
+    addGroundBuoys(terrain: PerlinTerrain): void;
+    getShipRotation(): {
+        x: number;
+        y: number;
+        z: number;
+    };
     initializeAudio(): Promise<void>;
     onWindowResize(): void;
 }

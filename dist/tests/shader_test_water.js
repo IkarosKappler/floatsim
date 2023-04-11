@@ -42,12 +42,30 @@ globalThis.addEventListener("load", function () {
   var worldWidthSegments = 256;
   var worldDepthSegments = 256;
   var perlinOptions = { iterations: 5, quality: 1.5 };
-  var terrainData = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
-  var terrainSize = { width: 7500, depth: 7500, height: 0 };
+  var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
+  // var terrainSize = { width: 7500, depth: 7500, height: 0 };
+  const terrainSize = { width: 2048.0, depth: 2048.0, height: 10.0 };
   console.log("PerlinTexture", PerlinTexture);
-  var baseTexture = new PerlinTexture(terrainData, terrainSize);
+  var baseTexture = new PerlinTexture(heightMap, terrainSize);
 
-  var terrain = new PerlinTerrain(terrainData, terrainSize, baseTexture);
+  const terrainCenter = new THREE.Vector3(0, 0, 0);
+  const terrainBounds = new THREE.Box3(
+    new THREE.Vector3(
+      terrainCenter.x - terrainSize.width / 2.0,
+      terrainCenter.y - terrainSize.height / 2.0,
+      terrainCenter.z - terrainSize.depth / 2.0
+    ),
+    new THREE.Vector3(
+      terrainCenter.x + terrainSize.width / 2.0,
+      terrainCenter.y + terrainSize.height / 2.0,
+      terrainCenter.z + terrainSize.depth / 2.0
+    )
+  );
+  const terrainTexture = new PerlinTexture(heightMap, terrainSize);
+  // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
+  const terrain = new PerlinTerrain(heightMap, terrainBounds, terrainTexture);
+
+  // var terrain = new PerlinTerrain(heightMap, terrainSize, baseTexture);
   terrain.mesh.position.y = -zStartOffset;
   terrain.mesh.scale.set(0.1, 0.1, 0.1);
   this.scene.add(terrain.mesh);

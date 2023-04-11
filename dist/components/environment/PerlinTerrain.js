@@ -25,9 +25,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PerlinTerrain = void 0;
 var THREE = __importStar(require("three"));
-// import { noise } from "../utils/math/perlin";
-var CausticShaderMaterial_1 = require("../utils/texture/CausticShaderMaterial");
-var Helpers_1 = require("../utils/Helpers");
+var CausticShaderMaterial_1 = require("../../utils/texture/CausticShaderMaterial");
+var Helpers_1 = require("../../utils/Helpers");
 var PerlinTerrain = /** @class */ (function () {
     function PerlinTerrain(heightMap, worldBunds, baseTexture) {
         this.heightMap = heightMap;

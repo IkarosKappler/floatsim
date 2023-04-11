@@ -5,7 +5,7 @@
  */
 import * as THREE from "three";
 import Ammo from "ammojs-typed";
-import { PerlinTerrain } from "./PerlinTerrain";
+import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { SceneContainer } from "./SceneContainer";
 type TAmmo = typeof Ammo;
 export declare class PhysicsHandler {

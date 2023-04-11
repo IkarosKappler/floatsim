@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { MinMax } from "./interfaces";
-import { SceneContainer } from "./SceneContainer";
+import { MinMax } from "../interfaces";
+import { SceneContainer } from "../SceneContainer";
 
 /**
  * Fog is measured this way:

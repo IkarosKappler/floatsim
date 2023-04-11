@@ -44,7 +44,7 @@ globalThis.addEventListener("load", function () {
 
   //---BEGIN--- Terrain Generation
   var planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-  var terrainSize = { width: 2048, depth: 2048, height: 100 };
+  var terrainSize = { width: 2048, depth: 2048, height: 10 };
   var terrainCenter = new THREE.Vector3(0, 0, 0);
   var terrainBounds = new THREE.Box3(
     new THREE.Vector3(
@@ -63,7 +63,7 @@ globalThis.addEventListener("load", function () {
   var worldWidthSegments = 256;
   var worldDepthSegments = 256;
   var perlinOptions = { iterations: 5, quality: 2.5 };
-  var heightMap = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
+  var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
 
   var geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
   var mesh = new THREE.Mesh(geometry, planeMaterial);

@@ -8,7 +8,7 @@ import * as THREE from "three";
 import Ammo from "ammojs-typed";
 import { generateDemoHeight } from "../utils/generateDemoHeight";
 
-import { PerlinTerrain } from "./PerlinTerrain";
+import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { SceneContainer } from "./SceneContainer";
 
 type TAmmo = typeof Ammo;

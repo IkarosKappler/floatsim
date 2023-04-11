@@ -5,9 +5,8 @@
  */
 
 import * as THREE from "three";
-import { SceneContainer } from "./SceneContainer";
-import { HUDData, ISceneContainer, TripleImmutable, TweakParams, UpdateableComponent } from "./interfaces";
-import { Bounds2Immutable } from "../utils/Helpers";
+import { SceneContainer } from "../SceneContainer";
+import { UpdateableComponent } from "../interfaces";
 
 const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;

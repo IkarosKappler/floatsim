@@ -15,11 +15,13 @@
     <script src="../lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script>globalThis.three = THREE;</script>
     <script src="../lib/three/examples/umd/math/ImprovedNoise.js"></script>
+    <script src="../utils/Helpers.js"></script> 
     <script src="../utils/texture/shaders/caustic_shader_material.glsl.js"></script>
     <script src="../utils/texture/CausticShaderMaterial.js"></script> 
     <script src="../utils/texture/PerlinTexture.js"></script> 
-    <script src="../components/PerlinTerrain.js"></script> 
-    <script src="../utils/perlin.js"></script> 
+    <script src="../utils/math/perlin.js"></script> 
+    <script src="../utils/math/PerlinHeightMap.js"></script> 
+    <script src="../components/environment/PerlinTerrain.js"></script> 
     <script src="shader_test_water.js"></script> 
     <script id="vertexShader" type="x-shader/x-vertex">
         varying vec2 vUv; 

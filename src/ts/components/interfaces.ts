@@ -76,7 +76,7 @@ export interface Size3Immutable {
   readonly depth: number;
 }
 
-export interface PerlinHeightMap {
+export interface IHeightMap {
   widthSegments: number;
   depthSegments: number;
   minHeightValue: number;

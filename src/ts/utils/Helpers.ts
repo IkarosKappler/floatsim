@@ -19,6 +19,32 @@ export const getColorStyle = (color: THREE.RGB, alpha: number): string => {
 };
 
 /**
+ * A cheap custom random number generator.
+ */
+export class CustomRandom {
+  private seed: number = 0;
+
+  /**
+   * Construct a new generator with the given seed.
+   * @param {number} seed - The seed to use.
+   */
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  /**
+   * Get the next pseudo random number.
+   *
+   * @static
+   * @returns {numbr} A peusdo random number between 0.0 and 1.0.
+   */
+  next(): number {
+    const x = Math.sin(this.seed++) * 10000;
+    return x - Math.floor(x);
+  }
+}
+
+/**
  * Convert bounds of form THREE.Box3 to a Vector3 containing the size.
  * @param bounds
  * @returns

@@ -29,7 +29,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bounds2Immutable = exports.svg2texture = exports.bounds2size = exports.getColorStyle = void 0;
+exports.Bounds2Immutable = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
 var THREE = __importStar(require("three"));
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -41,6 +41,31 @@ var getColorStyle = function (color, alpha) {
     return "rgba(".concat(Math.floor(color.r * 255), ", ").concat(Math.floor(color.g * 255), ", ").concat(Math.floor(color.b * 255), ", ").concat(alpha, ")");
 };
 exports.getColorStyle = getColorStyle;
+/**
+ * A cheap custom random number generator.
+ */
+var CustomRandom = /** @class */ (function () {
+    /**
+     * Construct a new generator with the given seed.
+     * @param {number} seed - The seed to use.
+     */
+    function CustomRandom(seed) {
+        this.seed = 0;
+        this.seed = seed;
+    }
+    /**
+     * Get the next pseudo random number.
+     *
+     * @static
+     * @returns {numbr} A peusdo random number between 0.0 and 1.0.
+     */
+    CustomRandom.prototype.next = function () {
+        var x = Math.sin(this.seed++) * 10000;
+        return x - Math.floor(x);
+    };
+    return CustomRandom;
+}());
+exports.CustomRandom = CustomRandom;
 /**
  * Convert bounds of form THREE.Box3 to a Vector3 containing the size.
  * @param bounds

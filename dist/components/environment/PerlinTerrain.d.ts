@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { CausticShaderMaterial } from "../utils/texture/CausticShaderMaterial";
-import { IHeightMap, Size3Immutable, TextureData } from "./interfaces";
+import { CausticShaderMaterial } from "../../utils/texture/CausticShaderMaterial";
+import { IHeightMap, Size3Immutable, TextureData } from "../interfaces";
 export declare class PerlinTerrain {
     readonly heightMap: IHeightMap;
     readonly worldSize: Size3Immutable;

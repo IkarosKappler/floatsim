@@ -14,6 +14,24 @@ import { IBounds2Immutable, Rect, Size3Immutable, Tuple } from "../components/in
  */
 export declare const getColorStyle: (color: THREE.RGB, alpha: number) => string;
 /**
+ * A cheap custom random number generator.
+ */
+export declare class CustomRandom {
+    private seed;
+    /**
+     * Construct a new generator with the given seed.
+     * @param {number} seed - The seed to use.
+     */
+    constructor(seed: number);
+    /**
+     * Get the next pseudo random number.
+     *
+     * @static
+     * @returns {numbr} A peusdo random number between 0.0 and 1.0.
+     */
+    next(): number;
+}
+/**
  * Convert bounds of form THREE.Box3 to a Vector3 containing the size.
  * @param bounds
  * @returns

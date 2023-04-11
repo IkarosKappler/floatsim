@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { TextureData, PerlinHeightMap, Size3Immutable } from "../../components/interfaces";
+import { TextureData, IHeightMap, Size3Immutable } from "../../components/interfaces";
 
 export class PerlinTexture implements TextureData {
   readonly material: THREE.Material;
@@ -8,7 +8,7 @@ export class PerlinTexture implements TextureData {
   readonly imageDataArray: Uint8ClampedArray;
   readonly imageCanvas: HTMLCanvasElement;
 
-  constructor(heightMap: PerlinHeightMap, worldSize: Size3Immutable) {
+  constructor(heightMap: IHeightMap, worldSize: Size3Immutable) {
     // const textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);
     // const textureData = PerlinTexture.generateTexture(heightMap.data, worldSize.width, worldSize.depth);
     const textureData = PerlinTexture.generateTexture(heightMap.data, heightMap.widthSegments, heightMap.depthSegments);

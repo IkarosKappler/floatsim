@@ -17,6 +17,17 @@ Adding more HUD fragments: Depth meter and compass.
 Adding floating particles.
 ![Floating particles](screenshots/screenshot-20230402-0.png)
 
+## Coordinates
+
+```
+Y
+|      Z
+|    /`
+|  /`
+|/`
+-----------X
+```
+
 ## Build THREE examples
 
 ```bash

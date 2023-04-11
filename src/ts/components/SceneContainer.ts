@@ -8,17 +8,18 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
-import { PerlinTerrain } from "./PerlinTerrain";
+import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { CockpitPlane } from "./CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { HUDData, PerlinHeightMap, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
-import { FogHandler } from "./FogHandler";
+import { HUDData, IHeightMap, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
+import { FogHandler } from "./environment/FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
 import { PerlinTexture } from "../utils/texture/PerlinTexture";
 import { AudioPlayer } from "../utils/AudioPlayer";
-import { FloatingParticles } from "./FloatingParticles";
+import { FloatingParticles } from "./environment/FloatingParticles";
 import { Concrete } from "./environment/Concrete";
+import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -218,26 +219,8 @@ export class SceneContainer {
 
         this.renderer.render(this.scene, this.camera);
 
-        // Updat HUD data
-        // hudData.shipRotation = this.camera.rotation;
-        // hudData.shipRotation = this.camera.getWorldDirection(new THREE.Vector3());
-        hudData.shipRotation = { x: 0, y: 0, z: 0 };
-        const euler = new THREE.Euler();
-        euler.order = "XYZ";
-        const rotation = euler.setFromQuaternion(this.camera.quaternion);
-        const worldDirection = this.camera.getWorldQuaternion(new THREE.Quaternion());
-        // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
-        hudData.shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
-
-        const rot2polar = (euler: THREE.Euler) => {
-          // Euler to polar
-          //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
-          const length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
-          const theta = Math.acos(euler.z / length);
-          const phi = Math.atan(euler.y / euler.x);
-          return { theta, phi };
-        };
-        hudData.shipRotation.z = rot2polar(rotation).theta;
+        // Update HUD data
+        hudData.shipRotation = this.getShipRotation();
 
         hudData.depth = this.camera.position.y;
         this.hud.beforeRender(this, hudData, this.tweakParams);
@@ -256,70 +239,10 @@ export class SceneContainer {
       }
 
       requestAnimationFrame(_render);
-    };
+    }; // END render
 
-    // // const zStartOffset = 800.0; // for ImprovedNoise
-    // const zStartOffset = 300.0; // for Custom noise
-    // const worldWidthSegments = 256;
-    // const worldDepthSegments = 256;
-    // const perlinOptions = { iterations: 5, quality: 1.5 };
-    // const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
-    //   worldWidthSegments,
-    //   worldDepthSegments,
-    //   perlinOptions
-    // );
-    // const terrainSize: Size3Immutable = { width: 7500, depth: 7500, height: 0 };
-    // const terrainTexture = new PerlinTexture(terrainData, terrainSize);
-    // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture); // , worldWidthSegments, worldDepthSegments); // .makeTerrain();
-    // console.log("terrainData", terrainData);
-    // terrain.mesh.position.y = this.sceneData.initialDepth - zStartOffset;
-    // this.scene.add(terrain.mesh);
-
-    // var imageData = terrainTexture.imageData;
-    // var buffer = imageData.data.buffer; // ArrayBuffer
-    // var arrayBuffer = new ArrayBuffer(imageData.data.length);
-    // var binary = new Uint8Array(arrayBuffer);
-    // for (var i = 0; i < binary.length; i++) {
-    //   binary[i] = imageData.data[i];
-    // }
-    // var dTex = new THREE.DataTexture(arrayBuffer, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-    // //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-    // dTex.needsUpdate = true;
-
-    // Load some "concrete" asset
-    const basePath = "resources/meshes/wavefront/concrete-ring/";
-    const objFileName = "newscene.obj";
-    const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
-    const targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
-    new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition });
-
-    // Test x-y- height positioning in the terrain class
-    const steps = 50;
-    const stepSizeX = terrain.worldSize.width / steps;
-    const stepSizeY = terrain.worldSize.depth / steps;
-    console.log(
-      "terrain.worldSize.width",
-      terrain.worldSize.width,
-      "terrain.worldSize.depth",
-      terrain.worldSize.depth,
-      "stepSizeX",
-      stepSizeX,
-      "stepSizeY",
-      stepSizeY,
-      "terrain.bounds",
-      terrain.bounds
-    );
-    for (var x = 0; x < terrain.worldSize.width; x += stepSizeX) {
-      for (var y = 0; y < terrain.worldSize.depth; y += stepSizeY) {
-        const heightValue = terrain.getHeightAt(x, y);
-        if (x === 0) {
-          console.log("x", y, "y", y, "heightValue", heightValue);
-        }
-        const bouy = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshPhongMaterial({ color: 0xff0000 }));
-        bouy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.z + y, terrain.bounds.min.y + heightValue);
-        this.scene.add(bouy);
-      }
-    }
+    this.loadConcrete();
+    this.addGroundBuoys(terrain);
 
     window.addEventListener("resize", () => {
       _self.onWindowResize();
@@ -356,17 +279,15 @@ export class SceneContainer {
 
   makeTerrain(): PerlinTerrain {
     //--- MAKE TERRAIN ---
-    const zStartOffset = -200.0; // for ImprovedNoise
+    const zStartOffset = -320.0; // for ImprovedNoise
     // const zStartOffset = 300.0; // for Custom noise
     const worldWidthSegments = 256;
     const worldDepthSegments = 256;
     const perlinOptions = { iterations: 5, quality: 2.5 };
-    const terrainData: PerlinHeightMap = PerlinTerrain.generatePerlinHeight(
-      worldWidthSegments,
-      worldDepthSegments,
-      perlinOptions
-    );
-    const terrainSize: Size3Immutable = { width: 2048, depth: 2048, height: 100 };
+    // const terrainData: IHeightMap = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
+    const terrainData: IHeightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
+
+    const terrainSize: Size3Immutable = { width: 2048.0, depth: 2048.0, height: 10.0 };
     const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
     const terrainBounds: THREE.Box3 = new THREE.Box3(
       new THREE.Vector3(
@@ -401,6 +322,71 @@ export class SceneContainer {
     //---END--- MAKE TERRAIN
 
     return terrain;
+  }
+
+  loadConcrete() {
+    // Load some "concrete" asset
+    const basePath = "resources/meshes/wavefront/concrete-ring/";
+    const objFileName = "newscene.obj";
+    const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+    const targetPosition = { x: 100.0, y: -20.0, z: 0.0 };
+    new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition });
+  }
+
+  addGroundBuoys(terrain: PerlinTerrain) {
+    // Test x-y- height positioning in the terrain class
+    const countPerAxis = 25;
+    const stepSizeX = terrain.worldSize.width / countPerAxis;
+    const stepSizeY = terrain.worldSize.depth / countPerAxis;
+    console.log(
+      "terrain.worldSize.width",
+      terrain.worldSize.width,
+      "terrain.worldSize.depth",
+      terrain.worldSize.depth,
+      "terrain.worldSize.height",
+      terrain.worldSize.height,
+      "stepSizeX",
+      stepSizeX,
+      "stepSizeY",
+      stepSizeY,
+      "terrain.bounds",
+      terrain.bounds
+    );
+    const buoyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    for (var x = 0; x < terrain.worldSize.width; x += stepSizeX) {
+      for (var y = 0; y < terrain.worldSize.depth; y += stepSizeY) {
+        const heightValue = terrain.getHeightAt(x, y);
+        const buoy = new THREE.Mesh(new THREE.SphereGeometry(1.5), buoyMaterial);
+        buoy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.y + heightValue, terrain.bounds.min.z + y);
+        buoy.position.add(terrain.mesh.position);
+        buoy.position.y += 2 * 3.0;
+        this.scene.add(buoy);
+      }
+    }
+  }
+
+  getShipRotation() {
+    // Updat HUD data
+    // hudData.shipRotation = this.camera.rotation;
+    // hudData.shipRotation = this.camera.getWorldDirection(new THREE.Vector3());
+    const shipRotation = { x: 0, y: 0, z: 0 };
+    const euler = new THREE.Euler();
+    euler.order = "XYZ";
+    const rotation = euler.setFromQuaternion(this.camera.quaternion);
+    const worldDirection = this.camera.getWorldQuaternion(new THREE.Quaternion());
+    // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
+    shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
+
+    const rot2polar = (euler: THREE.Euler) => {
+      // Euler to polar
+      //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
+      const length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
+      const theta = Math.acos(euler.z / length);
+      const phi = Math.atan(euler.y / euler.x);
+      return { theta, phi };
+    };
+    shipRotation.z = rot2polar(rotation).theta;
+    return shipRotation;
   }
 
   initializeAudio(): Promise<void> {
