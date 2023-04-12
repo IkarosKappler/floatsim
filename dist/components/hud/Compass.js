@@ -61,7 +61,7 @@ var Compass = /** @class */ (function () {
      */
     Compass.prototype.beforeRender = function (_sceneContainer, _data, tweakParams) {
         // Apply tweak params
-        this.compassMesh.position.z = tweakParams.z;
+        this.compassMesh.position.z = Compass.DEFAULT_Z_OFFSET + tweakParams.z;
         // Update compass rotation
         var m = new THREE.Matrix4();
         m.copy(_sceneContainer.camera.matrixWorld);
@@ -81,6 +81,7 @@ var Compass = /** @class */ (function () {
     Compass.prototype.updateSize = function () {
         // NOOP?
     };
+    Compass.DEFAULT_Z_OFFSET = -75.0;
     return Compass;
 }());
 exports.Compass = Compass;

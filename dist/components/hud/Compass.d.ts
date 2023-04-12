@@ -4,6 +4,7 @@ import { HudComponent } from "../HudComponent";
 export declare class Compass implements RenderableComponent {
     readonly hudComponent: HudComponent;
     private readonly compassMesh;
+    private static readonly DEFAULT_Z_OFFSET;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender

@@ -2,7 +2,7 @@
 <html> 
 <head> 
     <meta charset="UTF-8">
-    <title>THREE.js Water Shader Test</title> 
+    <title>THREE.js Perlin Terrain Test</title> 
     <link rel="stylesheet" href="../styles.css" />
     <script src="../lib/three/build/three.150.min.js"></script>
     <script>globalThis.three = THREE;
@@ -11,7 +11,11 @@
     <script>
         globalThis.module = globalThis;
     </script>
+    <script src="../lib/tweakpane/tweakpane.min.js"></script>
     <script src="../module.js"></script>
+    <script>
+        globalThis.exports["tweakpane"] = Tweakpane;
+    </script>
     <script src="../lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script>globalThis.three = THREE;</script>
     <script src="../lib/three/examples/umd/math/ImprovedNoise.js"></script>

@@ -7,6 +7,8 @@ export class Compass implements RenderableComponent {
   readonly hudComponent: HudComponent;
   private readonly compassMesh: THREE.Mesh;
 
+  private static readonly DEFAULT_Z_OFFSET = -75.0;
+
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
 
@@ -45,7 +47,7 @@ export class Compass implements RenderableComponent {
    */
   beforeRender(_sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams) {
     // Apply tweak params
-    this.compassMesh.position.z = tweakParams.z;
+    this.compassMesh.position.z = Compass.DEFAULT_Z_OFFSET + tweakParams.z;
     // Update compass rotation
     var m = new THREE.Matrix4();
     m.copy(_sceneContainer.camera.matrixWorld);

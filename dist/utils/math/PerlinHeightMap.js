@@ -17,12 +17,13 @@ var PerlinHeightMap = /** @class */ (function () {
      * @returns PerlinHeightMap
      */
     function PerlinHeightMap(widthSegments, depthSegments, options) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         this.widthSegments = widthSegments;
         this.depthSegments = depthSegments;
         var iterations = (_a = options === null || options === void 0 ? void 0 : options.iterations) !== null && _a !== void 0 ? _a : 5;
         var initialQuality = (_b = options === null || options === void 0 ? void 0 : options.quality) !== null && _b !== void 0 ? _b : 1.5;
-        console.log("iterations", iterations, "initialQuality", initialQuality);
+        var offset = { x: ((_c = options === null || options === void 0 ? void 0 : options.offset) === null || _c === void 0 ? void 0 : _c.x) || 0, y: (_d = options === null || options === void 0 ? void 0 : options.offset) === null || _d === void 0 ? void 0 : _d.y };
+        // console.log("iterations", iterations, "initialQuality", initialQuality);
         var useCustomNoise = true;
         var seed = Math.PI / 4;
         var size = widthSegments * depthSegments;
@@ -33,11 +34,16 @@ var PerlinHeightMap = /** @class */ (function () {
         var maxHeightValue = Number.MIN_VALUE;
         var perlin = new ImprovedNoise_1.ImprovedNoise();
         var getHeight = function (x, y, z) {
+            // if (useCustomNoise) {
+            //   return noise.perlin3(x, y, z);
+            // } else {
+            //   return perlin.noise(x, y, z);
+            // }
             if (useCustomNoise) {
-                return perlin_1.noise.perlin3(x, y, z);
+                return perlin_1.noise.perlin3(offset.x + x, offset.y + y, z);
             }
             else {
-                return perlin.noise(x, y, z);
+                return perlin.noise(offset.x + x, offset.y + y, z);
             }
         };
         var randomizer = new Helpers_1.CustomRandom(seed);
@@ -58,7 +64,7 @@ var PerlinHeightMap = /** @class */ (function () {
             resolution *= qualityFactor;
             // quality *= quality;
         }
-        console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
+        // console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
         this.minHeightValue = minHeightValue;
         this.maxHeightValue = maxHeightValue;
     } // END constructor

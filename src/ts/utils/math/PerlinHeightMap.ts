@@ -1,5 +1,5 @@
 import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise";
-import { IHeightMap } from "../../components/interfaces";
+import { IHeightMap, Tuple } from "../../components/interfaces";
 import { CustomRandom } from "../Helpers";
 import { noise } from "./perlin";
 
@@ -21,13 +21,19 @@ export class PerlinHeightMap implements IHeightMap {
    * @param options
    * @returns PerlinHeightMap
    */
-  constructor(widthSegments: number, depthSegments: number, options?: { iterations?: number; quality?: number }) {
+  constructor(
+    widthSegments: number,
+    depthSegments: number,
+    options?: { iterations?: number; quality?: number; offset?: Tuple<number> }
+  ) {
     this.widthSegments = widthSegments;
     this.depthSegments = depthSegments;
 
     const iterations: number = options?.iterations ?? 5;
     const initialQuality: number = options?.quality ?? 1.5;
-    console.log("iterations", iterations, "initialQuality", initialQuality);
+    const offset = { x: options?.offset?.x || 0, y: options?.offset?.y };
+
+    // console.log("iterations", iterations, "initialQuality", initialQuality);
     const useCustomNoise: boolean = true;
     const seed: number = Math.PI / 4;
     const size: number = widthSegments * depthSegments;
@@ -41,10 +47,15 @@ export class PerlinHeightMap implements IHeightMap {
 
     const perlin = new ImprovedNoise();
     const getHeight = (x: number, y: number, z: number): number => {
+      // if (useCustomNoise) {
+      //   return noise.perlin3(x, y, z);
+      // } else {
+      //   return perlin.noise(x, y, z);
+      // }
       if (useCustomNoise) {
-        return noise.perlin3(x, y, z);
+        return noise.perlin3(offset.x + x, offset.y + y, z);
       } else {
-        return perlin.noise(x, y, z);
+        return perlin.noise(offset.x + x, offset.y + y, z);
       }
     };
 
@@ -69,7 +80,7 @@ export class PerlinHeightMap implements IHeightMap {
       resolution *= qualityFactor;
       // quality *= quality;
     }
-    console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
+    // console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
 
     this.minHeightValue = minHeightValue;
     this.maxHeightValue = maxHeightValue;

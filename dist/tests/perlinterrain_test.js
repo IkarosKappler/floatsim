@@ -2,6 +2,10 @@ globalThis.addEventListener("load", function () {
   this.clock = new THREE.Clock();
   this.scene = new THREE.Scene();
 
+  const tweakParams = {
+    y: 0.0
+  };
+
   // Initialize a new THREE renderer (you are also allowed
   // to pass an existing canvas for rendering).
   this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -62,16 +66,29 @@ globalThis.addEventListener("load", function () {
 
   var worldWidthSegments = 256;
   var worldDepthSegments = 256;
-  var perlinOptions = { iterations: 5, quality: 2.5 };
-  var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
-  heightMap.bilinearSmoothstep(2);
 
-  var geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
-  // const terrain = new PerlinTerrain(heightMap, terrainBounds, terrainTexture);
-  var mesh = new THREE.Mesh(geometry, planeMaterial);
-  mesh.scale.set(0.01, 0.01, 0.01);
-  //   mesh.position.y = -50;
-  this.scene.add(mesh);
+  var mesh = null;
+
+  var rebuildTerrainAt = function (offsetX, offsetY) {
+    var perlinOptions = { iterations: 5, quality: 2.5, offset: { x: offsetX, y: offsetY + tweakParams.y } };
+    var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
+    heightMap.bilinearSmoothstep(2);
+
+    var geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
+    // const terrain = new PerlinTerrain(heightMap, terrainBounds, terrainTexture);
+    if (mesh) {
+      this.scene.remove(mesh);
+    }
+    mesh = new THREE.Mesh(geometry, planeMaterial);
+    mesh.scale.set(0.01, 0.01, 0.01);
+    //   mesh.position.y = -50;
+    this.scene.add(mesh);
+  };
+  var rebuildTerrain = function () {
+    rebuildTerrainAt(0, 0);
+    // rebuildTerrainAt(0, 1.0);
+  };
+  rebuildTerrain();
 
   // Finally we want to be able to rotate the whole scene with the mouse:
   // add an orbit control helper.
@@ -116,4 +133,20 @@ globalThis.addEventListener("load", function () {
   window.addEventListener("resize", function () {
     onWindowResize();
   });
+
+  var initTweakPane = function () {
+    // console.log(TweakPane);
+    const pane = new window["Tweakpane"].Pane();
+    pane.addInput(tweakParams, "y", {
+      min: -1.0,
+      max: 1.0
+    });
+    // pane.addInput(sceneContainer.tweakParams, "isRendering");
+    // pane.addInput(sceneContainer.tweakParams, "highlightHudFragments");
+    pane.on("change", ev => {
+      // console.log("changed: " + JSON.stringify(ev.value));
+      rebuildTerrain();
+    });
+  };
+  initTweakPane();
 });

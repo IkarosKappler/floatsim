@@ -1,4 +1,4 @@
-import { IHeightMap } from "../../components/interfaces";
+import { IHeightMap, Tuple } from "../../components/interfaces";
 /**
  * A wrapper class for holding terrain data (generated from Perlin noise).
  */
@@ -19,6 +19,7 @@ export declare class PerlinHeightMap implements IHeightMap {
     constructor(widthSegments: number, depthSegments: number, options?: {
         iterations?: number;
         quality?: number;
+        offset?: Tuple<number>;
     });
     /**
      * Convert a position on the heightmap's x-y-grid to an offset inside the
