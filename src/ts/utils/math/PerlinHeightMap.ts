@@ -31,7 +31,7 @@ export class PerlinHeightMap implements IHeightMap {
 
     const iterations: number = options?.iterations ?? 5;
     const initialQuality: number = options?.quality ?? 1.5;
-    const offset = { x: options?.offset?.x || 0, y: options?.offset?.y };
+    const offset = { x: options?.offset?.x ?? 0, y: options?.offset?.y ?? 0 };
 
     // console.log("iterations", iterations, "initialQuality", initialQuality);
     const useCustomNoise: boolean = true;

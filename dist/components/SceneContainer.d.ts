@@ -32,9 +32,9 @@ export declare class SceneContainer {
     loadConcrete(terrain: PerlinTerrain): void;
     addGroundBuoys(terrain: PerlinTerrain): void;
     getShipRotation(): {
-        x: number;
-        y: number;
         z: number;
+        y: number;
+        x: number;
     };
     addVisibleBoundingBox(object: THREE.Object3D): void;
     initializeAudio(): Promise<void>;

@@ -3,6 +3,8 @@ globalThis.addEventListener("load", function () {
   this.scene = new THREE.Scene();
 
   const tweakParams = {
+    iterations: 5,
+    quality: 2.5,
     y: 0.0
   };
 
@@ -48,7 +50,7 @@ globalThis.addEventListener("load", function () {
 
   //---BEGIN--- Terrain Generation
   var planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-  var terrainSize = { width: 2048, depth: 2048, height: 10 };
+  var terrainSize = { width: 20, depth: 20, height: 0.1 };
   var terrainCenter = new THREE.Vector3(0, 0, 0);
   var terrainBounds = new THREE.Box3(
     new THREE.Vector3(
@@ -67,26 +69,31 @@ globalThis.addEventListener("load", function () {
   var worldWidthSegments = 256;
   var worldDepthSegments = 256;
 
-  var mesh = null;
+  var meshes = [];
 
   var rebuildTerrainAt = function (offsetX, offsetY) {
-    var perlinOptions = { iterations: 5, quality: 2.5, offset: { x: offsetX, y: offsetY + tweakParams.y } };
+    var perlinOptions = {
+      iterations: tweakParams.iterations,
+      quality: tweakParams.quality,
+      offset: { x: offsetX, y: offsetY + tweakParams.y }
+    };
     var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
     heightMap.bilinearSmoothstep(2);
 
     var geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
-    // const terrain = new PerlinTerrain(heightMap, terrainBounds, terrainTexture);
-    if (mesh) {
-      this.scene.remove(mesh);
-    }
-    mesh = new THREE.Mesh(geometry, planeMaterial);
-    mesh.scale.set(0.01, 0.01, 0.01);
-    //   mesh.position.y = -50;
+    var mesh = new THREE.Mesh(geometry, planeMaterial);
+    meshes.push(mesh);
+    // mesh.scale.set(0.01, 0.01, 0.01);
+    mesh.position.set(offsetX * terrainSize.width, 0, offsetY * terrainSize.depth);
     this.scene.add(mesh);
   };
   var rebuildTerrain = function () {
+    for (var i in meshes) {
+      this.scene.remove(meshes[i]);
+    }
+    meshes = [];
     rebuildTerrainAt(0, 0);
-    // rebuildTerrainAt(0, 1.0);
+    rebuildTerrainAt(0, 1.0);
   };
   rebuildTerrain();
 
@@ -141,8 +148,15 @@ globalThis.addEventListener("load", function () {
       min: -1.0,
       max: 1.0
     });
-    // pane.addInput(sceneContainer.tweakParams, "isRendering");
-    // pane.addInput(sceneContainer.tweakParams, "highlightHudFragments");
+    pane.addInput(tweakParams, "iterations", {
+      min: 1,
+      max: 10,
+      step: 1
+    });
+    pane.addInput(tweakParams, "quality", {
+      min: 0.0,
+      max: 5.0
+    });
     pane.on("change", ev => {
       // console.log("changed: " + JSON.stringify(ev.value));
       rebuildTerrain();

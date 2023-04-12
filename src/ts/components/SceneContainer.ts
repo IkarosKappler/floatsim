@@ -367,27 +367,12 @@ export class SceneContainer {
   }
 
   getShipRotation() {
-    // Updat HUD data
-    // hudData.shipRotation = this.camera.rotation;
-    // hudData.shipRotation = this.camera.getWorldDirection(new THREE.Vector3());
-    const shipRotation = { x: 0, y: 0, z: 0 };
-    const euler = new THREE.Euler();
-    euler.order = "XYZ";
-    const rotation = euler.setFromQuaternion(this.camera.quaternion);
-    const worldDirection = this.camera.getWorldQuaternion(new THREE.Quaternion());
-    // hudData.shipRotation.z = Math.atan2(this.camera.rotation.x, this.camera.rotation.z);
-    shipRotation.z = worldDirection.z; // Math.atan2(worldDirection.x, worldDirection.z);
-
-    const rot2polar = (euler: THREE.Euler) => {
-      // Euler to polar
-      //    https://stackoverflow.com/questions/37667438/convert-three-js-scene-rotation-to-polar-coordinates
-      const length = Math.sqrt(euler.x * euler.x + euler.y * euler.y + euler.z * euler.z);
-      const theta = Math.acos(euler.z / length);
-      const phi = Math.atan(euler.y / euler.x);
-      return { theta, phi };
-    };
-    shipRotation.z = rot2polar(rotation).theta;
-    return shipRotation;
+    const worldDir = new THREE.Vector3();
+    this.camera.getWorldDirection(worldDir);
+    const horizontalVector = new THREE.Vector3(worldDir.x, 0, worldDir.z);
+    const isNegative = worldDir.y > 0;
+    const angle = worldDir.angleTo(horizontalVector);
+    return { z: isNegative ? -angle : angle, y: 0, x: 0 };
   }
 
   addVisibleBoundingBox(object: THREE.Object3D) {
