@@ -14,24 +14,10 @@ import { RAD2DEG } from "../constants";
 export class VariometerFragment implements RenderableComponent {
   private hudComponent: HudComponent;
   private loopCounter: number = 0;
-
-  // private depthMeterTexture: HTMLImageElement;
-  // private static ASSET_PATH: string = "img/depth-meter-a.png";
-  // private static ASSET_SIZE = new Bounds2Immutable({ x: 0, y: 0, width: 600, height: 1347 });
-  // private static ASSETS_LEFT_SCALE_BOUNDS = Bounds2Immutable.fromMinMax({ x: 150, y: 192 }, { x: 252, y: 1156 });
-  // private static ASSETS_RIGHT_SCALE_BOUNDS = Bounds2Immutable.fromMinMax({ x: 386, y: 94 }, { x: 480, y: 1248 });
-  // private static HUD_RATIO = VariometerFragment.ASSET_SIZE.width / VariometerFragment.ASSET_SIZE.height;
-
-  // static readonly MAX_DEPTH_METER = -12000;
-
-  private currentHudScale: number;
   private currentHudBounds: Bounds2Immutable;
-  private leftSubBounds: Bounds2Immutable;
-  private rightSubBounds: Bounds2Immutable;
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
-    // this.depthMeterTexture = new THREE.ImageLoader().load(VariometerFragment.ASSET_PATH);
 
     // Initialize the current bounds
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
@@ -42,15 +28,14 @@ export class VariometerFragment implements RenderableComponent {
    */
   beforeRender(_sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
     // Calculate the current view angle
-    // const angle = ((_sceneContainer.clock.getElapsedTime() * 0.25) % Math.PI) - Math.PI / 2.0;
-    const angle = -hudData.shipRotation.z;
+    const angle = hudData.shipRotation.z;
 
     // Define the upper and the lower bounds for the displayed value
     const MAX_ANGLE = Math.PI / 2.0;
     const MIN_ANGLE = -Math.PI / 2.0;
 
     // Determine the percentage of the current value in the valid range
-    const anglePct = angle / (MAX_ANGLE - MIN_ANGLE);
+    const anglePct = (angle / (MAX_ANGLE - MIN_ANGLE)) * 2.0;
 
     // Calculate the (relative) vertical offset to draw the value at inside the HUD fragment
     const zeroOffsetV = this.currentHudBounds.height * (0.5 + anglePct);

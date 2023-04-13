@@ -151,12 +151,9 @@ var SceneContainer = /** @class */ (function () {
         // firstPersonControls.noFly = true;
         firstPersonControls.lookVertical = true;
         firstPersonControls.constrainVertical = true;
-        firstPersonControls.verticalMin = Math.PI * 0.25; // in radians
-        firstPersonControls.verticalMax = Math.PI * 0.75; // in radians
-        // firstPersonControls.lon = -150;
-        // firstPersonControls.lat = 120;
-        // firstPersonControls.enabled = true;
-        // console.log("firstPersonControls", firstPersonControls);
+        // PI/2.0 is the middle
+        firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
+        firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
         this.controls = firstPersonControls;
         this.stats = new Stats_1.Stats.Stats();
         document.querySelector("body").appendChild(this.stats.domElement);
@@ -184,7 +181,7 @@ var SceneContainer = /** @class */ (function () {
                 }
                 _this.renderer.render(_this.scene, _this.camera);
                 // Update HUD data
-                hudData.shipRotation = _this.getShipRotation();
+                hudData.shipRotation.z = _this.getShipVerticalInclination();
                 hudData.depth = _this.camera.position.y;
                 _this.hud.beforeRender(_this, hudData, _this.tweakParams);
                 _this.hud.renderFragment(_this.renderer);
@@ -293,13 +290,13 @@ var SceneContainer = /** @class */ (function () {
             }
         }
     };
-    SceneContainer.prototype.getShipRotation = function () {
+    SceneContainer.prototype.getShipVerticalInclination = function () {
         var worldDir = new THREE.Vector3();
         this.camera.getWorldDirection(worldDir);
         var horizontalVector = new THREE.Vector3(worldDir.x, 0, worldDir.z);
-        var isNegative = worldDir.y > 0;
+        var isNegative = worldDir.y < 0;
         var angle = worldDir.angleTo(horizontalVector);
-        return { z: isNegative ? -angle : angle, y: 0, x: 0 };
+        return isNegative ? -angle : angle;
     };
     SceneContainer.prototype.addVisibleBoundingBox = function (object) {
         var box = new THREE.BoxHelper(object, 0x000000);

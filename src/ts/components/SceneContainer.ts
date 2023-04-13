@@ -20,6 +20,7 @@ import { AudioPlayer } from "../utils/AudioPlayer";
 import { FloatingParticles } from "./environment/FloatingParticles";
 import { Concrete } from "./environment/Concrete";
 import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
+import { DEG2RAD } from "./constants";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -173,12 +174,9 @@ export class SceneContainer {
     // firstPersonControls.noFly = true;
     firstPersonControls.lookVertical = true;
     firstPersonControls.constrainVertical = true;
-    firstPersonControls.verticalMin = Math.PI * 0.25; // in radians
-    firstPersonControls.verticalMax = Math.PI * 0.75; // in radians
-    // firstPersonControls.lon = -150;
-    // firstPersonControls.lat = 120;
-    // firstPersonControls.enabled = true;
-    // console.log("firstPersonControls", firstPersonControls);
+    // PI/2.0 is the middle
+    firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
+    firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
 
     this.controls = firstPersonControls;
 
@@ -215,7 +213,7 @@ export class SceneContainer {
         this.renderer.render(this.scene, this.camera);
 
         // Update HUD data
-        hudData.shipRotation = this.getShipRotation();
+        hudData.shipRotation.z = this.getShipVerticalInclination();
 
         hudData.depth = this.camera.position.y;
         this.hud.beforeRender(this, hudData, this.tweakParams);
@@ -366,13 +364,13 @@ export class SceneContainer {
     }
   }
 
-  getShipRotation() {
+  getShipVerticalInclination() {
     const worldDir = new THREE.Vector3();
     this.camera.getWorldDirection(worldDir);
     const horizontalVector = new THREE.Vector3(worldDir.x, 0, worldDir.z);
-    const isNegative = worldDir.y > 0;
+    const isNegative = worldDir.y < 0;
     const angle = worldDir.angleTo(horizontalVector);
-    return { z: isNegative ? -angle : angle, y: 0, x: 0 };
+    return isNegative ? -angle : angle;
   }
 
   addVisibleBoundingBox(object: THREE.Object3D) {

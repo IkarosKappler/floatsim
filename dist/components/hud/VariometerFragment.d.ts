@@ -9,10 +9,7 @@ import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../i
 export declare class VariometerFragment implements RenderableComponent {
     private hudComponent;
     private loopCounter;
-    private currentHudScale;
     private currentHudBounds;
-    private leftSubBounds;
-    private rightSubBounds;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender

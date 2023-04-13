@@ -12,7 +12,6 @@ var VariometerFragment = /** @class */ (function () {
     function VariometerFragment(hudComponent) {
         this.loopCounter = 0;
         this.hudComponent = hudComponent;
-        // this.depthMeterTexture = new THREE.ImageLoader().load(VariometerFragment.ASSET_PATH);
         // Initialize the current bounds
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
@@ -21,13 +20,12 @@ var VariometerFragment = /** @class */ (function () {
      */
     VariometerFragment.prototype.beforeRender = function (_sceneContainer, hudData, tweakParams) {
         // Calculate the current view angle
-        // const angle = ((_sceneContainer.clock.getElapsedTime() * 0.25) % Math.PI) - Math.PI / 2.0;
-        var angle = -hudData.shipRotation.z;
+        var angle = hudData.shipRotation.z;
         // Define the upper and the lower bounds for the displayed value
         var MAX_ANGLE = Math.PI / 2.0;
         var MIN_ANGLE = -Math.PI / 2.0;
         // Determine the percentage of the current value in the valid range
-        var anglePct = angle / (MAX_ANGLE - MIN_ANGLE);
+        var anglePct = (angle / (MAX_ANGLE - MIN_ANGLE)) * 2.0;
         // Calculate the (relative) vertical offset to draw the value at inside the HUD fragment
         var zeroOffsetV = this.currentHudBounds.height * (0.5 + anglePct);
         // TODO: as global?
