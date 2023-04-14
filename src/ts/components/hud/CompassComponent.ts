@@ -3,11 +3,11 @@ import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../i
 import { HudComponent } from "../HudComponent";
 import { svg2texture } from "../../utils/Helpers";
 
-export class Compass implements RenderableComponent {
+export class CompassComponent implements RenderableComponent {
   readonly hudComponent: HudComponent;
   private readonly compassMesh: THREE.Mesh;
 
-  private static readonly DEFAULT_Z_OFFSET = -75.0;
+  private static readonly DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
@@ -47,7 +47,9 @@ export class Compass implements RenderableComponent {
    */
   beforeRender(_sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams) {
     // Apply tweak params
-    this.compassMesh.position.z = Compass.DEFAULT_Z_OFFSET + tweakParams.z;
+    this.compassMesh.position.z = CompassComponent.DEFAULT_OFFSET.x + tweakParams.compassZ;
+    this.compassMesh.position.z = CompassComponent.DEFAULT_OFFSET.y + tweakParams.compassZ;
+    this.compassMesh.position.z = CompassComponent.DEFAULT_OFFSET.z + tweakParams.compassZ;
     // Update compass rotation
     var m = new THREE.Matrix4();
     m.copy(_sceneContainer.camera.matrixWorld);

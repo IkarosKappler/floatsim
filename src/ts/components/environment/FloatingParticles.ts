@@ -75,22 +75,19 @@ interface IParticle {
 
 export class FloatingParticles implements UpdateableComponent {
   private readonly sceneContainer: SceneContainer;
-  // readonly texturePath: string;
   private readonly geometry: THREE.BufferGeometry;
   private readonly particles: Array<IParticle>;
   private containingBox: THREE.Box3;
 
   constructor(sceneContainer: SceneContainer, texturePath: string, containingBox: THREE.Box3, particleDensity: number) {
-    // } initialPosition: TripleImmutable<number>) {
     this.sceneContainer = sceneContainer;
-    // this.texturePath = texturePath;
     this.containingBox = containingBox;
 
     console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
 
     this.geometry = new THREE.BufferGeometry();
     this.particles = [];
-    this.init(texturePath, particleDensity); // initialPosition);
+    this.init(texturePath, particleDensity);
   }
 
   private init(texturePath: string, particleDensity: number) {
@@ -98,10 +95,10 @@ export class FloatingParticles implements UpdateableComponent {
     // Inspired by
     //    https://discourse.threejs.org/t/function-to-extend-materials/7882
 
-    const positions = [];
-    const colors = [];
-    const sizes = [];
-    const angles = [];
+    const positions: Array<number> = [];
+    const colors: Array<number> = [];
+    const sizes: Array<number> = [];
+    const angles: Array<number> = [];
 
     // Compute particle count from particle density and size
     const boundingBoxSize = new THREE.Vector3();

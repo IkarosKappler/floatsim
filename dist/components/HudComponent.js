@@ -25,10 +25,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HudComponent = void 0;
 var THREE = __importStar(require("three"));
-var Compass_1 = require("./hud/Compass");
+var CompassComponent_1 = require("./hud/CompassComponent");
 var DepthMeterFragment_1 = require("./hud/DepthMeterFragment");
 var LowerInfoHudFragment_1 = require("./hud/LowerInfoHudFragment");
 var VariometerFragment_1 = require("./hud/VariometerFragment");
+var SonarComponent_1 = require("./hud/SonarComponent");
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor, warningColor) {
         this.primaryColor = primaryColor;
@@ -50,6 +51,7 @@ var HudComponent = /** @class */ (function () {
         };
         // Create the camera and set the viewport to match the screen dimensions.
         this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
+        // this.hudCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, -50, 10000);
         this.hudCamera.position.z = 150;
         // Create also a custom scene for HUD.
         this.hudScene = new THREE.Scene();
@@ -69,13 +71,15 @@ var HudComponent = /** @class */ (function () {
         this.plane.position.z = 0; // Depth in the scene
         this.hudScene.add(this.plane);
         // Create a compass
-        this.compass = new Compass_1.Compass(this);
+        this.compass = new CompassComponent_1.CompassComponent(this);
         // Create the depth meter
         this.depthMeter = new DepthMeterFragment_1.DepthMeterFragment(this);
         // Create the lower info hud fragment
         this.lowerInfoHud = new LowerInfoHudFragment_1.LowerInfoHudFragment(this);
         // Create the Variometer
         this.variometer = new VariometerFragment_1.VariometerFragment(this);
+        // Create a sonar
+        this.sonar = new SonarComponent_1.SonarComponent(this);
     }
     /**
      * @implement RenderableComponent.beforeRender

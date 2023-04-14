@@ -13,21 +13,21 @@ export const vertex = /* glsl */ `
     void main() {
     
     
-    // This is just the local position.
-    vUv = uv; // position;
-    // This is the global position in the world.
-    vposition = (modelMatrix * vec4(position, 1.0)).xyz;
-    
-    vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
-    // gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-    gl_Position = projectionMatrix * modelViewPosition; 
+        // This is just the local position.
+        vUv = uv; // position;
+        // This is the global position in the world.
+        vposition = (modelMatrix * vec4(position, 1.0)).xyz;
+        
+        vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+        // gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        gl_Position = projectionMatrix * modelViewPosition; 
 
 
-    // General THREEJS varying
-    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0);
+        // General THREEJS varying
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0);
 
-    // # --- <fog_vertex>
-    vFogDepth = - mvPosition.z;
+        // # --- <fog_vertex>
+        vFogDepth = - mvPosition.z;
     }
 `;
 

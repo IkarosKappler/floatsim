@@ -36,14 +36,12 @@ var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sam
 var distance_fragment = /* glsl */ "\n  // 'distance' void main() {\n    vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - 0.5) + 0.5, sin(vRotation) * (gl_PointCoord.y - 0.5) + 0.5);\n\n    // Re-read from texture and apply rotation\n    float mid = 0.5;\n    uv = vec2(\n      cos(vRotation) * (uv.x - mid) + sin(vRotation) * (uv.y - mid) + mid,\n      cos(vRotation) * (uv.y - mid) - sin(vRotation) * (uv.x - mid) + mid\n    );\n    gl_FragColor = texture2D( map, uv ) * vColor; // vec4( vColor.rgb, 1.0 );\n\n    float minAlphaModifyer = 0.0;\n    float maxAlphaModifyer = 0.25;\n    \n    // gl_FragColor.a = mix( gl_FragColor.a, 0.0, particleDistFactor );\n    gl_FragColor.a = minAlphaModifyer + (maxAlphaModifyer-minAlphaModifyer)*mix( gl_FragColor.a, 0.0, particleDistFactor );\n\n  // }\n  ";
 var FloatingParticles = /** @class */ (function () {
     function FloatingParticles(sceneContainer, texturePath, containingBox, particleDensity) {
-        // } initialPosition: TripleImmutable<number>) {
         this.sceneContainer = sceneContainer;
-        // this.texturePath = texturePath;
         this.containingBox = containingBox;
         console.log("THREE.ShaderChunk.map_particle_fragment", THREE.ShaderChunk.map_particle_pars_fragment);
         this.geometry = new THREE.BufferGeometry();
         this.particles = [];
-        this.init(texturePath, particleDensity); // initialPosition);
+        this.init(texturePath, particleDensity);
     }
     FloatingParticles.prototype.init = function (texturePath, particleDensity) {
         // initialPosition: TripleImmutable<number>) {

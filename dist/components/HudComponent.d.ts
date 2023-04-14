@@ -10,6 +10,7 @@ export declare class HudComponent implements RenderableComponent {
     private hudMaterial;
     private plane;
     private compass;
+    private sonar;
     readonly primaryColor: THREE.Color;
     readonly warningColor: THREE.Color;
     private depthMeter;

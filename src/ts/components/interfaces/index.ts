@@ -30,7 +30,12 @@ export interface Triple<T> {
 }
 
 export interface TweakParams {
-  z: 0;
+  compassX: number;
+  compassY: number;
+  compassZ: number;
+  sonarX: number;
+  sonarY: number;
+  sonarZ: number;
   isRendering: boolean;
   highlightHudFragments: boolean;
 }

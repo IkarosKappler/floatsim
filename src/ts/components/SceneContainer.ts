@@ -55,7 +55,16 @@ export class SceneContainer {
         min: -500
       }
     };
-    this.tweakParams = { z: 0, isRendering: true, highlightHudFragments: false };
+    this.tweakParams = {
+      sonarX: 0,
+      sonarY: 0,
+      sonarZ: 0,
+      compassX: 0,
+      compassY: 0,
+      compassZ: 0,
+      isRendering: true,
+      highlightHudFragments: false
+    };
 
     // Initialize a new THREE renderer (you are also allowed
     // to pass an existing canvas for rendering).
@@ -185,7 +194,7 @@ export class SceneContainer {
 
     const hudData: HUDData = {
       depth: this.camera.position.y,
-      shipRotation: this.camera.rotation
+      shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
     };
 
     const terrain = this.makeTerrain();
@@ -277,7 +286,6 @@ export class SceneContainer {
     const worldWidthSegments = 256;
     const worldDepthSegments = 256;
     const perlinOptions = { iterations: 5, quality: 2.5 };
-    // const terrainData: IHeightMap = PerlinTerrain.generatePerlinHeight(worldWidthSegments, worldDepthSegments, perlinOptions);
     const terrainData: IHeightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
 
     const terrainSize: Size3Immutable = { width: 2048.0, depth: 2048.0, height: 10.0 };

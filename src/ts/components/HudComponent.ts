@@ -1,21 +1,23 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./interfaces";
-import { Compass } from "./hud/Compass";
+import { CompassComponent } from "./hud/CompassComponent";
 import { DepthMeterFragment } from "./hud/DepthMeterFragment";
 import { LowerInfoHudFragment } from "./hud/LowerInfoHudFragment";
 import { VariometerFragment } from "./hud/VariometerFragment";
+import { SonarComponent } from "./hud/SonarComponent";
 
 export class HudComponent implements RenderableComponent {
   readonly hudCanvas: HTMLCanvasElement;
   readonly hudBitmap: CanvasRenderingContext2D;
-  private hudCamera: THREE.OrthographicCamera;
+  private hudCamera: THREE.Camera; // THREE.OrthographicCamera;
   readonly hudScene: THREE.Scene;
   private hudImage: HTMLImageElement;
   private hudDynamicTexture: THREE.Texture;
   private hudMaterial: THREE.MeshBasicMaterial;
   private plane: THREE.Mesh;
 
-  private compass: Compass;
+  private compass: CompassComponent;
+  private sonar: SonarComponent;
 
   // TODO: convert to color palette with objects
   readonly primaryColor: THREE.Color;
@@ -47,6 +49,7 @@ export class HudComponent implements RenderableComponent {
 
     // Create the camera and set the viewport to match the screen dimensions.
     this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
+    // this.hudCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, -50, 10000);
     this.hudCamera.position.z = 150;
     // Create also a custom scene for HUD.
     this.hudScene = new THREE.Scene();
@@ -70,7 +73,7 @@ export class HudComponent implements RenderableComponent {
     this.hudScene.add(this.plane);
 
     // Create a compass
-    this.compass = new Compass(this);
+    this.compass = new CompassComponent(this);
 
     // Create the depth meter
     this.depthMeter = new DepthMeterFragment(this);
@@ -80,6 +83,9 @@ export class HudComponent implements RenderableComponent {
 
     // Create the Variometer
     this.variometer = new VariometerFragment(this);
+
+    // Create a sonar
+    this.sonar = new SonarComponent(this);
   }
 
   /**
