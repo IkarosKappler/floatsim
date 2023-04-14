@@ -35,8 +35,9 @@ var Helpers_1 = require("../../utils/Helpers");
  * @version 1.0.0
  */
 var SonarComponent = /** @class */ (function () {
-    function SonarComponent(hudComponent) {
-        this.hudComponent = hudComponent;
+    function SonarComponent(cockpitScene) {
+        // this.hudComponent = hudComponent;
+        this.cockpitScene = cockpitScene;
         this.particles = [];
         var verticalDimension = 16; // north pole to south pole
         var horizontalDimension = 16; // along equator
@@ -91,19 +92,19 @@ var SonarComponent = /** @class */ (function () {
             //   map: compassTexture,
             transparent: true,
             side: THREE.DoubleSide,
-            emissive: hudComponent.primaryColor,
+            // emissive: hudComponent.primaryColor,
             flatShading: true
         });
         this.sonarGroup = new THREE.Group();
         var sonarPointMesh = new THREE.Points(this.pointsGeometry, sonarMaterial);
         this.sonarGroup.add(sonarPointMesh);
         // Radius=30 -> definitely in range of camera
-        this.sonarGroup.position.add(new THREE.Vector3(30, 300, -160));
-        this.hudComponent.hudScene.add(this.sonarGroup);
+        // this.sonarGroup.position.add(new THREE.Vector3(30, 300, -160));
+        this.cockpitScene.cockpitScene.add(this.sonarGroup);
         var visualBoxGeometry = new THREE.BoxGeometry(boundingBoxSize.width, boundingBoxSize.height, boundingBoxSize.depth);
         var visualBox = new THREE.Mesh(visualBoxGeometry);
         var boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
-        this.hudComponent.hudScene.add(boxHelper);
+        this.cockpitScene.cockpitScene.add(boxHelper);
         // const onTextureReady = (texture: THREE.Texture) => {
         //   sonarMaterial.map = texture;
         // };
@@ -128,7 +129,7 @@ var SonarComponent = /** @class */ (function () {
      */
     SonarComponent.prototype.renderFragment = function (_renderer) {
         // NOOP (nothing to render here)
-        // The compass just updates its rotation/position
+        // The sonar just updates its point matrix
     };
     /**
      * @implement RenderableComponent.updateSize

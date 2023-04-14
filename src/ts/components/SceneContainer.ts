@@ -150,7 +150,7 @@ export class SceneContainer {
     // this.cockpit = new CockpitPlane();
     // this.camera.add(this.cockpit.mesh);
 
-    this.cockpitScene = new CockpitScene(this.renderer.domElement.width, this.renderer.domElement.height);
+    this.cockpitScene = new CockpitScene(this, this.renderer.domElement.width, this.renderer.domElement.height);
 
     const hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
     const hudWarningColor = new THREE.Color(params.getString("hudWarningColor", "#c88800"));

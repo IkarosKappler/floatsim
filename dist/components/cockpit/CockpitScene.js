@@ -35,8 +35,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CockpitScene = void 0;
 var THREE = __importStar(require("three"));
 var CockpitPlane_1 = require("./CockpitPlane");
+var SonarComponent_1 = require("./SonarComponent");
 var CockpitScene = /** @class */ (function () {
-    function CockpitScene(width, height) {
+    function CockpitScene(sceneContainer, width, height) {
         // Create the camera and set the viewport to match the screen dimensions.
         this.cockpitCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
         // this.cockpitCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0, 10000);
@@ -47,21 +48,14 @@ var CockpitScene = /** @class */ (function () {
         // this.cockpitCamera.add(this.cockpitPlane.mesh);
         this.cockpitCamera.add(this.cockpitPlane.mesh);
         this.cockpitScene.add(this.cockpitCamera);
+        this.sonarComponent = new SonarComponent_1.SonarComponent(this);
     }
-    // setCockpitSize(width: number, height: number) {
-    //   // this.mesh.scale.set(width / 40, height / 40, 1);
-    //   this.cockpitPlane.setCockpitSize(width, height);
-    // }
     /**
      * @implement RenderableComponent.beforeRender
      */
     CockpitScene.prototype.beforeRender = function (sceneContainer, hudData, tweakParams) {
-        // Apply tweak params
-        // this.compass.beforeRender(sceneContainer, hudData, tweakParams);
-        // this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
-        // this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
-        // this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
-        // this.hudDynamicTexture.needsUpdate = true;
+        // Apply tweak params?
+        this.sonarComponent.beforeRender(sceneContainer, hudData, tweakParams);
     };
     /**
      * @implement RenderableComponent.renderFragment

@@ -37,10 +37,10 @@ var CockpitPlane = /** @class */ (function () {
     function CockpitPlane() {
         var _this = this;
         this.textureSize = { width: 100, height: 100 };
-        var cockpitTexture = new THREE.TextureLoader().load("resources/img/cockpit-nasa.png");
-        cockpitTexture.addEventListener("load", function () {
-            _this.textureSize.width = cockpitTexture.image.width;
-            _this.textureSize.height = cockpitTexture.image.height;
+        var cockpitTexture = new THREE.TextureLoader().load("resources/img/cockpit-nasa.png", function (tex) {
+            _this.textureSize.width = tex.image.width;
+            _this.textureSize.height = tex.image.height;
+            console.log("[CockpitPlane] TextureSize", _this.textureSize);
         });
         var cockpitAlpahMap = new THREE.TextureLoader().load("resources/img/cockpit-nasa-alphamap.png");
         var material = new THREE.MeshBasicMaterial({
@@ -65,6 +65,9 @@ var CockpitPlane = /** @class */ (function () {
         // Find best fit
         var ratio = 1.5; //height / width;
         this.mesh.scale.set(width * ratio, height * ratio, 1);
+        console.log("[CockpitPlane] setCockpitSize", width, height, width / this.textureSize.width, height / this.textureSize.height);
+        // this.mesh.scale.set(this.textureSize.width / width, height / this.textureSize.height, 1);
+        // this.mesh.scale.set(this.textureSize.width / width, this.textureSize.height / height, 1);
     };
     return CockpitPlane;
 }());

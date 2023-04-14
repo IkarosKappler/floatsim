@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, Size3Immutable, TweakParams } from "../interfaces";
 import { HudComponent } from "../HudComponent";
 import { bounds2size, svg2texture } from "../../utils/Helpers";
+import { SceneContainer } from "../SceneContainer";
+import { CockpitScene } from "./CockpitScene";
 
 /**
  * A sonar component for the cockpit.
@@ -13,7 +15,8 @@ import { bounds2size, svg2texture } from "../../utils/Helpers";
  */
 
 export class SonarComponent {
-  readonly hudComponent: HudComponent;
+  // readonly hudComponent: HudComponent;
+  private readonly cockpitScene: CockpitScene;
   private readonly sonarGroup: THREE.Group;
   //   private readonly sonarPointMeshh: THREE.Group;
   private readonly containingBox: THREE.Box3;
@@ -22,8 +25,9 @@ export class SonarComponent {
 
   private static readonly DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
 
-  constructor(hudComponent: HudComponent) {
-    this.hudComponent = hudComponent;
+  constructor(cockpitScene: CockpitScene) {
+    // this.hudComponent = hudComponent;
+    this.cockpitScene = cockpitScene;
 
     this.particles = [];
 
@@ -99,7 +103,7 @@ export class SonarComponent {
       //   map: compassTexture,
       transparent: true,
       side: THREE.DoubleSide,
-      emissive: hudComponent.primaryColor,
+      // emissive: hudComponent.primaryColor,
       flatShading: true
     });
     this.sonarGroup = new THREE.Group();
@@ -107,13 +111,13 @@ export class SonarComponent {
     this.sonarGroup.add(sonarPointMesh);
 
     // Radius=30 -> definitely in range of camera
-    this.sonarGroup.position.add(new THREE.Vector3(30, 300, -160));
-    this.hudComponent.hudScene.add(this.sonarGroup);
+    // this.sonarGroup.position.add(new THREE.Vector3(30, 300, -160));
+    this.cockpitScene.cockpitScene.add(this.sonarGroup);
 
     const visualBoxGeometry = new THREE.BoxGeometry(boundingBoxSize.width, boundingBoxSize.height, boundingBoxSize.depth);
     const visualBox = new THREE.Mesh(visualBoxGeometry);
     const boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
-    this.hudComponent.hudScene.add(boxHelper);
+    this.cockpitScene.cockpitScene.add(boxHelper);
 
     // const onTextureReady = (texture: THREE.Texture) => {
     //   sonarMaterial.map = texture;
@@ -141,7 +145,7 @@ export class SonarComponent {
    */
   renderFragment(_renderer: THREE.WebGLRenderer): void {
     // NOOP (nothing to render here)
-    // The compass just updates its rotation/position
+    // The sonar just updates its point matrix
   }
 
   /**

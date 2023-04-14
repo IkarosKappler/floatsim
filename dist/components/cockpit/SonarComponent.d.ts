@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, TweakParams } from "../interfaces";
-import { HudComponent } from "../HudComponent";
+import { CockpitScene } from "./CockpitScene";
 /**
  * A sonar component for the cockpit.
  * This is not a HUD component.
@@ -10,13 +10,13 @@ import { HudComponent } from "../HudComponent";
  * @version 1.0.0
  */
 export declare class SonarComponent {
-    readonly hudComponent: HudComponent;
+    private readonly cockpitScene;
     private readonly sonarGroup;
     private readonly containingBox;
     private readonly particles;
     private readonly pointsGeometry;
     private static readonly DEFAULT_OFFSET;
-    constructor(hudComponent: HudComponent);
+    constructor(cockpitScene: CockpitScene);
     /**
      * @implement RenderableComponent.befoRerender
      */

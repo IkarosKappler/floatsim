@@ -135,7 +135,7 @@ var SceneContainer = /** @class */ (function () {
         // Add cockpit
         // this.cockpit = new CockpitPlane();
         // this.camera.add(this.cockpit.mesh);
-        this.cockpitScene = new CockpitScene_1.CockpitScene(this.renderer.domElement.width, this.renderer.domElement.height);
+        this.cockpitScene = new CockpitScene_1.CockpitScene(this, this.renderer.domElement.width, this.renderer.domElement.height);
         var hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
         var hudWarningColor = new THREE.Color(params.getString("hudWarningColor", "#c88800"));
         this.hud = new HudComponent_1.HudComponent(this.renderer.domElement.width, this.renderer.domElement.height, hudPrimaryColor, hudWarningColor);

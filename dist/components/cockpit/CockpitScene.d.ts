@@ -10,10 +10,11 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 export declare class CockpitScene implements RenderableComponent {
+    readonly cockpitScene: THREE.Scene;
     private readonly cockpitCamera;
-    private readonly cockpitScene;
     private readonly cockpitPlane;
-    constructor(width: number, height: number);
+    private readonly sonarComponent;
+    constructor(sceneContainer: ISceneContainer, width: number, height: number);
     /**
      * @implement RenderableComponent.beforeRender
      */
