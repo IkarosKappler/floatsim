@@ -45,6 +45,6 @@ export class CockpitPlane {
 
     // Find best fit
     var ratio = 1.5; //height / width;
-    this.mesh.scale.set(width * ratio, height * ratio, 1);
+    this.mesh.scale.set(width / this.textureSize.width, height / this.textureSize.height, 1);
   }
 }
