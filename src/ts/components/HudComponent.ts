@@ -4,7 +4,7 @@ import { CompassComponent } from "./hud/CompassComponent";
 import { DepthMeterFragment } from "./hud/DepthMeterFragment";
 import { LowerInfoHudFragment } from "./hud/LowerInfoHudFragment";
 import { VariometerFragment } from "./hud/VariometerFragment";
-import { SonarComponent } from "./hud/SonarComponent";
+// import { SonarComponent } from "./cockpit/SonarComponent";
 
 export class HudComponent implements RenderableComponent {
   readonly hudCanvas: HTMLCanvasElement;
@@ -17,7 +17,7 @@ export class HudComponent implements RenderableComponent {
   private plane: THREE.Mesh;
 
   private compass: CompassComponent;
-  private sonar: SonarComponent;
+  // private sonar: SonarComponent;
 
   // TODO: convert to color palette with objects
   readonly primaryColor: THREE.Color;
@@ -50,7 +50,7 @@ export class HudComponent implements RenderableComponent {
     // Create the camera and set the viewport to match the screen dimensions.
     this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
     // this.hudCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, -50, 10000);
-    this.hudCamera.position.z = 150;
+    this.hudCamera.position.z = 0; // 150;
     // Create also a custom scene for HUD.
     this.hudScene = new THREE.Scene();
 
@@ -63,6 +63,7 @@ export class HudComponent implements RenderableComponent {
       map: this.hudDynamicTexture,
       transparent: true
       // opacity: 1
+      // blending: THREE.AdditiveBlending
     });
 
     // Create plane to render the HUD. This plane fill the whole screen.
@@ -83,9 +84,6 @@ export class HudComponent implements RenderableComponent {
 
     // Create the Variometer
     this.variometer = new VariometerFragment(this);
-
-    // Create a sonar
-    this.sonar = new SonarComponent(this);
   }
 
   /**

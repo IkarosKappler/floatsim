@@ -29,7 +29,7 @@ var CompassComponent_1 = require("./hud/CompassComponent");
 var DepthMeterFragment_1 = require("./hud/DepthMeterFragment");
 var LowerInfoHudFragment_1 = require("./hud/LowerInfoHudFragment");
 var VariometerFragment_1 = require("./hud/VariometerFragment");
-var SonarComponent_1 = require("./hud/SonarComponent");
+// import { SonarComponent } from "./cockpit/SonarComponent";
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor, warningColor) {
         this.primaryColor = primaryColor;
@@ -52,7 +52,7 @@ var HudComponent = /** @class */ (function () {
         // Create the camera and set the viewport to match the screen dimensions.
         this.hudCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
         // this.hudCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, -50, 10000);
-        this.hudCamera.position.z = 150;
+        this.hudCamera.position.z = 0; // 150;
         // Create also a custom scene for HUD.
         this.hudScene = new THREE.Scene();
         // Create texture from rendered graphics.
@@ -63,6 +63,7 @@ var HudComponent = /** @class */ (function () {
             map: this.hudDynamicTexture,
             transparent: true
             // opacity: 1
+            // blending: THREE.AdditiveBlending
         });
         // Create plane to render the HUD. This plane fill the whole screen.
         var planeGeometry = new THREE.PlaneGeometry(100, 100); //width, height);
@@ -78,8 +79,6 @@ var HudComponent = /** @class */ (function () {
         this.lowerInfoHud = new LowerInfoHudFragment_1.LowerInfoHudFragment(this);
         // Create the Variometer
         this.variometer = new VariometerFragment_1.VariometerFragment(this);
-        // Create a sonar
-        this.sonar = new SonarComponent_1.SonarComponent(this);
     }
     /**
      * @implement RenderableComponent.beforeRender

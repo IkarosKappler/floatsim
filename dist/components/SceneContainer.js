@@ -33,7 +33,6 @@ var THREE = __importStar(require("three"));
 var FirstPersonControls_js_1 = require("three/examples/jsm/controls/FirstPersonControls.js");
 var Stats_1 = require("../Stats");
 var PerlinTerrain_1 = require("./environment/PerlinTerrain");
-var CockpitPlane_1 = require("./CockpitPlane");
 var HudComponent_1 = require("./HudComponent");
 var FogHandler_1 = require("./environment/FogHandler");
 var PhysicsHandler_1 = require("./PhysicsHandler");
@@ -42,6 +41,7 @@ var AudioPlayer_1 = require("../utils/AudioPlayer");
 var FloatingParticles_1 = require("./environment/FloatingParticles");
 var Concrete_1 = require("./environment/Concrete");
 var PerlinHeightMap_1 = require("../utils/math/PerlinHeightMap");
+var CockpitScene_1 = require("./cockpit/CockpitScene");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -133,8 +133,9 @@ var SceneContainer = /** @class */ (function () {
         // And look at the cube again
         this.camera.lookAt(this.cube.position);
         // Add cockpit
-        this.cockpit = new CockpitPlane_1.CockpitPlane();
-        this.camera.add(this.cockpit.mesh);
+        // this.cockpit = new CockpitPlane();
+        // this.camera.add(this.cockpit.mesh);
+        this.cockpitScene = new CockpitScene_1.CockpitScene(this.renderer.domElement.width, this.renderer.domElement.height);
         var hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
         var hudWarningColor = new THREE.Color(params.getString("hudWarningColor", "#c88800"));
         this.hud = new HudComponent_1.HudComponent(this.renderer.domElement.width, this.renderer.domElement.height, hudPrimaryColor, hudWarningColor);
@@ -189,10 +190,12 @@ var SceneContainer = /** @class */ (function () {
                     updateables[i].update(elapsedTime, deltaTime);
                 }
                 _this.renderer.render(_this.scene, _this.camera);
+                _this.cockpitScene.beforeRender(_this, hudData, _this.tweakParams);
+                _this.hud.beforeRender(_this, hudData, _this.tweakParams);
                 // Update HUD data
                 hudData.shipRotation.z = _this.getShipVerticalInclination();
                 hudData.depth = _this.camera.position.y;
-                _this.hud.beforeRender(_this, hudData, _this.tweakParams);
+                _this.cockpitScene.renderFragment(_this.renderer);
                 _this.hud.renderFragment(_this.renderer);
                 terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
                 if (_this.isGameRunning) {
@@ -326,7 +329,7 @@ var SceneContainer = /** @class */ (function () {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.cockpit.setCockpitSize(window.innerWidth, window.innerHeight);
+        this.cockpitScene.updateSize(window.innerWidth, window.innerHeight);
         // this.hud.setHudSize(this.renderer.domElement.width, this.renderer.domElement.height);
         this.hud.updateSize(this.renderer.domElement.width, this.renderer.domElement.height);
         if (this.controls.hasOwnProperty("handleResize")) {

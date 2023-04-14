@@ -9,7 +9,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
-import { CockpitPlane } from "./CockpitPlane";
+import { CockpitPlane } from "./cockpit/CockpitPlane";
 import { HudComponent } from "./HudComponent";
 import { HUDData, IHeightMap, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
@@ -21,6 +21,7 @@ import { FloatingParticles } from "./environment/FloatingParticles";
 import { Concrete } from "./environment/Concrete";
 import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 import { DEG2RAD } from "./constants";
+import { CockpitScene } from "./cockpit/CockpitScene";
 
 export class SceneContainer {
   readonly scene: THREE.Scene;
@@ -29,7 +30,8 @@ export class SceneContainer {
   readonly clock: THREE.Clock;
   readonly stats: Stats;
   readonly controls: OrbitControls | FirstPersonControls;
-  readonly cockpit: CockpitPlane;
+  // readonly cockpit: CockpitPlane;
+  readonly cockpitScene: CockpitScene;
   readonly hud: HudComponent;
   readonly fogHandler: FogHandler;
   readonly sceneData: SceneData;
@@ -145,8 +147,10 @@ export class SceneContainer {
     this.camera.lookAt(this.cube.position);
 
     // Add cockpit
-    this.cockpit = new CockpitPlane();
-    this.camera.add(this.cockpit.mesh);
+    // this.cockpit = new CockpitPlane();
+    // this.camera.add(this.cockpit.mesh);
+
+    this.cockpitScene = new CockpitScene(this.renderer.domElement.width, this.renderer.domElement.height);
 
     const hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
     const hudWarningColor = new THREE.Color(params.getString("hudWarningColor", "#c88800"));
@@ -221,11 +225,14 @@ export class SceneContainer {
 
         this.renderer.render(this.scene, this.camera);
 
+        this.cockpitScene.beforeRender(this, hudData, this.tweakParams);
+        this.hud.beforeRender(this, hudData, this.tweakParams);
+
         // Update HUD data
         hudData.shipRotation.z = this.getShipVerticalInclination();
-
         hudData.depth = this.camera.position.y;
-        this.hud.beforeRender(this, hudData, this.tweakParams);
+
+        this.cockpitScene.renderFragment(this.renderer);
         this.hud.renderFragment(this.renderer);
 
         terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
@@ -404,7 +411,7 @@ export class SceneContainer {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.cockpit.setCockpitSize(window.innerWidth, window.innerHeight);
+    this.cockpitScene.updateSize(window.innerWidth, window.innerHeight);
     // this.hud.setHudSize(this.renderer.domElement.width, this.renderer.domElement.height);
     this.hud.updateSize(this.renderer.domElement.width, this.renderer.domElement.height);
 

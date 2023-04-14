@@ -7,7 +7,7 @@ export class CompassComponent implements RenderableComponent {
   readonly hudComponent: HudComponent;
   private readonly compassMesh: THREE.Mesh;
 
-  private static readonly DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
+  private static readonly DEFAULT_OFFSET = { x: 30, y: 300, z: -200.0 }; //-75.0 };
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
@@ -33,7 +33,12 @@ export class CompassComponent implements RenderableComponent {
     this.compassMesh = new THREE.Mesh(compassGeometry, compassMaterial);
 
     // Radius=30 -> definitely in range of camera
-    this.compassMesh.position.add(new THREE.Vector3(30, 300, -160));
+    // this.compassMesh.position.add(new THREE.Vector3(30, 300, -160));
+    this.compassMesh.position.add(
+      new THREE.Vector3(CompassComponent.DEFAULT_OFFSET.x, CompassComponent.DEFAULT_OFFSET.y, CompassComponent.DEFAULT_OFFSET.z)
+    );
+
+    // this.hudComponent.hudScene.add(this.compassMesh);
     this.hudComponent.hudScene.add(this.compassMesh);
 
     const onTextureReady = (texture: THREE.Texture) => {
@@ -47,8 +52,8 @@ export class CompassComponent implements RenderableComponent {
    */
   beforeRender(_sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams) {
     // Apply tweak params
-    this.compassMesh.position.z = CompassComponent.DEFAULT_OFFSET.x + tweakParams.compassZ;
-    this.compassMesh.position.z = CompassComponent.DEFAULT_OFFSET.y + tweakParams.compassZ;
+    this.compassMesh.position.x = CompassComponent.DEFAULT_OFFSET.x + tweakParams.compassX;
+    this.compassMesh.position.y = CompassComponent.DEFAULT_OFFSET.y + tweakParams.compassY;
     this.compassMesh.position.z = CompassComponent.DEFAULT_OFFSET.z + tweakParams.compassZ;
     // Update compass rotation
     var m = new THREE.Matrix4();
