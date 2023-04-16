@@ -5,7 +5,7 @@
  * @date    2023-03-26
  */
 import * as THREE from "three";
-import { IBounds2Immutable, Rect, Size3Immutable, Tuple } from "../components/interfaces";
+import { IBounds2Immutable, Rect, Size3Immutable, Triple, Tuple } from "../components/interfaces";
 /**
  * Get the CSS colors string with adjustable alpha value.
  * @param {THREE.Color} color
@@ -43,6 +43,26 @@ export declare const bounds2size: (bounds: THREE.Box3) => Size3Immutable;
  * @param {function} onTextureReady
  */
 export declare const svg2texture: (svgPath: string, onTextureReady: (texture: THREE.Texture) => void) => void;
+/**
+ * This is a vector-like behavior and 'rotates' this vertex
+ * around given center (around the z axis – rotation on the screen plane).
+ *
+ * @param {number} angle - The angle to 'rotate' this vertex; 0.0 means no change.
+ * @param {XYCoords=} center - The center of rotation; default is (0,0).
+ * @return {Vertex} The passed vertex, for chaining.
+ * @memberof Vertex
+ **/
+export declare const rotateVertZ: (vertex: THREE.Vector3, angle: number, center?: Triple<number> | undefined) => THREE.Vector3;
+/**
+ * This is a vector-like behavior and 'rotates' this vertex
+ * around given center (around the z axis – rotation on the screen plane).
+ *
+ * @param {number} angle - The angle to 'rotate' this vertex; 0.0 means no change.
+ * @param {XYCoords=} center - The center of rotation; default is (0,0).
+ * @return {Vertex} The passed vertex, for chaining.
+ * @memberof Vertex
+ **/
+export declare const rotateVertY: (vertex: THREE.Vector3, angle: number, center?: Triple<number> | undefined) => THREE.Vector3;
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */

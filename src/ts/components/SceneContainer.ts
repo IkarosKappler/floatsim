@@ -11,7 +11,7 @@ import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { CockpitPlane } from "./cockpit/CockpitPlane";
 import { HudComponent } from "./HudComponent";
-import { HUDData, IHeightMap, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
+import { HUDData, IHeightMap, ISceneContainer, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
@@ -23,11 +23,9 @@ import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 import { DEG2RAD } from "./constants";
 import { CockpitScene } from "./cockpit/CockpitScene";
 
-export class SceneContainer {
+export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
-  readonly camera: THREE.PerspectiveCamera;
   readonly renderer: THREE.WebGLRenderer;
-  readonly clock: THREE.Clock;
   readonly stats: Stats;
   readonly controls: OrbitControls | FirstPersonControls;
   // readonly cockpit: CockpitPlane;
@@ -37,6 +35,11 @@ export class SceneContainer {
   readonly sceneData: SceneData;
   readonly tweakParams: TweakParams;
 
+  // Implement ISceneContainer
+  readonly camera: THREE.PerspectiveCamera;
+  readonly clock: THREE.Clock;
+  readonly collidableMeshes: Array<THREE.Object3D>;
+
   private isGameRunning: boolean = false;
 
   // Example cube
@@ -45,6 +48,7 @@ export class SceneContainer {
   constructor(params: Params) {
     this.clock = new THREE.Clock();
     this.scene = new THREE.Scene();
+    this.collidableMeshes = [];
 
     this.sceneData = {
       initialDepth: params.getNumber("initialDepth", -898.0), // -898.0,
@@ -329,6 +333,9 @@ export class SceneContainer {
     dTex.needsUpdate = true;
     //---END--- MAKE TERRAIN
 
+    // Add to collidables
+    this.collidableMeshes.push(terrain.mesh);
+
     return terrain;
   }
 
@@ -343,6 +350,7 @@ export class SceneContainer {
     console.log("targetPosition", targetPosition);
     const callback = (loadedObject: THREE.Object3D) => {
       this.addVisibleBoundingBox(loadedObject);
+      this.collidableMeshes.push(loadedObject);
     };
     new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }

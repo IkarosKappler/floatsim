@@ -16,7 +16,9 @@ export declare class SonarComponent {
     private readonly particles;
     private readonly pointsGeometry;
     private static readonly DEFAULT_OFFSET;
+    private dimension;
     constructor(cockpitScene: CockpitScene);
+    private updatePositions;
     /**
      * @implement RenderableComponent.befoRerender
      */

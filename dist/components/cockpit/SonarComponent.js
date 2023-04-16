@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SonarComponent = void 0;
 var THREE = __importStar(require("three"));
 var Helpers_1 = require("../../utils/Helpers");
+var constants_1 = require("../constants");
 /**
  * A sonar component for the cockpit.
  * This is not a HUD component.
@@ -36,12 +37,13 @@ var Helpers_1 = require("../../utils/Helpers");
  */
 var SonarComponent = /** @class */ (function () {
     function SonarComponent(cockpitScene) {
-        // this.hudComponent = hudComponent;
         this.cockpitScene = cockpitScene;
+        this.dimension = { vertical: 8, horizontal: 16 };
         this.particles = [];
-        var verticalDimension = 16; // north pole to south pole
-        var horizontalDimension = 16; // along equator
-        var particleCount = verticalDimension * horizontalDimension;
+        // const verticalDimension = 16; // north pole to south pole
+        // const horizontalDimension = 16; // along equator
+        // const particleCount = verticalDimension * horizontalDimension;
+        var particleCount = this.dimension.vertical * this.dimension.horizontal;
         var positions = [];
         var colors = [];
         var sizes = [];
@@ -64,7 +66,8 @@ var SonarComponent = /** @class */ (function () {
             sizes.push(size);
             angles.push(angle);
             this.particles.push({
-                position: new THREE.Vector3(x, y, z)
+                position: new THREE.Vector3(x, y, z),
+                hasNoMeasure: false
             });
         }
         this.pointsGeometry = new THREE.BufferGeometry();
@@ -87,13 +90,15 @@ var SonarComponent = /** @class */ (function () {
             blendDstAlpha: 1500
         });
         // const sonarGeometry = new THREE.BufferGeometry();
-        var sonarMaterial = new THREE.MeshStandardMaterial({
+        var sonarMaterial = new THREE.PointsMaterial({
             color: 0xffffff,
             //   map: compassTexture,
             transparent: true,
             side: THREE.DoubleSide,
-            // emissive: hudComponent.primaryColor,
-            flatShading: true
+            // emissive: 0xffffff,
+            // pointSize: 2.0,
+            // flatShading: true
+            size: 2.0
         });
         this.sonarGroup = new THREE.Group();
         var sonarPointMesh = new THREE.Points(this.pointsGeometry, sonarMaterial);
@@ -109,7 +114,47 @@ var SonarComponent = /** @class */ (function () {
         //   sonarMaterial.map = texture;
         // };
         // svg2texture(`resources/img/compass-texture-d.svg?time=${new Date().getTime()}`, onTextureReady);
+        this.updatePositions();
     }
+    SonarComponent.prototype.updatePositions = function () {
+        var boxCenter = this.containingBox.getCenter(new THREE.Vector3());
+        var boxSize = (0, Helpers_1.bounds2size)(this.containingBox);
+        // TODO: check type
+        var bufferAttribute = this.pointsGeometry.attributes.position;
+        var bufferArray = bufferAttribute.array; // Check type
+        var directionVector = new THREE.Vector3();
+        // Polar south at -PI/2, polar north at +PI/2
+        for (var v = 0; v < this.dimension.vertical; v++) {
+            var polar = -Math.PI / 2.0 + Math.PI * (v / this.dimension.vertical);
+            for (var h = 0; h < this.dimension.horizontal; h++) {
+                var phi = (constants_1.TAU / this.dimension.horizontal) * h;
+                // const index = v * this.dimension.vertical + h; // this.dimension.horizontal;
+                var index = v * this.dimension.horizontal + h; // this.dimension.horizontal;
+                var particle = this.particles[index];
+                particle.position.set(boxCenter.x + boxSize.width / 2.0, boxCenter.y, boxCenter.z);
+                (0, Helpers_1.rotateVertZ)(particle.position, polar, boxCenter);
+                (0, Helpers_1.rotateVertY)(particle.position, phi, boxCenter);
+                directionVector.set(particle.position.x, particle.position.y, particle.position.z);
+                // Cast ray
+                // if (v === 0 && h === this.dimension.horizontal / 2) {
+                //   // var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+                //   var rayCaster = new THREE.Raycaster(
+                //     boxCenter, // originPoint
+                //     directionVector.normalize()
+                //   );
+                //   var collisionResults = rayCaster.intersectObjects(this.cockpitScene.sceneContainer.collidableMeshes);
+                //   if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+                //     console.log(" Hit ", collisionResults[0]);
+                //   }
+                // }
+                // bufferArray.setXYZ( )
+                bufferArray[index * 3] = particle.position.x;
+                bufferArray[index * 3 + 1] = particle.position.y;
+                bufferArray[index * 3 + 2] = particle.position.z;
+            }
+        }
+        bufferAttribute.needsUpdate = true;
+    };
     /**
      * @implement RenderableComponent.befoRerender
      */
@@ -123,6 +168,8 @@ var SonarComponent = /** @class */ (function () {
         m.copy(_sceneContainer.camera.matrixWorld);
         m.invert();
         this.sonarGroup.setRotationFromMatrix(m);
+        // Update positions
+        this.updatePositions();
     };
     /**
      * @implement RenderableComponent.renderFragment

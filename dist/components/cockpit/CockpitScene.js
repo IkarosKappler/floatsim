@@ -38,6 +38,7 @@ var CockpitPlane_1 = require("./CockpitPlane");
 var SonarComponent_1 = require("./SonarComponent");
 var CockpitScene = /** @class */ (function () {
     function CockpitScene(sceneContainer, width, height) {
+        this.sceneContainer = sceneContainer;
         // Create the camera and set the viewport to match the screen dimensions.
         this.cockpitCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
         // this.cockpitCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0, 10000);

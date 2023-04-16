@@ -29,7 +29,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bounds2Immutable = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
+exports.Bounds2Immutable = exports.rotateVertY = exports.rotateVertZ = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
 var THREE = __importStar(require("three"));
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -105,6 +105,60 @@ var svg2texture = function (svgPath, onTextureReady) {
     svgImage.src = svgPath;
 };
 exports.svg2texture = svg2texture;
+/**
+ * This is a vector-like behavior and 'rotates' this vertex
+ * around given center (around the z axis – rotation on the screen plane).
+ *
+ * @param {number} angle - The angle to 'rotate' this vertex; 0.0 means no change.
+ * @param {XYCoords=} center - The center of rotation; default is (0,0).
+ * @return {Vertex} The passed vertex, for chaining.
+ * @memberof Vertex
+ **/
+var rotateVertZ = function (vertex, angle, center) {
+    if (!center || typeof center === "undefined") {
+        center = { x: 0, y: 0, z: 0 };
+    }
+    // vertex.sub(center);
+    vertex.x -= center.x;
+    vertex.y -= center.y;
+    angle += Math.atan2(vertex.y, vertex.x);
+    // let len = this.distance(Vertex.ZERO); // {x:0,y:0});
+    var len = Math.sqrt(vertex.x * vertex.x + vertex.y * vertex.y); // vertex.length();
+    vertex.x = len * Math.cos(angle);
+    vertex.y = len * Math.sin(angle);
+    // vertex.add(center);
+    vertex.x += center.x;
+    vertex.y += center.y;
+    return vertex;
+};
+exports.rotateVertZ = rotateVertZ;
+/**
+ * This is a vector-like behavior and 'rotates' this vertex
+ * around given center (around the z axis – rotation on the screen plane).
+ *
+ * @param {number} angle - The angle to 'rotate' this vertex; 0.0 means no change.
+ * @param {XYCoords=} center - The center of rotation; default is (0,0).
+ * @return {Vertex} The passed vertex, for chaining.
+ * @memberof Vertex
+ **/
+var rotateVertY = function (vertex, angle, center) {
+    if (!center || typeof center === "undefined") {
+        center = { x: 0, y: 0, z: 0 };
+    }
+    // vertex.sub(center);
+    vertex.x -= center.x;
+    vertex.z -= center.z;
+    angle += Math.atan2(vertex.z, vertex.x);
+    // let len = this.distance(Vertex.ZERO); // {x:0,y:0});
+    var len = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z); // vertex.length();
+    vertex.x = len * Math.cos(angle);
+    vertex.z = len * Math.sin(angle);
+    // vertex.add(center);
+    vertex.x += center.x;
+    vertex.z += center.z;
+    return vertex;
+};
+exports.rotateVertY = rotateVertY;
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */

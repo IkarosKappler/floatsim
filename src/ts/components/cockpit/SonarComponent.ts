@@ -1,9 +1,10 @@
 import * as THREE from "three";
-import { HUDData, ISceneContainer, RenderableComponent, Size3Immutable, TweakParams } from "../interfaces";
+import { HUDData, ISceneContainer, RenderableComponent, Size3Immutable, Tuple, TweakParams } from "../interfaces";
 import { HudComponent } from "../HudComponent";
-import { bounds2size, svg2texture } from "../../utils/Helpers";
+import { bounds2size, rotateVertY, rotateVertZ, svg2texture } from "../../utils/Helpers";
 import { SceneContainer } from "../SceneContainer";
 import { CockpitScene } from "./CockpitScene";
+import { TAU } from "../constants";
 
 /**
  * A sonar component for the cockpit.
@@ -15,25 +16,28 @@ import { CockpitScene } from "./CockpitScene";
  */
 
 export class SonarComponent {
-  // readonly hudComponent: HudComponent;
   private readonly cockpitScene: CockpitScene;
   private readonly sonarGroup: THREE.Group;
-  //   private readonly sonarPointMeshh: THREE.Group;
   private readonly containingBox: THREE.Box3;
-  private readonly particles: Array<{ position: THREE.Vector3 }>;
+  private readonly particles: Array<{ position: THREE.Vector3; hasNoMeasure: boolean }>;
   private readonly pointsGeometry: THREE.BufferGeometry;
 
   private static readonly DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
 
+  // private readonly positionsBuffer: Array<number>; // TODO; check ths type, use Float32Array?
+
+  private dimension: { vertical: number; horizontal: number };
+
   constructor(cockpitScene: CockpitScene) {
-    // this.hudComponent = hudComponent;
     this.cockpitScene = cockpitScene;
+    this.dimension = { vertical: 8, horizontal: 16 };
 
     this.particles = [];
 
-    const verticalDimension = 16; // north pole to south pole
-    const horizontalDimension = 16; // along equator
-    const particleCount = verticalDimension * horizontalDimension;
+    // const verticalDimension = 16; // north pole to south pole
+    // const horizontalDimension = 16; // along equator
+    // const particleCount = verticalDimension * horizontalDimension;
+    const particleCount = this.dimension.vertical * this.dimension.horizontal;
 
     const positions: Array<number> = [];
     const colors: Array<number> = [];
@@ -70,7 +74,8 @@ export class SonarComponent {
       angles.push(angle);
 
       this.particles.push({
-        position: new THREE.Vector3(x, y, z)
+        position: new THREE.Vector3(x, y, z),
+        hasNoMeasure: false
       });
     }
 
@@ -98,13 +103,15 @@ export class SonarComponent {
     });
 
     // const sonarGeometry = new THREE.BufferGeometry();
-    const sonarMaterial = new THREE.MeshStandardMaterial({
+    const sonarMaterial = new THREE.PointsMaterial({
       color: 0xffffff,
       //   map: compassTexture,
       transparent: true,
       side: THREE.DoubleSide,
-      // emissive: hudComponent.primaryColor,
-      flatShading: true
+      // emissive: 0xffffff,
+      // pointSize: 2.0,
+      // flatShading: true
+      size: 2.0
     });
     this.sonarGroup = new THREE.Group();
     const sonarPointMesh = new THREE.Points(this.pointsGeometry, sonarMaterial);
@@ -123,6 +130,53 @@ export class SonarComponent {
     //   sonarMaterial.map = texture;
     // };
     // svg2texture(`resources/img/compass-texture-d.svg?time=${new Date().getTime()}`, onTextureReady);
+
+    this.updatePositions();
+  }
+
+  private updatePositions() {
+    const boxCenter = this.containingBox.getCenter(new THREE.Vector3());
+    const boxSize = bounds2size(this.containingBox);
+    // TODO: check type
+    const bufferAttribute = this.pointsGeometry.attributes.position as THREE.BufferAttribute;
+    const bufferArray = bufferAttribute.array as any; // Check type
+
+    const directionVector = new THREE.Vector3();
+    // Polar south at -PI/2, polar north at +PI/2
+    for (var v = 0; v < this.dimension.vertical; v++) {
+      const polar = -Math.PI / 2.0 + Math.PI * (v / this.dimension.vertical);
+      for (var h = 0; h < this.dimension.horizontal; h++) {
+        const phi = (TAU / this.dimension.horizontal) * h;
+        // const index = v * this.dimension.vertical + h; // this.dimension.horizontal;
+        const index = v * this.dimension.horizontal + h; // this.dimension.horizontal;
+
+        const particle = this.particles[index];
+        particle.position.set(boxCenter.x + boxSize.width / 2.0, boxCenter.y, boxCenter.z);
+        rotateVertZ(particle.position, polar, boxCenter);
+        rotateVertY(particle.position, phi, boxCenter);
+
+        directionVector.set(particle.position.x, particle.position.y, particle.position.z);
+
+        // Cast ray
+        // if (v === 0 && h === this.dimension.horizontal / 2) {
+        //   // var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+        //   var rayCaster = new THREE.Raycaster(
+        //     boxCenter, // originPoint
+        //     directionVector.normalize()
+        //   );
+        //   var collisionResults = rayCaster.intersectObjects(this.cockpitScene.sceneContainer.collidableMeshes);
+        //   if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
+        //     console.log(" Hit ", collisionResults[0]);
+        //   }
+        // }
+
+        // bufferArray.setXYZ( )
+        bufferArray[index * 3] = particle.position.x;
+        bufferArray[index * 3 + 1] = particle.position.y;
+        bufferArray[index * 3 + 2] = particle.position.z;
+      }
+    }
+    bufferAttribute.needsUpdate = true;
   }
 
   /**
@@ -138,6 +192,9 @@ export class SonarComponent {
     m.copy(_sceneContainer.camera.matrixWorld);
     m.invert();
     this.sonarGroup.setRotationFromMatrix(m);
+
+    // Update positions
+    this.updatePositions();
   }
 
   /**

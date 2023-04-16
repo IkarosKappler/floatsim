@@ -91,6 +91,7 @@ export interface TextureData {
 export interface ISceneContainer {
     readonly camera: THREE.PerspectiveCamera;
     readonly clock: THREE.Clock;
+    readonly collidableMeshes: Array<THREE.Object3D>;
 }
 export interface UpdateableComponent {
     update(elapsedTime: number, deltaTime: number): any;

@@ -48,6 +48,7 @@ var SceneContainer = /** @class */ (function () {
         this.isGameRunning = false;
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
+        this.collidableMeshes = [];
         this.sceneData = {
             initialDepth: params.getNumber("initialDepth", -898.0),
             deepFogDepth: {
@@ -266,6 +267,8 @@ var SceneContainer = /** @class */ (function () {
         //   var dTex = baseTexture.imageDataArray; //new THREE.DataTexture(baseTexture.imageDataArray, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
         dTex.needsUpdate = true;
         //---END--- MAKE TERRAIN
+        // Add to collidables
+        this.collidableMeshes.push(terrain.mesh);
         return terrain;
     };
     SceneContainer.prototype.loadConcrete = function (terrain) {
@@ -280,6 +283,7 @@ var SceneContainer = /** @class */ (function () {
         console.log("targetPosition", targetPosition);
         var callback = function (loadedObject) {
             _this.addVisibleBoundingBox(loadedObject);
+            _this.collidableMeshes.push(loadedObject);
         };
         new Concrete_1.Concrete(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };

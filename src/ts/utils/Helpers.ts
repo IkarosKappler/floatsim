@@ -6,7 +6,7 @@
  */
 
 import * as THREE from "three";
-import { IBounds2Immutable, Rect, Size3Immutable, Tuple } from "../components/interfaces";
+import { IBounds2Immutable, Rect, Size3Immutable, Triple, Tuple } from "../components/interfaces";
 
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -81,6 +81,62 @@ export const svg2texture = (svgPath: string, onTextureReady: (texture: THREE.Tex
     onTextureReady(texture);
   };
   svgImage.src = svgPath;
+};
+
+/**
+ * This is a vector-like behavior and 'rotates' this vertex
+ * around given center (around the z axis – rotation on the screen plane).
+ *
+ * @param {number} angle - The angle to 'rotate' this vertex; 0.0 means no change.
+ * @param {XYCoords=} center - The center of rotation; default is (0,0).
+ * @return {Vertex} The passed vertex, for chaining.
+ * @memberof Vertex
+ **/
+export const rotateVertZ = (vertex: THREE.Vector3, angle: number, center?: Triple<number> | undefined): THREE.Vector3 => {
+  if (!center || typeof center === "undefined") {
+    center = { x: 0, y: 0, z: 0 };
+  }
+  // vertex.sub(center);
+  vertex.x -= center.x;
+  vertex.y -= center.y;
+  angle += Math.atan2(vertex.y, vertex.x);
+  // let len = this.distance(Vertex.ZERO); // {x:0,y:0});
+  const len = Math.sqrt(vertex.x * vertex.x + vertex.y * vertex.y); // vertex.length();
+  vertex.x = len * Math.cos(angle);
+  vertex.y = len * Math.sin(angle);
+  // vertex.add(center);
+  vertex.x += center.x;
+  vertex.y += center.y;
+
+  return vertex;
+};
+
+/**
+ * This is a vector-like behavior and 'rotates' this vertex
+ * around given center (around the z axis – rotation on the screen plane).
+ *
+ * @param {number} angle - The angle to 'rotate' this vertex; 0.0 means no change.
+ * @param {XYCoords=} center - The center of rotation; default is (0,0).
+ * @return {Vertex} The passed vertex, for chaining.
+ * @memberof Vertex
+ **/
+export const rotateVertY = (vertex: THREE.Vector3, angle: number, center?: Triple<number> | undefined): THREE.Vector3 => {
+  if (!center || typeof center === "undefined") {
+    center = { x: 0, y: 0, z: 0 };
+  }
+  // vertex.sub(center);
+  vertex.x -= center.x;
+  vertex.z -= center.z;
+  angle += Math.atan2(vertex.z, vertex.x);
+  // let len = this.distance(Vertex.ZERO); // {x:0,y:0});
+  const len = Math.sqrt(vertex.x * vertex.x + vertex.z * vertex.z); // vertex.length();
+  vertex.x = len * Math.cos(angle);
+  vertex.z = len * Math.sin(angle);
+  // vertex.add(center);
+  vertex.x += center.x;
+  vertex.z += center.z;
+
+  return vertex;
 };
 
 /**

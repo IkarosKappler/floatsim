@@ -9,15 +9,13 @@ import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonCont
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { HudComponent } from "./HudComponent";
-import { SceneData, TweakParams } from "./interfaces";
+import { ISceneContainer, SceneData, TweakParams } from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
 import { Params } from "../utils/Params";
 import { CockpitScene } from "./cockpit/CockpitScene";
-export declare class SceneContainer {
+export declare class SceneContainer implements ISceneContainer {
     readonly scene: THREE.Scene;
-    readonly camera: THREE.PerspectiveCamera;
     readonly renderer: THREE.WebGLRenderer;
-    readonly clock: THREE.Clock;
     readonly stats: Stats;
     readonly controls: OrbitControls | FirstPersonControls;
     readonly cockpitScene: CockpitScene;
@@ -25,6 +23,9 @@ export declare class SceneContainer {
     readonly fogHandler: FogHandler;
     readonly sceneData: SceneData;
     readonly tweakParams: TweakParams;
+    readonly camera: THREE.PerspectiveCamera;
+    readonly clock: THREE.Clock;
+    readonly collidableMeshes: Array<THREE.Object3D>;
     private isGameRunning;
     cube: THREE.Mesh;
     constructor(params: Params);

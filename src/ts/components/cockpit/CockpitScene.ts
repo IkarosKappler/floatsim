@@ -12,8 +12,10 @@ import * as THREE from "three";
 import { CockpitPlane } from "./CockpitPlane";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 import { SonarComponent } from "./SonarComponent";
+import { SceneContainer } from "../SceneContainer";
 
 export class CockpitScene implements RenderableComponent {
+  readonly sceneContainer: ISceneContainer;
   // readonly mesh: THREE.Mesh;
   readonly cockpitScene: THREE.Scene;
 
@@ -23,6 +25,7 @@ export class CockpitScene implements RenderableComponent {
   private readonly sonarComponent: SonarComponent;
 
   constructor(sceneContainer: ISceneContainer, width: number, height: number) {
+    this.sceneContainer = sceneContainer;
     // Create the camera and set the viewport to match the screen dimensions.
     this.cockpitCamera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 0, 1500);
     // this.cockpitCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0, 10000);

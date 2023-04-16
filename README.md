@@ -24,12 +24,14 @@ screenshot-20230411-0.png
 ## Coordinates
 
 ```
-Y
-|      Z
-|    /`
-|  /`
-|/`
------------X
+(height)
+ Y
+ |      Z (depth)
+ |    /`
+ |  /`
+ |/`
+ +----------X
+        (width)
 ```
 
 ## Build THREE examples
