@@ -9,7 +9,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
-import { CockpitPlane } from "./cockpit/CockpitPlane";
 import { HudComponent } from "./HudComponent";
 import { HUDData, IHeightMap, ISceneContainer, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
@@ -20,7 +19,6 @@ import { AudioPlayer } from "../utils/AudioPlayer";
 import { FloatingParticles } from "./environment/FloatingParticles";
 import { Concrete } from "./environment/Concrete";
 import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
-import { DEG2RAD } from "./constants";
 import { CockpitScene } from "./cockpit/CockpitScene";
 
 export class SceneContainer implements ISceneContainer {
@@ -28,7 +26,6 @@ export class SceneContainer implements ISceneContainer {
   readonly renderer: THREE.WebGLRenderer;
   readonly stats: Stats;
   readonly controls: OrbitControls | FirstPersonControls;
-  // readonly cockpit: CockpitPlane;
   readonly cockpitScene: CockpitScene;
   readonly hud: HudComponent;
   readonly fogHandler: FogHandler;
@@ -39,6 +36,7 @@ export class SceneContainer implements ISceneContainer {
   readonly camera: THREE.PerspectiveCamera;
   readonly clock: THREE.Clock;
   readonly collidableMeshes: Array<THREE.Object3D>;
+  readonly terrainSegments: Array<PerlinTerrain>;
 
   private isGameRunning: boolean = false;
 
@@ -49,6 +47,7 @@ export class SceneContainer implements ISceneContainer {
     this.clock = new THREE.Clock();
     this.scene = new THREE.Scene();
     this.collidableMeshes = [];
+    this.terrainSegments = [];
 
     this.sceneData = {
       initialDepth: params.getNumber("initialDepth", -898.0), // -898.0,
@@ -206,6 +205,7 @@ export class SceneContainer implements ISceneContainer {
     };
 
     const terrain = this.makeTerrain();
+    this.terrainSegments.push(terrain);
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles

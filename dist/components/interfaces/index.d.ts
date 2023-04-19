@@ -1,6 +1,7 @@
 /**
  * Global interfaces.
  */
+import { PerlinTerrain } from "../environment/PerlinTerrain";
 export interface HUDData {
     depth: number;
     shipRotation: Triple<number>;
@@ -92,6 +93,7 @@ export interface ISceneContainer {
     readonly camera: THREE.PerspectiveCamera;
     readonly clock: THREE.Clock;
     readonly collidableMeshes: Array<THREE.Object3D>;
+    readonly terrainSegments: Array<PerlinTerrain>;
 }
 export interface UpdateableComponent {
     update(elapsedTime: number, deltaTime: number): any;

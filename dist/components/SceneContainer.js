@@ -49,6 +49,7 @@ var SceneContainer = /** @class */ (function () {
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         this.collidableMeshes = [];
+        this.terrainSegments = [];
         this.sceneData = {
             initialDepth: params.getNumber("initialDepth", -898.0),
             deepFogDepth: {
@@ -173,6 +174,7 @@ var SceneContainer = /** @class */ (function () {
             shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
         };
         var terrain = this.makeTerrain();
+        this.terrainSegments.push(terrain);
         var updateables = [];
         // Initialize particles
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", terrain.bounds, 0.00001));

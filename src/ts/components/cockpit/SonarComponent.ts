@@ -19,19 +19,19 @@ export class SonarComponent {
   private readonly cockpitScene: CockpitScene;
   private readonly sonarGroup: THREE.Group;
   private readonly containingBox: THREE.Box3;
+  private readonly containingBoxSize: Size3Immutable;
   private readonly particles: Array<{ position: THREE.Vector3; hasNoMeasure: boolean }>;
   private readonly pointsGeometry: THREE.BufferGeometry;
 
   private static readonly DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
 
-  // private readonly positionsBuffer: Array<number>; // TODO; check ths type, use Float32Array?
-
   private dimension: { vertical: number; horizontal: number };
 
   constructor(cockpitScene: CockpitScene) {
     this.cockpitScene = cockpitScene;
-    this.dimension = { vertical: 8, horizontal: 16 };
+    this.dimension = { vertical: 16, horizontal: 16 };
 
+    const boxSize = 64.0;
     this.particles = [];
 
     // const verticalDimension = 16; // north pole to south pole
@@ -44,19 +44,18 @@ export class SonarComponent {
     const sizes: Array<number> = [];
     const angles: Array<number> = [];
 
-    const boxSize = 64.0;
     this.containingBox = new THREE.Box3(
       new THREE.Vector3(-boxSize / 2.0, -boxSize / 2.0, -boxSize / 2.0),
       new THREE.Vector3(boxSize / 2.0, boxSize / 2.0, boxSize / 2.0)
     );
-    const boundingBoxSize: Size3Immutable = bounds2size(this.containingBox);
+    this.containingBoxSize = bounds2size(this.containingBox);
 
     for (let i = 0; i < particleCount; i++) {
       // Initialize with random points.
       // Will be measured points later
-      const x = this.containingBox.min.x + Math.random() * boundingBoxSize.width;
-      const y = this.containingBox.min.y + Math.random() * boundingBoxSize.height;
-      const z = this.containingBox.min.z + Math.random() * boundingBoxSize.depth;
+      const x = this.containingBox.min.x + Math.random() * this.containingBoxSize.width;
+      const y = this.containingBox.min.y + Math.random() * this.containingBoxSize.height;
+      const z = this.containingBox.min.z + Math.random() * this.containingBoxSize.depth;
 
       const color = new THREE.Color(
         128 + Math.floor(Math.random() * 127),
@@ -90,56 +89,54 @@ export class SonarComponent {
     this.pointsGeometry.attributes.aColor.needsUpdate = true;
     this.pointsGeometry.attributes.aRotation.needsUpdate = true;
 
-    // const particleTexture = new THREE.TextureLoader().load(texturePath);
-
-    const material = new THREE.PointsMaterial({
-      color: new THREE.Color("rgba(255,255,255,0.75)"), // 0x888888,
-      //   map: particleTexture,
-      transparent: false,
-      // size: 5,
-      // blending: THREE.AdditiveBlending,
-      depthTest: false, // !!! Setting this to true produces flickering!
-      blendDstAlpha: 1500
-    });
-
-    // const sonarGeometry = new THREE.BufferGeometry();
-    const sonarMaterial = new THREE.PointsMaterial({
-      color: 0xffffff,
-      //   map: compassTexture,
-      transparent: true,
-      side: THREE.DoubleSide,
-      // emissive: 0xffffff,
-      // pointSize: 2.0,
-      // flatShading: true
-      size: 2.0
-    });
     this.sonarGroup = new THREE.Group();
-    const sonarPointMesh = new THREE.Points(this.pointsGeometry, sonarMaterial);
-    this.sonarGroup.add(sonarPointMesh);
-
-    // Radius=30 -> definitely in range of camera
-    // this.sonarGroup.position.add(new THREE.Vector3(30, 300, -160));
-    this.cockpitScene.cockpitScene.add(this.sonarGroup);
-
-    const visualBoxGeometry = new THREE.BoxGeometry(boundingBoxSize.width, boundingBoxSize.height, boundingBoxSize.depth);
-    const visualBox = new THREE.Mesh(visualBoxGeometry);
-    const boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
-    this.cockpitScene.cockpitScene.add(boxHelper);
-
-    // const onTextureReady = (texture: THREE.Texture) => {
-    //   sonarMaterial.map = texture;
-    // };
-    // svg2texture(`resources/img/compass-texture-d.svg?time=${new Date().getTime()}`, onTextureReady);
-
+    this.initSonarGroup();
+    this.initVisualBox();
     this.updatePositions();
   }
 
+  private initSonarGroup() {
+    const sonarMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      transparent: true,
+      side: THREE.DoubleSide,
+      size: 2.0
+    });
+    const sonarPointMesh = new THREE.Points(this.pointsGeometry, sonarMaterial);
+    this.sonarGroup.add(sonarPointMesh);
+    this.cockpitScene.cockpitScene.add(this.sonarGroup);
+  }
+
+  private initVisualBox() {
+    const visualBoxGeometry = new THREE.BoxGeometry(
+      this.containingBoxSize.width,
+      this.containingBoxSize.height,
+      this.containingBoxSize.depth
+    );
+    const visualBox = new THREE.Mesh(visualBoxGeometry);
+    const boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
+    this.cockpitScene.cockpitScene.add(boxHelper);
+  }
+
   private updatePositions() {
+    this.updatePositionsToSphere();
+    const scanMap = true;
+    if (scanMap) {
+      this.scanMap();
+    }
+  }
+
+  private scanMap() {
     const boxCenter = this.containingBox.getCenter(new THREE.Vector3());
     const boxSize = bounds2size(this.containingBox);
     // TODO: check type
     const bufferAttribute = this.pointsGeometry.attributes.position as THREE.BufferAttribute;
     const bufferArray = bufferAttribute.array as any; // Check type
+
+    const curTerrain = this.cockpitScene.sceneContainer.terrainSegments[0];
+    if (!curTerrain) {
+      return;
+    }
 
     const directionVector = new THREE.Vector3();
     // Polar south at -PI/2, polar north at +PI/2
@@ -164,11 +161,47 @@ export class SonarComponent {
         //     boxCenter, // originPoint
         //     directionVector.normalize()
         //   );
-        //   var collisionResults = rayCaster.intersectObjects(this.cockpitScene.sceneContainer.collidableMeshes);
+        //   // var collisionResults = rayCaster.intersectObjects(this.cockpitScene.sceneContainer.collidableMeshes);
+        //   // const curTerrain = this.cockpitScene.sceneContainer.terrainSegments[0];
+
+        //   const collisionResults = [];
+        //   curTerrain.mesh.raycast(rayCaster, collisionResults);
         //   if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
         //     console.log(" Hit ", collisionResults[0]);
         //   }
         // }
+
+        // bufferArray.setXYZ( )
+        bufferArray[index * 3] = particle.position.x;
+        bufferArray[index * 3 + 1] = particle.position.y;
+        bufferArray[index * 3 + 2] = particle.position.z;
+      }
+    }
+    bufferAttribute.needsUpdate = true;
+  }
+
+  private updatePositionsToSphere() {
+    const boxCenter = this.containingBox.getCenter(new THREE.Vector3());
+    const boxSize = bounds2size(this.containingBox);
+    // TODO: check type
+    const bufferAttribute = this.pointsGeometry.attributes.position as THREE.BufferAttribute;
+    const bufferArray = bufferAttribute.array as any; // Check type
+
+    const directionVector = new THREE.Vector3();
+    // Polar south at -PI/2, polar north at +PI/2
+    for (var v = 0; v < this.dimension.vertical; v++) {
+      const polar = -Math.PI / 2.0 + Math.PI * (v / this.dimension.vertical);
+      for (var h = 0; h < this.dimension.horizontal; h++) {
+        const phi = (TAU / this.dimension.horizontal) * h;
+        // const index = v * this.dimension.vertical + h; // this.dimension.horizontal;
+        const index = v * this.dimension.horizontal + h; // this.dimension.horizontal;
+
+        const particle = this.particles[index];
+        particle.position.set(boxCenter.x + boxSize.width / 2.0, boxCenter.y, boxCenter.z);
+        rotateVertZ(particle.position, polar, boxCenter);
+        rotateVertY(particle.position, phi, boxCenter);
+
+        directionVector.set(particle.position.x, particle.position.y, particle.position.z);
 
         // bufferArray.setXYZ( )
         bufferArray[index * 3] = particle.position.x;

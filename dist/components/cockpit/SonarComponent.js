@@ -38,7 +38,8 @@ var constants_1 = require("../constants");
 var SonarComponent = /** @class */ (function () {
     function SonarComponent(cockpitScene) {
         this.cockpitScene = cockpitScene;
-        this.dimension = { vertical: 8, horizontal: 16 };
+        this.dimension = { vertical: 16, horizontal: 16 };
+        var boxSize = 64.0;
         this.particles = [];
         // const verticalDimension = 16; // north pole to south pole
         // const horizontalDimension = 16; // along equator
@@ -48,15 +49,14 @@ var SonarComponent = /** @class */ (function () {
         var colors = [];
         var sizes = [];
         var angles = [];
-        var boxSize = 64.0;
         this.containingBox = new THREE.Box3(new THREE.Vector3(-boxSize / 2.0, -boxSize / 2.0, -boxSize / 2.0), new THREE.Vector3(boxSize / 2.0, boxSize / 2.0, boxSize / 2.0));
-        var boundingBoxSize = (0, Helpers_1.bounds2size)(this.containingBox);
+        this.containingBoxSize = (0, Helpers_1.bounds2size)(this.containingBox);
         for (var i = 0; i < particleCount; i++) {
             // Initialize with random points.
             // Will be measured points later
-            var x = this.containingBox.min.x + Math.random() * boundingBoxSize.width;
-            var y = this.containingBox.min.y + Math.random() * boundingBoxSize.height;
-            var z = this.containingBox.min.z + Math.random() * boundingBoxSize.depth;
+            var x = this.containingBox.min.x + Math.random() * this.containingBoxSize.width;
+            var y = this.containingBox.min.y + Math.random() * this.containingBoxSize.height;
+            var z = this.containingBox.min.z + Math.random() * this.containingBoxSize.depth;
             var color = new THREE.Color(128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127));
             var alpha = 0.5 + Math.random() * 0.5;
             var size = Math.random() * 5.0;
@@ -79,49 +79,45 @@ var SonarComponent = /** @class */ (function () {
         this.pointsGeometry.attributes.aSize.needsUpdate = true;
         this.pointsGeometry.attributes.aColor.needsUpdate = true;
         this.pointsGeometry.attributes.aRotation.needsUpdate = true;
-        // const particleTexture = new THREE.TextureLoader().load(texturePath);
-        var material = new THREE.PointsMaterial({
-            color: new THREE.Color("rgba(255,255,255,0.75)"),
-            //   map: particleTexture,
-            transparent: false,
-            // size: 5,
-            // blending: THREE.AdditiveBlending,
-            depthTest: false,
-            blendDstAlpha: 1500
-        });
-        // const sonarGeometry = new THREE.BufferGeometry();
+        this.sonarGroup = new THREE.Group();
+        this.initSonarGroup();
+        this.initVisualBox();
+        this.updatePositions();
+    }
+    SonarComponent.prototype.initSonarGroup = function () {
         var sonarMaterial = new THREE.PointsMaterial({
             color: 0xffffff,
-            //   map: compassTexture,
             transparent: true,
             side: THREE.DoubleSide,
-            // emissive: 0xffffff,
-            // pointSize: 2.0,
-            // flatShading: true
             size: 2.0
         });
-        this.sonarGroup = new THREE.Group();
         var sonarPointMesh = new THREE.Points(this.pointsGeometry, sonarMaterial);
         this.sonarGroup.add(sonarPointMesh);
-        // Radius=30 -> definitely in range of camera
-        // this.sonarGroup.position.add(new THREE.Vector3(30, 300, -160));
         this.cockpitScene.cockpitScene.add(this.sonarGroup);
-        var visualBoxGeometry = new THREE.BoxGeometry(boundingBoxSize.width, boundingBoxSize.height, boundingBoxSize.depth);
+    };
+    SonarComponent.prototype.initVisualBox = function () {
+        var visualBoxGeometry = new THREE.BoxGeometry(this.containingBoxSize.width, this.containingBoxSize.height, this.containingBoxSize.depth);
         var visualBox = new THREE.Mesh(visualBoxGeometry);
         var boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
         this.cockpitScene.cockpitScene.add(boxHelper);
-        // const onTextureReady = (texture: THREE.Texture) => {
-        //   sonarMaterial.map = texture;
-        // };
-        // svg2texture(`resources/img/compass-texture-d.svg?time=${new Date().getTime()}`, onTextureReady);
-        this.updatePositions();
-    }
+    };
     SonarComponent.prototype.updatePositions = function () {
+        this.updatePositionsToSphere();
+        var scanMap = true;
+        if (scanMap) {
+            this.scanMap();
+        }
+    };
+    SonarComponent.prototype.scanMap = function () {
         var boxCenter = this.containingBox.getCenter(new THREE.Vector3());
         var boxSize = (0, Helpers_1.bounds2size)(this.containingBox);
         // TODO: check type
         var bufferAttribute = this.pointsGeometry.attributes.position;
         var bufferArray = bufferAttribute.array; // Check type
+        var curTerrain = this.cockpitScene.sceneContainer.terrainSegments[0];
+        if (!curTerrain) {
+            return;
+        }
         var directionVector = new THREE.Vector3();
         // Polar south at -PI/2, polar north at +PI/2
         for (var v = 0; v < this.dimension.vertical; v++) {
@@ -142,11 +138,41 @@ var SonarComponent = /** @class */ (function () {
                 //     boxCenter, // originPoint
                 //     directionVector.normalize()
                 //   );
-                //   var collisionResults = rayCaster.intersectObjects(this.cockpitScene.sceneContainer.collidableMeshes);
+                //   // var collisionResults = rayCaster.intersectObjects(this.cockpitScene.sceneContainer.collidableMeshes);
+                //   // const curTerrain = this.cockpitScene.sceneContainer.terrainSegments[0];
+                //   const collisionResults = [];
+                //   curTerrain.mesh.raycast(rayCaster, collisionResults);
                 //   if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
                 //     console.log(" Hit ", collisionResults[0]);
                 //   }
                 // }
+                // bufferArray.setXYZ( )
+                bufferArray[index * 3] = particle.position.x;
+                bufferArray[index * 3 + 1] = particle.position.y;
+                bufferArray[index * 3 + 2] = particle.position.z;
+            }
+        }
+        bufferAttribute.needsUpdate = true;
+    };
+    SonarComponent.prototype.updatePositionsToSphere = function () {
+        var boxCenter = this.containingBox.getCenter(new THREE.Vector3());
+        var boxSize = (0, Helpers_1.bounds2size)(this.containingBox);
+        // TODO: check type
+        var bufferAttribute = this.pointsGeometry.attributes.position;
+        var bufferArray = bufferAttribute.array; // Check type
+        var directionVector = new THREE.Vector3();
+        // Polar south at -PI/2, polar north at +PI/2
+        for (var v = 0; v < this.dimension.vertical; v++) {
+            var polar = -Math.PI / 2.0 + Math.PI * (v / this.dimension.vertical);
+            for (var h = 0; h < this.dimension.horizontal; h++) {
+                var phi = (constants_1.TAU / this.dimension.horizontal) * h;
+                // const index = v * this.dimension.vertical + h; // this.dimension.horizontal;
+                var index = v * this.dimension.horizontal + h; // this.dimension.horizontal;
+                var particle = this.particles[index];
+                particle.position.set(boxCenter.x + boxSize.width / 2.0, boxCenter.y, boxCenter.z);
+                (0, Helpers_1.rotateVertZ)(particle.position, polar, boxCenter);
+                (0, Helpers_1.rotateVertY)(particle.position, phi, boxCenter);
+                directionVector.set(particle.position.x, particle.position.y, particle.position.z);
                 // bufferArray.setXYZ( )
                 bufferArray[index * 3] = particle.position.x;
                 bufferArray[index * 3 + 1] = particle.position.y;

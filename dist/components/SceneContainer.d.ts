@@ -26,6 +26,7 @@ export declare class SceneContainer implements ISceneContainer {
     readonly camera: THREE.PerspectiveCamera;
     readonly clock: THREE.Clock;
     readonly collidableMeshes: Array<THREE.Object3D>;
+    readonly terrainSegments: Array<PerlinTerrain>;
     private isGameRunning;
     cube: THREE.Mesh;
     constructor(params: Params);

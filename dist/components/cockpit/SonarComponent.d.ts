@@ -13,12 +13,17 @@ export declare class SonarComponent {
     private readonly cockpitScene;
     private readonly sonarGroup;
     private readonly containingBox;
+    private readonly containingBoxSize;
     private readonly particles;
     private readonly pointsGeometry;
     private static readonly DEFAULT_OFFSET;
     private dimension;
     constructor(cockpitScene: CockpitScene);
+    private initSonarGroup;
+    private initVisualBox;
     private updatePositions;
+    private scanMap;
+    private updatePositionsToSphere;
     /**
      * @implement RenderableComponent.befoRerender
      */
