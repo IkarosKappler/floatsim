@@ -95,6 +95,7 @@ globalThis.addEventListener("load", function () {
     u_bright: { type: "f", value: 32.0 },
     u_intensity: { type: "f", value: 0.5 },
     u_time: { type: "f", value: this.clock.getDelta() },
+    u_shutter_amount: { type: "f", value: 0.0 },
     // u_texture: { type: "t", value: dTex },
     u_effect_color: { type: "t", value: new THREE.Vector4(0.29, 0.75, 0.89) }
   };
@@ -140,6 +141,10 @@ globalThis.addEventListener("load", function () {
   this.stats = new Stats.Stats();
   document.querySelector("body").appendChild(this.stats.domElement);
 
+  var tweakParams = {
+    shutter_amount: 0.5
+  };
+
   var loopNumber = 0;
   var _render = function () {
     var elapsedTime = _self.clock.getElapsedTime();
@@ -147,6 +152,12 @@ globalThis.addEventListener("load", function () {
     _self.renderer.render(_self.scene, _self.camera);
 
     _self.planeMesh.material.uniforms.u_time.value = elapsedTime;
+    _self.planeMesh.material.uniforms.u_shutter_amount.value = tweakParams.shutter_amount; // (elapsedTime / 3.0) % 1.5;
+    // console.log(
+    //   "_self.planeMesh.material.uniforms.u_shutter_amount.value",
+    //   _self.planeMesh.material.uniforms.u_shutter_amount.value
+    // );
+    // console.log("elapsedTime", elapsedTime);
     // terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
     _self.planeMesh.material.uniformsNeedUpdate = true;
 
@@ -167,5 +178,11 @@ globalThis.addEventListener("load", function () {
 
   window.addEventListener("resize", function () {
     onWindowResize();
+  });
+
+  var pane = new window["Tweakpane"].Pane();
+  pane.addInput(tweakParams, "shutter_amount", {
+    min: -1.0,
+    max: 1.0
   });
 });
