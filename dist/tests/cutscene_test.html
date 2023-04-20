@@ -77,29 +77,36 @@
         void main()
         {
 
+            // uncoment when using real texture
+            // vec4 texture_color = texture2D(u_texture, vUv.xy);
+
             // TODO: pass pixel size as uniforms
             float canvasWidth = 100.0;
             float canvasHeight = 100.0;
-
-            float shuter_width_0 = 3.0;
-            float shuter_width_1 = 3.0;
-            float shuter_width_2 = 3.0;
-
-            float offsetY = floor( mod(vUv.y*canvasHeight, 3.0) );
-
-            // float pctX = mod(u_shutter_amount, 1.0); // * 3.0;
-            float pctX = clamp(u_shutter_amount, 0.0, 1.0); 
-
-
-            float modX = 1.0 + mod( vUv.x*canvasWidth + offsetY, 3.0 );
-            float transX = floor( (1.0/shuter_width_0) + modX * pctX );
-
-            // uncoment when using real texture
-            // vec4 texture_color = texture2D(u_texture, vUv.xy);
+            float rowOffsetFactor = 2.0;
             vec4 light_color = vec4(1.0, 1.0, 1.0, 0.0);
             vec4 dark_color = vec4(0.0, 0.0, 0.0, 1.0);
 
-            gl_FragColor = mix( light_color, dark_color, transX);
+            // Please use full integer values here, no fractions
+            float f_shutter_width = 5.0;
+            float f_shutter_height = 5.0;
+            // 25
+            float f_shutter_square = f_shutter_width*f_shutter_height;
+
+            // A value between 0.0 ... height
+            float offsetY = ( mod( round(vUv.y*canvasHeight), f_shutter_height) );
+            // A value between 0.0 ... width
+            float offsetX = ( mod( round(vUv.x*canvasWidth - rowOffsetFactor*offsetY), f_shutter_width) );
+
+            // Between 0.0 and f_shutter_square (exclusive)
+            float relX = ( offsetY * f_shutter_width + (offsetX) );
+
+            // Apply a threshhold
+            //   * all elements below the threshold (shutter_amount) are opaque
+            //   * all elements above the threshold (shutter_amount) are transparent
+            float opacity = floor( (relX+1.0) / ((f_shutter_square)*(u_shutter_amount)+1.0) );
+
+            gl_FragColor = mix( light_color, dark_color, opacity );
         }
     </script>
 

@@ -117,7 +117,7 @@ globalThis.addEventListener("load", function () {
   //   cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
   //   this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, cutsceneMaterial]);
 
-  const planeGeometry = new THREE.BoxGeometry(10, 1, 10, 1, 1, 1);
+  const planeGeometry = new THREE.BoxGeometry(100, 1, 100, 1, 1, 1);
   this.planeMesh = new THREE.Mesh(planeGeometry, cutsceneMaterial);
   this.scene.add(this.planeMesh);
 
@@ -182,7 +182,7 @@ globalThis.addEventListener("load", function () {
 
   var pane = new window["Tweakpane"].Pane();
   pane.addInput(tweakParams, "shutter_amount", {
-    min: -1.0,
+    min: 0.0,
     max: 1.0
   });
 });
