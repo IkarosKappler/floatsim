@@ -33,70 +33,24 @@ globalThis.addEventListener("load", function () {
   ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
   this.scene.add(ah);
 
-  //--- BEGIN--- Create Water Shader (TEST)
+  var tweakParams = {
+    shutter_amount: 0.5,
+    canvas_width: 180,
+    canvas_height: 180
+  };
+
+  //--- BEGIN--- Create Cutscene Shader (TEST)
   var vertShader = document.getElementById("vertexShader").innerHTML;
   var fragShader = document.getElementById("fragmentShader").innerHTML;
-
-  //---BEGIN--- Terrain Generation
-  /* var zStartOffset = 80.0; // for Custom noise, different for Improved noise
-  var worldWidthSegments = 256;
-  var worldDepthSegments = 256;
-  var perlinOptions = { iterations: 5, quality: 1.5 };
-  var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
-  // var terrainSize = { width: 7500, depth: 7500, height: 0 };
-  const terrainSize = { width: 2048.0, depth: 2048.0, height: 10.0 };
-  console.log("PerlinTexture", PerlinTexture);
-  var baseTexture = new PerlinTexture(heightMap, terrainSize);
-
-  const terrainCenter = new THREE.Vector3(0, 0, 0);
-  const terrainBounds = new THREE.Box3(
-    new THREE.Vector3(
-      terrainCenter.x - terrainSize.width / 2.0,
-      terrainCenter.y - terrainSize.height / 2.0,
-      terrainCenter.z - terrainSize.depth / 2.0
-    ),
-    new THREE.Vector3(
-      terrainCenter.x + terrainSize.width / 2.0,
-      terrainCenter.y + terrainSize.height / 2.0,
-      terrainCenter.z + terrainSize.depth / 2.0
-    )
-  );
-  const terrainTexture = new PerlinTexture(heightMap, terrainSize);
-  // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
-  const terrain = new PerlinTerrain(heightMap, terrainBounds, terrainTexture);
-
-  // var terrain = new PerlinTerrain(heightMap, terrainSize, baseTexture);
-  terrain.mesh.position.y = -zStartOffset;
-  terrain.mesh.scale.set(0.1, 0.1, 0.1);
-  this.scene.add(terrain.mesh);
-  //---END--- Terrain Generation
-*/
-
-  /*
-  var imageData = baseTexture.imageData;
-  var buffer = imageData.data.buffer; // ArrayBuffer
-  var arrayBuffer = new ArrayBuffer(imageData.data.length);
-  var binary = new Uint8Array(arrayBuffer);
-  for (var i = 0; i < binary.length; i++) {
-    binary[i] = imageData.data[i];
-  }
-  var dTex = new THREE.DataTexture(baseTexture.imageData, worldWidthSegments, worldDepthSegments, THREE.RGBAFormat);
-  dTex.needsUpdate = true;
-  */
-
+  var textureImage = new THREE.TextureLoader().load("../resources/img/cockpit-nasa.png", function (tex) {});
   var uniforms = {
     // Fog
-    fogColor: { type: "t", value: new THREE.Color(0x021a38) }, // TODO: change fog color
-    vFogDepth: { type: "f", value: 0.0021 }, // ???
-    fogDensity: { type: "f", value: 0.0021 }, // TODO: take from FogHandler
-    // Caustics
-    u_zoom: { type: "f", value: 0.5 },
-    u_speed: { type: "f", value: 0.4 },
-    u_bright: { type: "f", value: 32.0 },
-    u_intensity: { type: "f", value: 0.5 },
-    u_time: { type: "f", value: this.clock.getDelta() },
-    u_shutter_amount: { type: "f", value: 0.0 },
-    // u_texture: { type: "t", value: dTex },
+    u_shutter_color: { type: "t", value: new THREE.Color(0x001828) },
+    u_canvas_width: { type: "i", value: tweakParams.canvas_width },
+    u_canvas_height: { type: "i", value: tweakParams.canvas_height },
+    u_use_texture: { type: "b", value: true },
+    u_shutter_amount: { type: "f", value: tweakParams.shutter_amount },
+    u_texture: { type: "t", value: textureImage },
     u_effect_color: { type: "t", value: new THREE.Vector4(0.29, 0.75, 0.89) }
   };
   var cutsceneMaterial = new THREE.ShaderMaterial({
@@ -105,17 +59,7 @@ globalThis.addEventListener("load", function () {
     fragmentShader: fragShader,
     transparent: true
   });
-  //--- END--- Create Water Shader (TEST)
-
-  // Create a geometry conaining the logical 3D information (here: a cube)
-  //   var cubeGeometry = new THREE.BoxGeometry(12, 12, 12);
-  //   // Pick a material, something like MeshBasicMaterial, PhongMaterial,
-  //   var cubeBaseMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-  //   // Create the cube from the geometry and the material ...
-  //   cubeGeometry.clearGroups();
-  //   cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
-  //   cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
-  //   this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, cutsceneMaterial]);
+  //--- END--- Create Cutscene Shader (TEST)
 
   const planeGeometry = new THREE.BoxGeometry(100, 1, 100, 1, 1, 1);
   this.planeMesh = new THREE.Mesh(planeGeometry, cutsceneMaterial);
@@ -141,26 +85,12 @@ globalThis.addEventListener("load", function () {
   this.stats = new Stats.Stats();
   document.querySelector("body").appendChild(this.stats.domElement);
 
-  var tweakParams = {
-    shutter_amount: 0.5
-  };
-
   var loopNumber = 0;
   var _render = function () {
     var elapsedTime = _self.clock.getElapsedTime();
     _self.stats.update();
     _self.renderer.render(_self.scene, _self.camera);
-
-    _self.planeMesh.material.uniforms.u_time.value = elapsedTime;
-    _self.planeMesh.material.uniforms.u_shutter_amount.value = tweakParams.shutter_amount; // (elapsedTime / 3.0) % 1.5;
-    // console.log(
-    //   "_self.planeMesh.material.uniforms.u_shutter_amount.value",
-    //   _self.planeMesh.material.uniforms.u_shutter_amount.value
-    // );
-    // console.log("elapsedTime", elapsedTime);
-    // terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
-    _self.planeMesh.material.uniformsNeedUpdate = true;
-
+    // _self.planeMesh.material.uniformsNeedUpdate = true;
     loopNumber++;
     requestAnimationFrame(_render);
   };
@@ -181,8 +111,21 @@ globalThis.addEventListener("load", function () {
   });
 
   var pane = new window["Tweakpane"].Pane();
-  pane.addInput(tweakParams, "shutter_amount", {
-    min: 0.0,
-    max: 1.0
+  pane.addInput(tweakParams, "canvas_width", { min: 1, max: 1000 }).on("change", function (ev) {
+    _self.planeMesh.material.uniforms.u_canvas_width.value = ev.value;
+    _self.planeMesh.material.uniformsNeedUpdate = true;
   });
+  pane.addInput(tweakParams, "canvas_height", { min: 1, max: 1000 }).on("change", function (ev) {
+    _self.planeMesh.material.uniforms.u_canvas_height.value = ev.value;
+    _self.planeMesh.material.uniformsNeedUpdate = true;
+  });
+  pane
+    .addInput(tweakParams, "shutter_amount", {
+      min: 0.0,
+      max: 1.0
+    })
+    .on("change", function (ev) {
+      _self.planeMesh.material.uniforms.u_shutter_amount.value = ev.value;
+      _self.planeMesh.material.uniformsNeedUpdate = true;
+    });
 });
