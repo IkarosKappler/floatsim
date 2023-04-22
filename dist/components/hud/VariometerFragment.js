@@ -116,22 +116,23 @@ var VariometerFragment = /** @class */ (function () {
         }
     };
     VariometerFragment.prototype.drawZeroAt = function (zeroOffsetV, triangleSize) {
-        var colorStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
+        // const colorStyle = getColorStyle(this.hudComponent.primaryColor, 1.0);
+        var colorStyle = "rgb(255,255,255)";
         this.hudComponent.hudBitmap.strokeStyle = colorStyle;
         this.hudComponent.hudBitmap.beginPath();
         this.hudComponent.hudBitmap.moveTo(this.currentHudBounds.min.x + triangleSize.width + 1, this.currentHudBounds.min.y + zeroOffsetV);
-        this.hudComponent.hudBitmap.lineTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 16, this.currentHudBounds.min.y + zeroOffsetV);
+        this.hudComponent.hudBitmap.lineTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 22, this.currentHudBounds.min.y + zeroOffsetV);
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.closePath();
-        var colorStyleSecondary = (0, Helpers_1.getColorStyle)(this.hudComponent.warningColor, 1.0);
-        this.hudComponent.hudBitmap.strokeStyle = colorStyleSecondary;
+        // const colorStyleSecondary = getColorStyle(this.hudComponent.warningColor, 1.0);
+        // this.hudComponent.hudBitmap.strokeStyle = colorStyleSecondary;
         this.hudComponent.hudBitmap.beginPath();
         // Diagonal
-        this.hudComponent.hudBitmap.moveTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 8, this.currentHudBounds.min.y + zeroOffsetV - 6);
-        this.hudComponent.hudBitmap.lineTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 8 + 12, this.currentHudBounds.min.y + zeroOffsetV + 6);
+        this.hudComponent.hudBitmap.moveTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 16, this.currentHudBounds.min.y + zeroOffsetV - 6);
+        this.hudComponent.hudBitmap.lineTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 16 + 12, this.currentHudBounds.min.y + zeroOffsetV + 6);
         // Diagonal
-        this.hudComponent.hudBitmap.moveTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 8 + 12, this.currentHudBounds.min.y + zeroOffsetV - 6);
-        this.hudComponent.hudBitmap.lineTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 8, this.currentHudBounds.min.y + zeroOffsetV + 6);
+        this.hudComponent.hudBitmap.moveTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 16 + 12, this.currentHudBounds.min.y + zeroOffsetV - 6);
+        this.hudComponent.hudBitmap.lineTo(this.currentHudBounds.min.x + triangleSize.width + 1 + 16, this.currentHudBounds.min.y + zeroOffsetV + 6);
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.closePath();
     };

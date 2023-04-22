@@ -5,10 +5,13 @@ export declare class NavpointsFragment implements RenderableComponent {
     private hudComponent;
     private currentFragmentBounds;
     constructor(hudComponent: HudComponent);
+    private drawNavpoint;
+    private drawMarkerAt;
+    private drawDistanceLabelAt;
     /**
      * @implement RenderableComponent.befoRerender
      */
-    beforeRender(_sceneContainer: ISceneContainer, data: HUDData, tweakParams: TweakParams): void;
+    beforeRender(sceneContainer: ISceneContainer, _data: HUDData, tweakParams: TweakParams): void;
     /**
      * @implement RenderableComponent.renderFragment
      */

@@ -50,6 +50,8 @@ var SceneContainer = /** @class */ (function () {
         this.scene = new THREE.Scene();
         this.collidableMeshes = [];
         this.terrainSegments = [];
+        this.navpoints = [];
+        this.rendererSize = { width: window.innerWidth, height: window.innerHeight };
         this.sceneData = {
             initialDepth: params.getNumber("initialDepth", -898.0),
             deepFogDepth: {
@@ -214,6 +216,7 @@ var SceneContainer = /** @class */ (function () {
         }; // END render
         this.loadConcrete(terrain);
         this.addGroundBuoys(terrain);
+        this.addNavpoints(terrain);
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });
@@ -308,6 +311,13 @@ var SceneContainer = /** @class */ (function () {
             }
         }
     };
+    SceneContainer.prototype.addNavpoints = function (terrain) {
+        var navPointA = { position: new THREE.Vector3(130.0, 0.0, -135.0) };
+        var navPointB = { position: new THREE.Vector3(-130.0, 0.0, 135.0) };
+        navPointA.position.y += terrain.bounds.min.y;
+        navPointB.position.y += terrain.bounds.min.y;
+        this.navpoints.push(navPointA, navPointB);
+    };
     SceneContainer.prototype.getShipVerticalInclination = function () {
         var worldDir = new THREE.Vector3();
         this.camera.getWorldDirection(worldDir);
@@ -335,6 +345,9 @@ var SceneContainer = /** @class */ (function () {
     SceneContainer.prototype.onWindowResize = function () {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
+        // console.log(this.renderer.getSize)
+        this.rendererSize.width = window.innerWidth;
+        this.rendererSize.height = window.innerHeight;
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.cockpitScene.updateSize(window.innerWidth, window.innerHeight);
         // this.hud.setHudSize(this.renderer.domElement.width, this.renderer.domElement.height);

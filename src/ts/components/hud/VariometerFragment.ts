@@ -195,7 +195,8 @@ export class VariometerFragment implements RenderableComponent {
   }
 
   private drawZeroAt(zeroOffsetV: number, triangleSize: IDimension2Immutable) {
-    const colorStyle = getColorStyle(this.hudComponent.primaryColor, 1.0);
+    // const colorStyle = getColorStyle(this.hudComponent.primaryColor, 1.0);
+    const colorStyle = "rgb(255,255,255)";
     this.hudComponent.hudBitmap.strokeStyle = colorStyle;
     this.hudComponent.hudBitmap.beginPath();
     this.hudComponent.hudBitmap.moveTo(
@@ -203,31 +204,31 @@ export class VariometerFragment implements RenderableComponent {
       this.currentHudBounds.min.y + zeroOffsetV
     );
     this.hudComponent.hudBitmap.lineTo(
-      this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
+      this.currentHudBounds.min.x + triangleSize.width + 1 + 22,
       this.currentHudBounds.min.y + zeroOffsetV
     );
     this.hudComponent.hudBitmap.stroke();
     this.hudComponent.hudBitmap.closePath();
 
-    const colorStyleSecondary = getColorStyle(this.hudComponent.warningColor, 1.0);
-    this.hudComponent.hudBitmap.strokeStyle = colorStyleSecondary;
+    // const colorStyleSecondary = getColorStyle(this.hudComponent.warningColor, 1.0);
+    // this.hudComponent.hudBitmap.strokeStyle = colorStyleSecondary;
     this.hudComponent.hudBitmap.beginPath();
     // Diagonal
     this.hudComponent.hudBitmap.moveTo(
-      this.currentHudBounds.min.x + triangleSize.width + 1 + 8,
+      this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
       this.currentHudBounds.min.y + zeroOffsetV - 6
     );
     this.hudComponent.hudBitmap.lineTo(
-      this.currentHudBounds.min.x + triangleSize.width + 1 + 8 + 12,
+      this.currentHudBounds.min.x + triangleSize.width + 1 + 16 + 12,
       this.currentHudBounds.min.y + zeroOffsetV + 6
     );
     // Diagonal
     this.hudComponent.hudBitmap.moveTo(
-      this.currentHudBounds.min.x + triangleSize.width + 1 + 8 + 12,
+      this.currentHudBounds.min.x + triangleSize.width + 1 + 16 + 12,
       this.currentHudBounds.min.y + zeroOffsetV - 6
     );
     this.hudComponent.hudBitmap.lineTo(
-      this.currentHudBounds.min.x + triangleSize.width + 1 + 8,
+      this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
       this.currentHudBounds.min.y + zeroOffsetV + 6
     );
     this.hudComponent.hudBitmap.stroke();

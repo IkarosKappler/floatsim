@@ -1,6 +1,7 @@
 - 2023-04-22
   - Refactored the Caustic shader library (updating exports).
   - Refactoring test cutscene shader to shader library in the simulation.
+  - Adding a Navpoints HUD fragment.
 - 2023-04-20
   - Added a cutscene shader test.
 - 2023-03-xx

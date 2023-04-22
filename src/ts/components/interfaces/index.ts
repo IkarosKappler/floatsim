@@ -79,6 +79,11 @@ export interface SceneData {
   highFogDepth: MinMax;
 }
 
+export interface Size2Immutable {
+  readonly width: number;
+  readonly height: number;
+}
+
 export interface Size3Immutable {
   readonly width: number;
   readonly height: number;
@@ -108,11 +113,17 @@ export interface TextureData {
   readonly imageCanvas: HTMLCanvasElement;
 }
 
+export interface Navpoint {
+  position: Triple<number>;
+}
+
 export interface ISceneContainer {
+  readonly rendererSize: Size2Immutable;
   readonly camera: THREE.PerspectiveCamera;
   readonly clock: THREE.Clock;
   readonly collidableMeshes: Array<THREE.Object3D>;
   readonly terrainSegments: Array<PerlinTerrain>;
+  readonly navpoints: Array<Navpoint>;
 }
 
 export interface UpdateableComponent {

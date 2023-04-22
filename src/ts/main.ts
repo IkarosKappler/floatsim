@@ -21,7 +21,7 @@ globalThis.addEventListener("load", () => {
   const sceneContainer = new SceneContainer(params);
 
   console.log(TweakPane);
-  const pane = new window["Tweakpane"].Pane() as TweakPane.Pane;
+  const pane = new window["Tweakpane"].Pane({ title: "Params" }) as TweakPane.Pane;
   pane.addInput(sceneContainer.tweakParams, "compassZ", {
     min: -150,
     max: 150

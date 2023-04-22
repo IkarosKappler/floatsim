@@ -10,7 +10,18 @@ import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonCont
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { HudComponent } from "./hud/HudComponent";
-import { HUDData, IHeightMap, ISceneContainer, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
+import {
+  HUDData,
+  IDimension2,
+  IHeightMap,
+  ISceneContainer,
+  Navpoint,
+  SceneData,
+  Size2Immutable,
+  Size3Immutable,
+  TweakParams,
+  UpdateableComponent
+} from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
 import { Params } from "../utils/Params";
@@ -24,6 +35,7 @@ import { CockpitScene } from "./cockpit/CockpitScene";
 export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
   readonly renderer: THREE.WebGLRenderer;
+  readonly rendererSize: Size2Immutable;
   readonly stats: Stats;
   readonly controls: OrbitControls | FirstPersonControls;
   readonly cockpitScene: CockpitScene;
@@ -37,6 +49,7 @@ export class SceneContainer implements ISceneContainer {
   readonly clock: THREE.Clock;
   readonly collidableMeshes: Array<THREE.Object3D>;
   readonly terrainSegments: Array<PerlinTerrain>;
+  readonly navpoints: Array<Navpoint>;
 
   private isGameRunning: boolean = false;
 
@@ -48,6 +61,8 @@ export class SceneContainer implements ISceneContainer {
     this.scene = new THREE.Scene();
     this.collidableMeshes = [];
     this.terrainSegments = [];
+    this.navpoints = [];
+    this.rendererSize = { width: window.innerWidth, height: window.innerHeight };
 
     this.sceneData = {
       initialDepth: params.getNumber("initialDepth", -898.0), // -898.0,
@@ -257,6 +272,7 @@ export class SceneContainer implements ISceneContainer {
 
     this.loadConcrete(terrain);
     this.addGroundBuoys(terrain);
+    this.addNavpoints(terrain);
 
     window.addEventListener("resize", () => {
       _self.onWindowResize();
@@ -388,6 +404,14 @@ export class SceneContainer implements ISceneContainer {
     }
   }
 
+  addNavpoints(terrain: PerlinTerrain) {
+    const navPointA = { position: new THREE.Vector3(130.0, 0.0, -135.0) };
+    const navPointB = { position: new THREE.Vector3(-130.0, 0.0, 135.0) };
+    navPointA.position.y += terrain.bounds.min.y;
+    navPointB.position.y += terrain.bounds.min.y;
+    this.navpoints.push(navPointA, navPointB);
+  }
+
   getShipVerticalInclination() {
     const worldDir = new THREE.Vector3();
     this.camera.getWorldDirection(worldDir);
@@ -419,6 +443,9 @@ export class SceneContainer implements ISceneContainer {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
 
+    // console.log(this.renderer.getSize)
+    (this.rendererSize as IDimension2).width = window.innerWidth;
+    (this.rendererSize as IDimension2).height = window.innerHeight;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.cockpitScene.updateSize(window.innerWidth, window.innerHeight);
     // this.hud.setHudSize(this.renderer.domElement.width, this.renderer.domElement.height);
