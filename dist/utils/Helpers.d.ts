@@ -74,6 +74,7 @@ export declare class Bounds2Immutable implements IBounds2Immutable {
     constructor(x: number | Rect, y?: number, width?: number, height?: number);
     private getRelativeX;
     private getRelativeY;
+    getCenter(): Tuple<number>;
     getRelativePos(xFract: number, yFract: number): Tuple<number>;
     getRelativeBounds(minFracts: Tuple<number>, maxFracts: Tuple<number>): IBounds2Immutable;
     scale(factor: number): Bounds2Immutable;

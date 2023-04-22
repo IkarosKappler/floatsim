@@ -163,12 +163,16 @@ export class Bounds2Immutable implements IBounds2Immutable {
     }
   }
 
-  private getRelativeX(xFract: number) {
+  private getRelativeX(xFract: number): number {
     return this.min.x + this.width * xFract;
   }
 
-  private getRelativeY(yFract: number) {
+  private getRelativeY(yFract: number): number {
     return this.min.y + this.height * yFract;
+  }
+
+  getCenter(): Tuple<number> {
+    return { x: this.min.x + this.width / 2.0, y: this.min.y + this.height / 2.0 };
   }
 
   getRelativePos(xFract: number, yFract: number): Tuple<number> {

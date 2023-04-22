@@ -18,7 +18,7 @@ export declare class SonarComponent {
     private readonly pointsGeometry;
     private static readonly DEFAULT_OFFSET;
     private dimension;
-    constructor(cockpitScene: CockpitScene);
+    constructor(cockpitScene: CockpitScene, width: number, height: number);
     private initSonarGroup;
     private initVisualBox;
     private updatePositions;
@@ -35,5 +35,5 @@ export declare class SonarComponent {
     /**
      * @implement RenderableComponent.updateSize
      */
-    updateSize(): void;
+    updateSize(_width: number, height: number): void;
 }

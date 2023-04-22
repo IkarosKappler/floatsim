@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 import * as THREE from "three";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "./HudComponent";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 export declare class LowerInfoHudFragment implements RenderableComponent {
     private hudComponent;

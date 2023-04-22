@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "./HudComponent";
 import { svg2texture } from "../../utils/Helpers";
 
 export class CompassComponent implements RenderableComponent {

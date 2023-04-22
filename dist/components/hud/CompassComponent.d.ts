@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "./HudComponent";
 export declare class CompassComponent implements RenderableComponent {
     readonly hudComponent: HudComponent;
     private readonly compassMesh;

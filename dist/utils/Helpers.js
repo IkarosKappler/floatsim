@@ -185,6 +185,9 @@ var Bounds2Immutable = /** @class */ (function () {
     Bounds2Immutable.prototype.getRelativeY = function (yFract) {
         return this.min.y + this.height * yFract;
     };
+    Bounds2Immutable.prototype.getCenter = function () {
+        return { x: this.min.x + this.width / 2.0, y: this.min.y + this.height / 2.0 };
+    };
     Bounds2Immutable.prototype.getRelativePos = function (xFract, yFract) {
         return { x: this.getRelativeX(xFract), y: this.getRelativeY(yFract) };
     };

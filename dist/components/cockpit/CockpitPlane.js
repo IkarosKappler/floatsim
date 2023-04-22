@@ -36,6 +36,7 @@ var THREE = __importStar(require("three"));
 var CockpitPlane = /** @class */ (function () {
     function CockpitPlane() {
         var _this = this;
+        // Initially (using real size when textue is loaded)
         this.textureSize = { width: 100, height: 100 };
         var cockpitTexture = new THREE.TextureLoader().load("resources/img/cockpit-nasa.png", function (tex) {
             _this.textureSize.width = tex.image.width;

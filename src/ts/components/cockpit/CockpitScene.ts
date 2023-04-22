@@ -12,14 +12,13 @@ import * as THREE from "three";
 import { CockpitPlane } from "./CockpitPlane";
 import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 import { SonarComponent } from "./SonarComponent";
-import { SceneContainer } from "../SceneContainer";
 
 export class CockpitScene implements RenderableComponent {
   readonly sceneContainer: ISceneContainer;
   // readonly mesh: THREE.Mesh;
   readonly cockpitScene: THREE.Scene;
 
-  private readonly cockpitCamera: THREE.Camera;
+  private readonly cockpitCamera: THREE.OrthographicCamera;
   private readonly cockpitPlane: CockpitPlane;
 
   private readonly sonarComponent: SonarComponent;
@@ -38,7 +37,7 @@ export class CockpitScene implements RenderableComponent {
     this.cockpitCamera.add(this.cockpitPlane.mesh);
     this.cockpitScene.add(this.cockpitCamera);
 
-    this.sonarComponent = new SonarComponent(this);
+    this.sonarComponent = new SonarComponent(this, width, height);
   }
 
   /**
@@ -62,6 +61,11 @@ export class CockpitScene implements RenderableComponent {
    * @implement RenderableComponent.updateSize
    */
   updateSize(width: number, height: number) {
+    this.cockpitCamera.left = -width / 2;
+    this.cockpitCamera.right = width / 2;
+    this.cockpitCamera.top = height / 2;
+    this.cockpitCamera.bottom = -height / 2;
     this.cockpitPlane.setCockpitSize(width, height);
+    this.sonarComponent.updateSize(width, height);
   }
 }

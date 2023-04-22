@@ -49,7 +49,7 @@ var CockpitScene = /** @class */ (function () {
         // this.cockpitCamera.add(this.cockpitPlane.mesh);
         this.cockpitCamera.add(this.cockpitPlane.mesh);
         this.cockpitScene.add(this.cockpitCamera);
-        this.sonarComponent = new SonarComponent_1.SonarComponent(this);
+        this.sonarComponent = new SonarComponent_1.SonarComponent(this, width, height);
     }
     /**
      * @implement RenderableComponent.beforeRender
@@ -70,7 +70,12 @@ var CockpitScene = /** @class */ (function () {
      * @implement RenderableComponent.updateSize
      */
     CockpitScene.prototype.updateSize = function (width, height) {
+        this.cockpitCamera.left = -width / 2;
+        this.cockpitCamera.right = width / 2;
+        this.cockpitCamera.top = height / 2;
+        this.cockpitCamera.bottom = -height / 2;
         this.cockpitPlane.setCockpitSize(width, height);
+        this.sonarComponent.updateSize(width, height);
     };
     return CockpitScene;
 }());

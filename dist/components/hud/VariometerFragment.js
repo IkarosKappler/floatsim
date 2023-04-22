@@ -155,7 +155,7 @@ var VariometerFragment = /** @class */ (function () {
      * @implement RenderableComponent.updateSize
      */
     VariometerFragment.prototype.updateSize = function (viewportWidth, viewportHeight) {
-        console.log("Resized", viewportWidth);
+        console.log("[VariometerFragment] Resized", viewportWidth);
         // When the viewport sizes changes then then the HUD fragment bounds
         // need to be re-calculated as well.
         // Use one third of the total viewport height for this HUD fragment.

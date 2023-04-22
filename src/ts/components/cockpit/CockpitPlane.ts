@@ -14,6 +14,7 @@ export class CockpitPlane {
   private readonly textureSize: { width: number; height: number };
 
   constructor() {
+    // Initially (using real size when textue is loaded)
     this.textureSize = { width: 100, height: 100 };
     const cockpitTexture = new THREE.TextureLoader().load("resources/img/cockpit-nasa.png", tex => {
       this.textureSize.width = tex.image.width;

@@ -26,7 +26,16 @@ globalThis.addEventListener("load", () => {
     min: -150,
     max: 150
   });
-  pane.addInput(sceneContainer.tweakParams, "sonarZ", {
+  const sonar = pane.addFolder({ title: "Sonar" });
+  sonar.addInput(sceneContainer.tweakParams, "sonarX", {
+    min: -350,
+    max: 350
+  });
+  sonar.addInput(sceneContainer.tweakParams, "sonarY", {
+    min: -350,
+    max: 350
+  });
+  sonar.addInput(sceneContainer.tweakParams, "sonarZ", {
     min: -150,
     max: 150
   });

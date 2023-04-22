@@ -6,7 +6,7 @@
 
 import * as THREE from "three";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "./HudComponent";
 
 import { IDimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 
@@ -33,6 +33,50 @@ export class DepthMeterFragment implements RenderableComponent {
 
     // Initialize the current bounds
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
+  }
+
+  private drawIndicator(mPct: number, tweakParams: TweakParams, subBounds: Bounds2Immutable, pointToLeft: boolean) {
+    const triangleSize: IDimension2Immutable = {
+      height: this.currentHudBounds.height / 20.0,
+      width: this.currentHudBounds.height / 40.0
+    };
+
+    if (tweakParams.highlightHudFragments) {
+      const colorStyleBg = getColorStyle(this.hudComponent.primaryColor, 0.25);
+      this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
+      this.hudComponent.hudBitmap.fillRect(subBounds.min.x, subBounds.min.y, subBounds.width, subBounds.height);
+    }
+
+    // TODO: buffer color style string in class variable (is rarely changed)
+    const colorStyle = getColorStyle(this.hudComponent.primaryColor, 1.0);
+    this.hudComponent.hudBitmap.fillStyle = colorStyle;
+
+    // Draw indicator (left or right)
+    if (pointToLeft) {
+      // Left Triangle
+      var triangleBoundsLeft = new Bounds2Immutable({
+        x: subBounds.max.x,
+        y: subBounds.min.y + subBounds.height * mPct - triangleSize.height / 2.0,
+        width: triangleSize.width,
+        height: triangleSize.height
+      });
+      this.hudComponent.hudBitmap.moveTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
+      this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.max.x, triangleBoundsLeft.max.y);
+      this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.min.x, triangleBoundsLeft.min.y + triangleBoundsLeft.height / 2.0);
+      this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
+    } else {
+      // Right Triangle
+      var triangleBoundsRight = new Bounds2Immutable({
+        x: subBounds.min.x - triangleSize.width,
+        y: subBounds.min.y + subBounds.height * mPct - triangleSize.height / 2.0,
+        width: triangleSize.width,
+        height: triangleSize.height
+      });
+      this.hudComponent.hudBitmap.moveTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
+      this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.max.y);
+      this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.max.x, triangleBoundsRight.min.y + triangleBoundsRight.height / 2.0);
+      this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
+    }
   }
 
   /**
@@ -80,50 +124,6 @@ export class DepthMeterFragment implements RenderableComponent {
     );
 
     this.hudComponent.hudBitmap.restore();
-  }
-
-  private drawIndicator(mPct: number, tweakParams: TweakParams, subBounds: Bounds2Immutable, pointToLeft: boolean) {
-    const triangleSize: IDimension2Immutable = {
-      height: this.currentHudBounds.height / 20.0,
-      width: this.currentHudBounds.height / 40.0
-    };
-
-    if (tweakParams.highlightHudFragments) {
-      const colorStyleBg = getColorStyle(this.hudComponent.primaryColor, 0.25);
-      this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
-      this.hudComponent.hudBitmap.fillRect(subBounds.min.x, subBounds.min.y, subBounds.width, subBounds.height);
-    }
-
-    // TODO: buffer color style string in class variable (is rarely changed)
-    const colorStyle = getColorStyle(this.hudComponent.primaryColor, 1.0);
-    this.hudComponent.hudBitmap.fillStyle = colorStyle;
-
-    // Draw indicator (left or right)
-    if (pointToLeft) {
-      // Left Triangle
-      var triangleBoundsLeft = new Bounds2Immutable({
-        x: subBounds.max.x,
-        y: subBounds.min.y + subBounds.height * mPct - triangleSize.height / 2.0,
-        width: triangleSize.width,
-        height: triangleSize.height
-      });
-      this.hudComponent.hudBitmap.moveTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
-      this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.max.x, triangleBoundsLeft.max.y);
-      this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.min.x, triangleBoundsLeft.min.y + triangleBoundsLeft.height / 2.0);
-      this.hudComponent.hudBitmap.lineTo(triangleBoundsLeft.max.x, triangleBoundsLeft.min.y);
-    } else {
-      // Right Triangle
-      var triangleBoundsRight = new Bounds2Immutable({
-        x: subBounds.min.x - triangleSize.width,
-        y: subBounds.min.y + subBounds.height * mPct - triangleSize.height / 2.0,
-        width: triangleSize.width,
-        height: triangleSize.height
-      });
-      this.hudComponent.hudBitmap.moveTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
-      this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.max.y);
-      this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.max.x, triangleBoundsRight.min.y + triangleBoundsRight.height / 2.0);
-      this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
-    }
   }
 
   /**

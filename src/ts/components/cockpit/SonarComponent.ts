@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { HUDData, ISceneContainer, RenderableComponent, Size3Immutable, Tuple, TweakParams } from "../interfaces";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "../hud/HudComponent";
 import { bounds2size, rotateVertY, rotateVertZ, svg2texture } from "../../utils/Helpers";
 import { SceneContainer } from "../SceneContainer";
 import { CockpitScene } from "./CockpitScene";
@@ -23,15 +23,15 @@ export class SonarComponent {
   private readonly particles: Array<{ position: THREE.Vector3; hasNoMeasure: boolean }>;
   private readonly pointsGeometry: THREE.BufferGeometry;
 
-  private static readonly DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
+  private static readonly DEFAULT_OFFSET = { x: 0, y: 0.0, z: -25.0 };
 
   private dimension: { vertical: number; horizontal: number };
 
-  constructor(cockpitScene: CockpitScene) {
+  constructor(cockpitScene: CockpitScene, width: number, height: number) {
     this.cockpitScene = cockpitScene;
     this.dimension = { vertical: 16, horizontal: 16 };
 
-    const boxSize = 64.0;
+    const boxSize = 92.0;
     this.particles = [];
 
     // const verticalDimension = 16; // north pole to south pole
@@ -93,6 +93,8 @@ export class SonarComponent {
     this.initSonarGroup();
     this.initVisualBox();
     this.updatePositions();
+
+    this.updateSize(width, height);
   }
 
   private initSonarGroup() {
@@ -114,8 +116,9 @@ export class SonarComponent {
       this.containingBoxSize.depth
     );
     const visualBox = new THREE.Mesh(visualBoxGeometry);
-    const boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
-    this.cockpitScene.cockpitScene.add(boxHelper);
+    const boxHelper = new THREE.BoxHelper(visualBox, 0x888888);
+    // this.cockpitScene.cockpitScene.add(boxHelper);
+    this.sonarGroup.add(boxHelper);
   }
 
   private updatePositions() {
@@ -155,6 +158,7 @@ export class SonarComponent {
         directionVector.set(particle.position.x, particle.position.y, particle.position.z);
 
         // Cast ray
+        // --- ERR ---- THIS IS TOOOOO SLOW! CANNOT BE USED -----
         // if (v === 0 && h === this.dimension.horizontal / 2) {
         //   // var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
         //   var rayCaster = new THREE.Raycaster(
@@ -241,7 +245,8 @@ export class SonarComponent {
   /**
    * @implement RenderableComponent.updateSize
    */
-  updateSize() {
-    // NOOP?
+  updateSize(_width: number, height: number) {
+    // Default place sonar 50 pixels from lower border
+    SonarComponent.DEFAULT_OFFSET.y = -height / 4.0 - 50;
   }
 }

@@ -6,16 +6,13 @@
 
 import * as THREE from "three";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "./HudComponent";
 
 import { HUDData, IDimension2, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 import { RAD2DEG } from "../constants";
 
 export class LowerInfoHudFragment implements RenderableComponent {
   private hudComponent: HudComponent;
-  //   private depthMeterTexture: HTMLImageElement;
-
-  //   readonly ASSET_SIZE: Dimension2Immutable = { width: 576, height: 1357 };
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
@@ -60,12 +57,7 @@ export class LowerInfoHudFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.fillStyle = colorStyle;
     this.hudComponent.hudBitmap.strokeStyle = colorStyle;
 
-    this.hudComponent.hudBitmap.rect(
-      hudBounds.min.x, // this.hudComponent.hudCanvas.width - hudBounds.width,
-      hudBounds.min.y, // this.hudComponent.hudCanvas.height - hudBounds.height,
-      hudBounds.width,
-      hudBounds.height
-    );
+    this.hudComponent.hudBitmap.rect(hudBounds.min.x, hudBounds.min.y, hudBounds.width, hudBounds.height);
     this.hudComponent.hudBitmap.closePath();
     this.hudComponent.hudBitmap.stroke();
 

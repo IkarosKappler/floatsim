@@ -9,8 +9,6 @@ exports.LowerInfoHudFragment = void 0;
 var Helpers_1 = require("../../utils/Helpers");
 var constants_1 = require("../constants");
 var LowerInfoHudFragment = /** @class */ (function () {
-    //   private depthMeterTexture: HTMLImageElement;
-    //   readonly ASSET_SIZE: Dimension2Immutable = { width: 576, height: 1357 };
     function LowerInfoHudFragment(hudComponent) {
         this.hudComponent = hudComponent;
         // this.depthMeterTexture = new THREE.ImageLoader().load("img/depth-meter-a.png");
@@ -48,9 +46,7 @@ var LowerInfoHudFragment = /** @class */ (function () {
         var colorStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
         this.hudComponent.hudBitmap.fillStyle = colorStyle;
         this.hudComponent.hudBitmap.strokeStyle = colorStyle;
-        this.hudComponent.hudBitmap.rect(hudBounds.min.x, // this.hudComponent.hudCanvas.width - hudBounds.width,
-        hudBounds.min.y, // this.hudComponent.hudCanvas.height - hudBounds.height,
-        hudBounds.width, hudBounds.height);
+        this.hudComponent.hudBitmap.rect(hudBounds.min.x, hudBounds.min.y, hudBounds.width, hudBounds.height);
         this.hudComponent.hudBitmap.closePath();
         this.hudComponent.hudBitmap.stroke();
         // Draw HUD in the lower right corner

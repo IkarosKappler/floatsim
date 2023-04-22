@@ -36,10 +36,10 @@ var constants_1 = require("../constants");
  * @version 1.0.0
  */
 var SonarComponent = /** @class */ (function () {
-    function SonarComponent(cockpitScene) {
+    function SonarComponent(cockpitScene, width, height) {
         this.cockpitScene = cockpitScene;
         this.dimension = { vertical: 16, horizontal: 16 };
-        var boxSize = 64.0;
+        var boxSize = 92.0;
         this.particles = [];
         // const verticalDimension = 16; // north pole to south pole
         // const horizontalDimension = 16; // along equator
@@ -83,6 +83,7 @@ var SonarComponent = /** @class */ (function () {
         this.initSonarGroup();
         this.initVisualBox();
         this.updatePositions();
+        this.updateSize(width, height);
     }
     SonarComponent.prototype.initSonarGroup = function () {
         var sonarMaterial = new THREE.PointsMaterial({
@@ -98,8 +99,9 @@ var SonarComponent = /** @class */ (function () {
     SonarComponent.prototype.initVisualBox = function () {
         var visualBoxGeometry = new THREE.BoxGeometry(this.containingBoxSize.width, this.containingBoxSize.height, this.containingBoxSize.depth);
         var visualBox = new THREE.Mesh(visualBoxGeometry);
-        var boxHelper = new THREE.BoxHelper(visualBox, 0x000000);
-        this.cockpitScene.cockpitScene.add(boxHelper);
+        var boxHelper = new THREE.BoxHelper(visualBox, 0x888888);
+        // this.cockpitScene.cockpitScene.add(boxHelper);
+        this.sonarGroup.add(boxHelper);
     };
     SonarComponent.prototype.updatePositions = function () {
         this.updatePositionsToSphere();
@@ -132,6 +134,7 @@ var SonarComponent = /** @class */ (function () {
                 (0, Helpers_1.rotateVertY)(particle.position, phi, boxCenter);
                 directionVector.set(particle.position.x, particle.position.y, particle.position.z);
                 // Cast ray
+                // --- ERR ---- THIS IS TOOOOO SLOW! CANNOT BE USED -----
                 // if (v === 0 && h === this.dimension.horizontal / 2) {
                 //   // var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
                 //   var rayCaster = new THREE.Raycaster(
@@ -207,10 +210,11 @@ var SonarComponent = /** @class */ (function () {
     /**
      * @implement RenderableComponent.updateSize
      */
-    SonarComponent.prototype.updateSize = function () {
-        // NOOP?
+    SonarComponent.prototype.updateSize = function (_width, height) {
+        // Default place sonar 50 pixels from lower border
+        SonarComponent.DEFAULT_OFFSET.y = -height / 4.0 - 50;
     };
-    SonarComponent.DEFAULT_OFFSET = { x: 0, y: 0, z: -75.0 };
+    SonarComponent.DEFAULT_OFFSET = { x: 0, y: 0.0, z: -25.0 };
     return SonarComponent;
 }());
 exports.SonarComponent = SonarComponent;

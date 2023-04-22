@@ -6,7 +6,7 @@
 
 import * as THREE from "three";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
-import { HudComponent } from "../HudComponent";
+import { HudComponent } from "./HudComponent";
 
 import { IDimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 import { RAD2DEG } from "../constants";
@@ -269,7 +269,7 @@ export class VariometerFragment implements RenderableComponent {
    * @implement RenderableComponent.updateSize
    */
   updateSize(viewportWidth: number, viewportHeight: number) {
-    console.log("Resized", viewportWidth);
+    console.log("[VariometerFragment] Resized", viewportWidth);
     // When the viewport sizes changes then then the HUD fragment bounds
     // need to be re-calculated as well.
 

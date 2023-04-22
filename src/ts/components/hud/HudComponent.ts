@@ -1,12 +1,13 @@
 import * as THREE from "three";
-import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "./interfaces";
-import { CompassComponent } from "./hud/CompassComponent";
-import { DepthMeterFragment } from "./hud/DepthMeterFragment";
-import { LowerInfoHudFragment } from "./hud/LowerInfoHudFragment";
-import { VariometerFragment } from "./hud/VariometerFragment";
+import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
+import { CompassComponent } from "./CompassComponent";
+import { DepthMeterFragment } from "./DepthMeterFragment";
+import { LowerInfoHudFragment } from "./LowerInfoHudFragment";
+import { VariometerFragment } from "./VariometerFragment";
 // import { SonarComponent } from "./cockpit/SonarComponent";
 
-import { Cutscene_Shader } from "../utils/texture/shaders/cutscene_shader_material.glsl";
+import { Cutscene_Shader } from "../../utils/texture/shaders/cutscene_shader_material.glsl";
+import { NavpointsFragment } from "./NavpointsFragment";
 
 export class HudComponent implements RenderableComponent {
   readonly hudCanvas: HTMLCanvasElement;
@@ -28,6 +29,7 @@ export class HudComponent implements RenderableComponent {
   private depthMeter: DepthMeterFragment;
   private lowerInfoHud: LowerInfoHudFragment;
   private variometer: VariometerFragment;
+  private navpoints: NavpointsFragment;
 
   constructor(width: number, height: number, primaryColor: THREE.Color, warningColor: THREE.Color) {
     console.log("HudComponent vertex shader", Cutscene_Shader.vertex);
@@ -97,6 +99,9 @@ export class HudComponent implements RenderableComponent {
 
     // Create the Variometer
     this.variometer = new VariometerFragment(this);
+
+    // Create Navpoints fragment
+    this.navpoints = new NavpointsFragment(this);
   }
 
   /**
@@ -108,6 +113,7 @@ export class HudComponent implements RenderableComponent {
     this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
     this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
     this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
+    this.navpoints.beforeRender(sceneContainer, hudData, tweakParams);
     this.hudDynamicTexture.needsUpdate = true;
     this.hudMaterial.uniforms.u_shutter_amount.value = tweakParams.cutsceneShutterValue;
     this.hudMaterial.uniformsNeedUpdate = true;
@@ -138,5 +144,6 @@ export class HudComponent implements RenderableComponent {
     this.lowerInfoHud.updateSize(width, height);
     this.depthMeter.updateSize(width, height);
     this.variometer.updateSize(width, height);
+    this.navpoints.updateSize(width, height);
   }
 }

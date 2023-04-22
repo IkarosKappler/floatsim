@@ -38,30 +38,6 @@ var DepthMeterFragment = /** @class */ (function () {
         // Initialize the current bounds
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
-    /**
-     * @implement RenderableComponent.befoRerender
-     */
-    DepthMeterFragment.prototype.beforeRender = function (_sceneContainer, data, tweakParams) {
-        // Calculate depth in kilometers
-        var maxDepthPct = data.depth / DepthMeterFragment.MAX_DEPTH_METER;
-        var subKilometerPct = Math.abs((data.depth % 1000) / 1000);
-        this.hudComponent.hudBitmap.save();
-        this.hudComponent.hudBitmap.beginPath();
-        if (tweakParams.highlightHudFragments) {
-            var colorStyleBg = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
-            this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
-            this.hudComponent.hudBitmap.fillRect(this.currentHudBounds.min.x, this.currentHudBounds.min.y, this.currentHudBounds.width, this.currentHudBounds.height);
-        }
-        this.drawIndicator(subKilometerPct, tweakParams, this.leftSubBounds, true);
-        this.drawIndicator(maxDepthPct, tweakParams, this.rightSubBounds, false);
-        this.hudComponent.hudBitmap.fill();
-        this.hudComponent.hudBitmap.closePath();
-        // Draw texture with primary color (source-atop)
-        this.hudComponent.hudBitmap.drawImage(this.depthMeterTexture, this.currentHudBounds.min.x, this.currentHudBounds.min.y, this.currentHudBounds.width, this.currentHudBounds.height);
-        this.hudComponent.hudBitmap.globalCompositeOperation = "source-atop";
-        this.hudComponent.hudBitmap.fillRect(this.currentHudBounds.min.x, this.currentHudBounds.min.y, this.currentHudBounds.width, this.currentHudBounds.height);
-        this.hudComponent.hudBitmap.restore();
-    };
     DepthMeterFragment.prototype.drawIndicator = function (mPct, tweakParams, subBounds, pointToLeft) {
         var triangleSize = {
             height: this.currentHudBounds.height / 20.0,
@@ -102,6 +78,30 @@ var DepthMeterFragment = /** @class */ (function () {
             this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.max.x, triangleBoundsRight.min.y + triangleBoundsRight.height / 2.0);
             this.hudComponent.hudBitmap.lineTo(triangleBoundsRight.min.x, triangleBoundsRight.min.y);
         }
+    };
+    /**
+     * @implement RenderableComponent.befoRerender
+     */
+    DepthMeterFragment.prototype.beforeRender = function (_sceneContainer, data, tweakParams) {
+        // Calculate depth in kilometers
+        var maxDepthPct = data.depth / DepthMeterFragment.MAX_DEPTH_METER;
+        var subKilometerPct = Math.abs((data.depth % 1000) / 1000);
+        this.hudComponent.hudBitmap.save();
+        this.hudComponent.hudBitmap.beginPath();
+        if (tweakParams.highlightHudFragments) {
+            var colorStyleBg = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
+            this.hudComponent.hudBitmap.fillStyle = colorStyleBg;
+            this.hudComponent.hudBitmap.fillRect(this.currentHudBounds.min.x, this.currentHudBounds.min.y, this.currentHudBounds.width, this.currentHudBounds.height);
+        }
+        this.drawIndicator(subKilometerPct, tweakParams, this.leftSubBounds, true);
+        this.drawIndicator(maxDepthPct, tweakParams, this.rightSubBounds, false);
+        this.hudComponent.hudBitmap.fill();
+        this.hudComponent.hudBitmap.closePath();
+        // Draw texture with primary color (source-atop)
+        this.hudComponent.hudBitmap.drawImage(this.depthMeterTexture, this.currentHudBounds.min.x, this.currentHudBounds.min.y, this.currentHudBounds.width, this.currentHudBounds.height);
+        this.hudComponent.hudBitmap.globalCompositeOperation = "source-atop";
+        this.hudComponent.hudBitmap.fillRect(this.currentHudBounds.min.x, this.currentHudBounds.min.y, this.currentHudBounds.width, this.currentHudBounds.height);
+        this.hudComponent.hudBitmap.restore();
     };
     /**
      * @implement RenderableComponent.renderFragment

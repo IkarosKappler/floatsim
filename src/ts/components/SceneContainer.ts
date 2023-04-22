@@ -9,7 +9,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls.js";
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
-import { HudComponent } from "./HudComponent";
+import { HudComponent } from "./hud/HudComponent";
 import { HUDData, IHeightMap, ISceneContainer, SceneData, Size3Immutable, TweakParams, UpdateableComponent } from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
 import { PhysicsHandler } from "./PhysicsHandler";
