@@ -34,9 +34,12 @@ globalThis.addEventListener("load", function () {
   this.scene.add(ah);
 
   var tweakParams = {
+    shutter_color: 0x001828,
     shutter_amount: 0.5,
     canvas_width: 180,
-    canvas_height: 180
+    canvas_height: 180,
+    direction_h_ltr: true,
+    direction_v_ttb: true
   };
 
   //--- BEGIN--- Create Cutscene Shader (TEST)
@@ -45,10 +48,12 @@ globalThis.addEventListener("load", function () {
   var textureImage = new THREE.TextureLoader().load("../resources/img/cockpit-nasa.png", function (tex) {});
   var uniforms = {
     // Fog
-    u_shutter_color: { type: "t", value: new THREE.Color(0x001828) },
+    u_shutter_color: { type: "t", value: new THREE.Color(tweakParams.shutter_color) },
     u_canvas_width: { type: "i", value: tweakParams.canvas_width },
     u_canvas_height: { type: "i", value: tweakParams.canvas_height },
     u_use_texture: { type: "b", value: true },
+    u_direction_h_ltr: { type: "b", value: true },
+    u_direction_v_ttb: { type: "b", value: true },
     u_shutter_amount: { type: "f", value: tweakParams.shutter_amount },
     u_texture: { type: "t", value: textureImage },
     u_effect_color: { type: "t", value: new THREE.Vector4(0.29, 0.75, 0.89) }
@@ -126,6 +131,22 @@ globalThis.addEventListener("load", function () {
     })
     .on("change", function (ev) {
       _self.planeMesh.material.uniforms.u_shutter_amount.value = ev.value;
+      _self.planeMesh.material.uniformsNeedUpdate = true;
+    });
+  pane.addInput(tweakParams, "direction_h_ltr").on("change", function (ev) {
+    _self.planeMesh.material.uniforms.u_direction_h_ltr.value = ev.value;
+    _self.planeMesh.material.uniformsNeedUpdate = true;
+  });
+  pane.addInput(tweakParams, "direction_v_ttb").on("change", function (ev) {
+    _self.planeMesh.material.uniforms.u_direction_v_ttb.value = ev.value;
+    _self.planeMesh.material.uniformsNeedUpdate = true;
+  });
+  pane
+    .addInput(tweakParams, "shutter_color", {
+      view: "color"
+    })
+    .on("change", function (ev) {
+      _self.planeMesh.material.uniforms.u_shutter_color.value = new THREE.Color(ev.value);
       _self.planeMesh.material.uniformsNeedUpdate = true;
     });
 });

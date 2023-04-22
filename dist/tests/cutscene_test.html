@@ -52,6 +52,10 @@
         // Specifies if the texture should be used
         uniform bool u_use_texture;
 
+        // Specifies the directions
+        uniform bool u_direction_h_ltr;
+        uniform bool u_direction_v_ttb;
+
         // The underlying texture to use
         uniform sampler2D u_texture;
 
@@ -85,10 +89,28 @@
             // 25
             float f_shutter_square = f_shutter_width*f_shutter_height;
 
+            // Decide if left-to-right/right-to-left and top-down/bottom-up
+            float f_ux, f_uy;
+            if( u_direction_h_ltr ) {
+                f_ux = vUv.x;
+            } else {
+                f_ux = 1.0-vUv.x;
+            }
+            if( u_direction_v_ttb ) {
+                f_uy = vUv.y;
+            } else {
+                f_uy = 1.0-vUv.y;
+            }
+
             // A value between 0.0 ... height
-            float offsetY = ( mod( round(vUv.y*f_canvas_height), f_shutter_height) );
+            // float offsetY = ( mod( round(vUv.y*f_canvas_height), f_shutter_height) );
+            float offsetY = ( mod( round(f_uy*f_canvas_height), f_shutter_height) );
             // A value between 0.0 ... width
-            float offsetX = ( mod( round(vUv.x*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
+            //float offsetX = ( mod( round((1.0-vUv.x)*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
+            // float offsetX = ( mod( round((vUv.x)*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
+            float offsetX = ( mod( round(f_ux*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
+
+
 
             // Between 0.0 and f_shutter_square (exclusive)
             float relX = ( offsetY * f_shutter_width + (offsetX) );
