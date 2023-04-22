@@ -31,12 +31,28 @@ export class NavpointsFragment implements RenderableComponent {
     vector.x = ((vector.x + 1) * sceneContainer.rendererSize.width) / 2;
     vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
     vector.z = 0;
+    const colorMarker = getColorStyle(this.hudComponent.primaryColor, 1.0);
 
-    this.drawMarkerAt(vector);
-    this.drawDistanceLabelAt(vector, `d:${distance.toFixed(1)}m`);
+    if (this.currentFragmentBounds.contains(vector)) {
+      // Navpoint is in visible area
+      this.drawMarkerAt(vector, colorMarker);
+      this.drawDistanceLabelAt(vector, `${distance.toFixed(1)}m`);
+    } else {
+      // const directionPoint = { x : vector.x, y : vector.y };
+      // // Navpoint is out of visible scope
+      // if( vector.x < this.currentFragmentBounds.min.x ) {
+      //   directionPoint.x =
+      // }
+      const directionPoint = {
+        x: Math.min(Math.max(vector.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
+        y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
+      };
+      this.drawMarkerAt(directionPoint, "red");
+    }
   }
 
-  private drawMarkerAt(center: Tuple<number>) {
+  private drawMarkerAt(center: Tuple<number>, color: string) {
+    this.hudComponent.hudBitmap.strokeStyle = color;
     this.hudComponent.hudBitmap.beginPath();
     this.hudComponent.hudBitmap.moveTo(center.x - 5, center.y - 5);
     this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
@@ -80,7 +96,7 @@ export class NavpointsFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.fillStyle = colorFillStyle;
 
     const center = this.currentFragmentBounds.getCenter();
-    this.drawMarkerAt(center);
+    this.drawMarkerAt(center, colorStrokeStyle);
 
     for (var i = 0; i < sceneContainer.navpoints.length; i++) {
       this.drawNavpoint(sceneContainer, sceneContainer.navpoints[i]);
@@ -104,6 +120,13 @@ export class NavpointsFragment implements RenderableComponent {
     console.log("[NavpointsFragment] Resized", this.hudComponent.hudCanvas.width);
     // When the viewport sizes changes then then the HUD fragment bounds
     // need to be re-calculated as well.
-    this.currentFragmentBounds = new Bounds2Immutable(10, 10, width - 20, height - 20);
+    // Use 10% safe area from the frame borders
+    const safeAreaPct = 0.1;
+    this.currentFragmentBounds = new Bounds2Immutable(
+      width * safeAreaPct,
+      height * safeAreaPct,
+      width * (1.0 - 2 * safeAreaPct),
+      height * (1.0 - 2 * safeAreaPct)
+    );
   }
 }

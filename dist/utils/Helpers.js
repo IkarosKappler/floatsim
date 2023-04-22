@@ -196,6 +196,9 @@ var Bounds2Immutable = /** @class */ (function () {
         var maxAbs = this.getRelativePos(maxFracts.x, maxFracts.y);
         return new Bounds2Immutable(Math.min(minAbs.x, maxAbs.x), Math.min(minAbs.y, maxAbs.y), Math.abs(maxAbs.x - minAbs.x), Math.abs(maxAbs.y - minAbs.y));
     };
+    Bounds2Immutable.prototype.contains = function (point) {
+        return this.min.x <= point.x && point.x < this.max.x && this.min.y <= point.y && point.y < this.max.y;
+    };
     Bounds2Immutable.prototype.scale = function (factor) {
         return new Bounds2Immutable(this.min.x * factor, this.min.y * factor, this.width * factor, this.height * factor);
     };

@@ -45,10 +45,27 @@ var NavpointsFragment = /** @class */ (function () {
         vector.x = ((vector.x + 1) * sceneContainer.rendererSize.width) / 2;
         vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
         vector.z = 0;
-        this.drawMarkerAt(vector);
-        this.drawDistanceLabelAt(vector, "d:".concat(distance.toFixed(1), "m"));
+        var colorMarker = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
+        if (this.currentFragmentBounds.contains(vector)) {
+            // Navpoint is in visible area
+            this.drawMarkerAt(vector, colorMarker);
+            this.drawDistanceLabelAt(vector, "".concat(distance.toFixed(1), "m"));
+        }
+        else {
+            // const directionPoint = { x : vector.x, y : vector.y };
+            // // Navpoint is out of visible scope
+            // if( vector.x < this.currentFragmentBounds.min.x ) {
+            //   directionPoint.x =
+            // }
+            var directionPoint = {
+                x: Math.min(Math.max(vector.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
+                y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
+            };
+            this.drawMarkerAt(directionPoint, "red");
+        }
     };
-    NavpointsFragment.prototype.drawMarkerAt = function (center) {
+    NavpointsFragment.prototype.drawMarkerAt = function (center, color) {
+        this.hudComponent.hudBitmap.strokeStyle = color;
         this.hudComponent.hudBitmap.beginPath();
         this.hudComponent.hudBitmap.moveTo(center.x - 5, center.y - 5);
         this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
@@ -81,7 +98,7 @@ var NavpointsFragment = /** @class */ (function () {
         var colorFillStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.5);
         this.hudComponent.hudBitmap.fillStyle = colorFillStyle;
         var center = this.currentFragmentBounds.getCenter();
-        this.drawMarkerAt(center);
+        this.drawMarkerAt(center, colorStrokeStyle);
         for (var i = 0; i < sceneContainer.navpoints.length; i++) {
             this.drawNavpoint(sceneContainer, sceneContainer.navpoints[i]);
         }
@@ -101,7 +118,9 @@ var NavpointsFragment = /** @class */ (function () {
         console.log("[NavpointsFragment] Resized", this.hudComponent.hudCanvas.width);
         // When the viewport sizes changes then then the HUD fragment bounds
         // need to be re-calculated as well.
-        this.currentFragmentBounds = new Helpers_1.Bounds2Immutable(10, 10, width - 20, height - 20);
+        // Use 10% safe area from the frame borders
+        var safeAreaPct = 0.1;
+        this.currentFragmentBounds = new Helpers_1.Bounds2Immutable(width * safeAreaPct, height * safeAreaPct, width * (1.0 - 2 * safeAreaPct), height * (1.0 - 2 * safeAreaPct));
     };
     return NavpointsFragment;
 }());

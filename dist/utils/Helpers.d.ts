@@ -77,6 +77,7 @@ export declare class Bounds2Immutable implements IBounds2Immutable {
     getCenter(): Tuple<number>;
     getRelativePos(xFract: number, yFract: number): Tuple<number>;
     getRelativeBounds(minFracts: Tuple<number>, maxFracts: Tuple<number>): IBounds2Immutable;
+    contains(point: Tuple<number>): boolean;
     scale(factor: number): Bounds2Immutable;
     move(amount: Tuple<number>): Bounds2Immutable;
     static fromMinMax(min: Tuple<number>, max: Tuple<number>): Bounds2Immutable;

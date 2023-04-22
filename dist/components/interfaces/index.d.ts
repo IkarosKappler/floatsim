@@ -58,6 +58,7 @@ export interface IBounds2Immutable {
     readonly max: TupleImmutable<number>;
     readonly width: number;
     readonly height: number;
+    contains(point: Tuple<number>): boolean;
 }
 export interface SceneData {
     initialDepth: number;

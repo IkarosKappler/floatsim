@@ -189,6 +189,10 @@ export class Bounds2Immutable implements IBounds2Immutable {
     );
   }
 
+  contains(point: Tuple<number>): boolean {
+    return this.min.x <= point.x && point.x < this.max.x && this.min.y <= point.y && point.y < this.max.y;
+  }
+
   scale(factor: number): Bounds2Immutable {
     return new Bounds2Immutable(this.min.x * factor, this.min.y * factor, this.width * factor, this.height * factor);
   }
