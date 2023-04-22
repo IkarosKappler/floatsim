@@ -10,7 +10,7 @@
 
 import * as THREE from "three";
 import { TextureData } from "../../components/interfaces";
-import { vertex, fragment } from "./shaders/caustic_shader_material.glsl";
+import { Caustic_Shader } from "./shaders/caustic_shader_material.glsl";
 
 export class CausticShaderMaterial {
   readonly waterMaterial: THREE.ShaderMaterial;
@@ -77,8 +77,8 @@ export class CausticShaderMaterial {
     ]);
     this.waterMaterial = new THREE.ShaderMaterial({
       uniforms: uniforms,
-      vertexShader: vertex,
-      fragmentShader: fragment,
+      vertexShader: Caustic_Shader.vertex,
+      fragmentShader: Caustic_Shader.fragment,
       fog: true,
       transparent: false,
       alphaToCoverage: false // true

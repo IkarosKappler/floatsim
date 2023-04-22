@@ -54,5 +54,9 @@ globalThis.addEventListener("load", function () {
     pane.on("change", function (ev) {
         console.log("changed: " + JSON.stringify(ev.value));
     });
+    pane.addInput(sceneContainer.tweakParams, "cutsceneShutterValue", {
+        min: 0.0,
+        max: 1.0
+    });
 });
 //# sourceMappingURL=main.js.map

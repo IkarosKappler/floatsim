@@ -55,8 +55,7 @@ globalThis.addEventListener("load", function () {
     u_direction_h_ltr: { type: "b", value: true },
     u_direction_v_ttb: { type: "b", value: true },
     u_shutter_amount: { type: "f", value: tweakParams.shutter_amount },
-    u_texture: { type: "t", value: textureImage },
-    u_effect_color: { type: "t", value: new THREE.Vector4(0.29, 0.75, 0.89) }
+    u_texture: { type: "t", value: textureImage }
   };
   var cutsceneMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -86,16 +85,13 @@ globalThis.addEventListener("load", function () {
   orbitControls.enableZoom = true;
   orbitControls.target.copy(planeMesh.position);
 
-  //   console.log("Stats", Stats);
   this.stats = new Stats.Stats();
   document.querySelector("body").appendChild(this.stats.domElement);
 
   var loopNumber = 0;
   var _render = function () {
-    var elapsedTime = _self.clock.getElapsedTime();
     _self.stats.update();
     _self.renderer.render(_self.scene, _self.camera);
-    // _self.planeMesh.material.uniformsNeedUpdate = true;
     loopNumber++;
     requestAnimationFrame(_render);
   };

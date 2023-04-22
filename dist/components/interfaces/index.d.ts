@@ -33,6 +33,7 @@ export interface TweakParams {
     sonarZ: number;
     isRendering: boolean;
     highlightHudFragments: boolean;
+    cutsceneShutterValue: number;
 }
 export interface IDimension2 {
     width: number;

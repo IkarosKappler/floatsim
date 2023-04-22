@@ -159,9 +159,9 @@ export class FloatingParticles implements UpdateableComponent {
       blendDstAlpha: 1500
     });
     material.onBeforeCompile = (shader, renderer) => {
-      console.log("onBeforeCompile");
-      console.log(shader.fragmentShader);
-      console.log(shader.vertexShader);
+      // console.log("onBeforeCompile");
+      // console.log(shader.fragmentShader);
+      // console.log(shader.vertexShader);
 
       shader.fragmentShader = shader.fragmentShader
         .replace(

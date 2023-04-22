@@ -1,0 +1,15 @@
+- 2023-04-22
+  - Refactored the Caustic shader library (updating exports).
+  - Refactoring test cutscene shader to shader library in the simulation.
+- 2023-04-20
+  - Added a cutscene shader test.
+- 2023-03-xx
+  - Updating Perlin Terrain: int to float and added smoothening.
+  - Added ambient sound.
+  - Added HUD fragment: Variometer.
+  - Added HUD fragment: Depthmeter.
+  - Added HUD component: Compass.
+  - Added HUD fragment: general info display.
+  - Added Perlin terrain generation (test).
+  - Added caustic shader.
+  - Added fog.

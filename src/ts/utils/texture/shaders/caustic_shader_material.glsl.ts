@@ -1,4 +1,4 @@
-export const vertex = /* glsl */ `
+const vertex = /* glsl */ `
     // -- <fog_pars_vertex>
     // uniform vec3 fogColor;
     // varying float vFogDepth;
@@ -31,7 +31,7 @@ export const vertex = /* glsl */ `
     }
 `;
 
-export const fragment = /* glsl */ `
+const fragment = /* glsl */ `
     // -- <fog_pars_fragment>
     uniform vec3 fogColor;
     varying float vFogDepth;
@@ -91,3 +91,8 @@ export const fragment = /* glsl */ `
         // gl_FragColor.rgb = dithering( gl_FragColor.rgb );
     }
 `;
+
+export const Caustic_Shader = {
+  fragment,
+  vertex
+};

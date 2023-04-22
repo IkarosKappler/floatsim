@@ -90,8 +90,8 @@ var CausticShaderMaterial = /** @class */ (function () {
         ]);
         this.waterMaterial = new THREE.ShaderMaterial({
             uniforms: uniforms,
-            vertexShader: caustic_shader_material_glsl_1.vertex,
-            fragmentShader: caustic_shader_material_glsl_1.fragment,
+            vertexShader: caustic_shader_material_glsl_1.Caustic_Shader.vertex,
+            fragmentShader: caustic_shader_material_glsl_1.Caustic_Shader.fragment,
             fog: true,
             transparent: false,
             alphaToCoverage: false // true

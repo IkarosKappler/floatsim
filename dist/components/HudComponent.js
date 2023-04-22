@@ -30,8 +30,11 @@ var DepthMeterFragment_1 = require("./hud/DepthMeterFragment");
 var LowerInfoHudFragment_1 = require("./hud/LowerInfoHudFragment");
 var VariometerFragment_1 = require("./hud/VariometerFragment");
 // import { SonarComponent } from "./cockpit/SonarComponent";
+var cutscene_shader_material_glsl_1 = require("../utils/texture/shaders/cutscene_shader_material.glsl");
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor, warningColor) {
+        console.log("HudComponent vertex shader", cutscene_shader_material_glsl_1.Cutscene_Shader.vertex);
+        console.log("HudComponent fragment shader", cutscene_shader_material_glsl_1.Cutscene_Shader.fragment);
         this.primaryColor = primaryColor;
         this.warningColor = warningColor;
         // We will use 2D canvas element to render our HUD.
@@ -58,15 +61,24 @@ var HudComponent = /** @class */ (function () {
         // Create texture from rendered graphics.
         this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
         this.hudDynamicTexture.needsUpdate = true;
-        // Create HUD material.
-        this.hudMaterial = new THREE.MeshBasicMaterial({
-            map: this.hudDynamicTexture,
+        var uniforms = {
+            u_shutter_color: { type: "t", value: new THREE.Color(0x001828) },
+            u_canvas_width: { type: "i", value: width },
+            u_canvas_height: { type: "i", value: height },
+            u_use_texture: { type: "b", value: false },
+            u_direction_h_ltr: { type: "b", value: true },
+            u_direction_v_ttb: { type: "b", value: true },
+            u_shutter_amount: { type: "f", value: 0.5 },
+            u_texture: { type: "t", value: this.hudDynamicTexture }
+        };
+        this.hudMaterial = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: cutscene_shader_material_glsl_1.Cutscene_Shader.vertex,
+            fragmentShader: cutscene_shader_material_glsl_1.Cutscene_Shader.fragment,
             transparent: true
-            // opacity: 1
-            // blending: THREE.AdditiveBlending
         });
-        // Create plane to render the HUD. This plane fill the whole screen.
-        var planeGeometry = new THREE.PlaneGeometry(100, 100); //width, height);
+        // Create plane to render the HUD. This plane fills the whole screen.
+        var planeGeometry = new THREE.PlaneGeometry(100, 100);
         this.plane = new THREE.Mesh(planeGeometry, this.hudMaterial);
         this.plane.scale.set(width / 100, height / 100, 1);
         this.plane.position.z = 0; // Depth in the scene
@@ -90,6 +102,8 @@ var HudComponent = /** @class */ (function () {
         this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
         this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
         this.hudDynamicTexture.needsUpdate = true;
+        this.hudMaterial.uniforms.u_shutter_amount.value = tweakParams.cutsceneShutterValue;
+        this.hudMaterial.uniformsNeedUpdate = true;
     };
     /**
      * @implement RenderableComponent.renderFragment
@@ -107,7 +121,10 @@ var HudComponent = /** @class */ (function () {
         this.hudCanvas.height = height;
         this.hudDynamicTexture = new THREE.Texture(this.hudCanvas);
         this.hudDynamicTexture.needsUpdate = true;
-        this.hudMaterial.map = this.hudDynamicTexture;
+        this.hudMaterial.uniforms.u_texture.value = this.hudDynamicTexture;
+        this.hudMaterial.uniforms.u_canvas_width.value = width;
+        this.hudMaterial.uniforms.u_canvas_height.value = height;
+        this.hudMaterial.uniformsNeedUpdate = true;
         this.plane.scale.set(width / 100, height / 100, 1);
         this.lowerInfoHud.updateSize(width, height);
         this.depthMeter.updateSize(width, height);

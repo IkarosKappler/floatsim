@@ -35,4 +35,8 @@ globalThis.addEventListener("load", () => {
   pane.on("change", (ev: TweakPane.TpChangeEvent<number>) => {
     console.log("changed: " + JSON.stringify(ev.value));
   });
+  pane.addInput(sceneContainer.tweakParams, "cutsceneShutterValue", {
+    min: 0.0,
+    max: 1.0
+  });
 });

@@ -69,7 +69,8 @@ var SceneContainer = /** @class */ (function () {
             compassY: 0,
             compassZ: 0,
             isRendering: true,
-            highlightHudFragments: false
+            highlightHudFragments: false,
+            cutsceneShutterValue: 1.0
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).

@@ -97,9 +97,9 @@ var FloatingParticles = /** @class */ (function () {
             blendDstAlpha: 1500
         });
         material.onBeforeCompile = function (shader, renderer) {
-            console.log("onBeforeCompile");
-            console.log(shader.fragmentShader);
-            console.log(shader.vertexShader);
+            // console.log("onBeforeCompile");
+            // console.log(shader.fragmentShader);
+            // console.log(shader.vertexShader);
             shader.fragmentShader = shader.fragmentShader
                 .replace("#include <clipping_planes_pars_fragment>", ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n"))
                 .replace("#include <premultiplied_alpha_fragment>", ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n"));

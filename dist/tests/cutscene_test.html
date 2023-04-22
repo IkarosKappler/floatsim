@@ -41,8 +41,6 @@
 
     <script id="fragmentShader" type="x-shader/x-fragment">
 
-        #define FOG_EXP2 1
-
         // The shutter color for opaque pixels
         uniform vec3 u_shutter_color;
 
@@ -103,14 +101,9 @@
             }
 
             // A value between 0.0 ... height
-            // float offsetY = ( mod( round(vUv.y*f_canvas_height), f_shutter_height) );
             float offsetY = ( mod( round(f_uy*f_canvas_height), f_shutter_height) );
             // A value between 0.0 ... width
-            //float offsetX = ( mod( round((1.0-vUv.x)*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
-            // float offsetX = ( mod( round((vUv.x)*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
             float offsetX = ( mod( round(f_ux*f_canvas_width - rowOffsetFactor*offsetY), f_shutter_width) );
-
-
 
             // Between 0.0 and f_shutter_square (exclusive)
             float relX = ( offsetY * f_shutter_width + (offsetX) );

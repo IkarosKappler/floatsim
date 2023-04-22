@@ -32,14 +32,16 @@ export interface Triple<T> {
 }
 
 export interface TweakParams {
-  compassX: number;
-  compassY: number;
+  compassX: number; // currently not visible
+  compassY: number; // currently not visible
   compassZ: number;
-  sonarX: number;
-  sonarY: number;
+  sonarX: number; // currently not visible
+  sonarY: number; // currently not visible
   sonarZ: number;
   isRendering: boolean;
   highlightHudFragments: boolean;
+  // Must be in [0.0..1.0]
+  cutsceneShutterValue: number;
 }
 
 export interface IDimension2 {
