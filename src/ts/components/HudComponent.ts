@@ -66,7 +66,7 @@ export class HudComponent implements RenderableComponent {
       u_shutter_color: { type: "t", value: new THREE.Color(0x001828) },
       u_canvas_width: { type: "i", value: width },
       u_canvas_height: { type: "i", value: height },
-      u_use_texture: { type: "b", value: false },
+      u_use_texture: { type: "b", value: true },
       u_direction_h_ltr: { type: "b", value: true },
       u_direction_v_ttb: { type: "b", value: true },
       u_shutter_amount: { type: "f", value: 0.5 },

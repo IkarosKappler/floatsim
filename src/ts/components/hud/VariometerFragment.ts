@@ -123,32 +123,59 @@ export class VariometerFragment implements RenderableComponent {
         this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
         this.currentHudBounds.min.y + offsetV
       );
-      // second step
+      // second step (A)
       this.hudComponent.hudBitmap.moveTo(
         this.currentHudBounds.min.x + triangleSize.width + 1,
-        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.5
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.3333
       );
       this.hudComponent.hudBitmap.lineTo(
-        this.currentHudBounds.min.x + triangleSize.width + 1 + 10,
-        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.5
+        this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.3333
+      );
+      // second step (B)
+      this.hudComponent.hudBitmap.moveTo(
+        this.currentHudBounds.min.x + triangleSize.width + 1,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.6666
+      );
+      this.hudComponent.hudBitmap.lineTo(
+        this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.6666
       );
       // Third step (first)
       this.hudComponent.hudBitmap.moveTo(
         this.currentHudBounds.min.x + triangleSize.width + 1,
-        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.25
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.1667
       );
       this.hudComponent.hudBitmap.lineTo(
-        this.currentHudBounds.min.x + triangleSize.width + 1 + 4,
-        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.25
+        this.currentHudBounds.min.x + triangleSize.width + 1 + 8,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.1667
       );
       // Third step (second)
       this.hudComponent.hudBitmap.moveTo(
         this.currentHudBounds.min.x + triangleSize.width + 1,
-        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.75
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.5
       );
       this.hudComponent.hudBitmap.lineTo(
-        this.currentHudBounds.min.x + triangleSize.width + 1 + 4,
-        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.75
+        this.currentHudBounds.min.x + triangleSize.width + 1 + 8,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.5
+      );
+      // Third step (third)
+      this.hudComponent.hudBitmap.moveTo(
+        this.currentHudBounds.min.x + triangleSize.width + 1,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.6667
+      );
+      this.hudComponent.hudBitmap.lineTo(
+        this.currentHudBounds.min.x + triangleSize.width + 1 + 8,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.6667
+      );
+      // Third step (fourth)
+      this.hudComponent.hudBitmap.moveTo(
+        this.currentHudBounds.min.x + triangleSize.width + 1,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.8333
+      );
+      this.hudComponent.hudBitmap.lineTo(
+        this.currentHudBounds.min.x + triangleSize.width + 1 + 8,
+        this.currentHudBounds.min.y + offsetV - mainStepPixels * 0.8333
       );
     } // END while
     this.hudComponent.hudBitmap.closePath();

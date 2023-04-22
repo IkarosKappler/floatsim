@@ -51,9 +51,9 @@ globalThis.addEventListener("load", function () {
     });
     pane.addInput(sceneContainer.tweakParams, "isRendering");
     pane.addInput(sceneContainer.tweakParams, "highlightHudFragments");
-    pane.on("change", function (ev) {
-        console.log("changed: " + JSON.stringify(ev.value));
-    });
+    // pane.on("change", (ev: TweakPane.TpChangeEvent<number>) => {
+    //   console.log("changed: " + JSON.stringify(ev.value));
+    // });
     pane.addInput(sceneContainer.tweakParams, "cutsceneShutterValue", {
         min: 0.0,
         max: 1.0

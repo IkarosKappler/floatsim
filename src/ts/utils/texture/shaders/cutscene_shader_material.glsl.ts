@@ -46,7 +46,7 @@ const fragment = /* glsl */ `
         // TODO: pass pixel size as uniforms
         float f_canvas_width = float(u_canvas_width); // 100.0;
         float f_canvas_height = float(u_canvas_height); // 100.0;
-        float rowOffsetFactor = 2.0;
+        float rowOffsetFactor = 4.0;
         vec4 light_color = vec4(1.0, 1.0, 1.0, 0.0);
         if( u_use_texture ) {
             light_color = texture2D(u_texture, vUv.xy);
