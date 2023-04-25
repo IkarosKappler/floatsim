@@ -59,9 +59,6 @@ export class ObjFileHandler {
             if ((child as THREE.Mesh).isMesh) {
               // TODO: check type
               const childMesh = child as THREE.Mesh;
-              // childMesh.geometry.uvsNeedUpdate = true;
-              // childMesh.geometry.buffersNeedUpdate = true;
-              // childMesh.geometry.computeVertexNormals();
               this.locateMaterial(childMesh, materials);
               if (Array.isArray(childMesh.material)) {
                 childMesh.material.forEach(mat => {

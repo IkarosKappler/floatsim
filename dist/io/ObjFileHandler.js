@@ -71,9 +71,6 @@ var ObjFileHandler = /** @class */ (function () {
                         if (child.isMesh) {
                             // TODO: check type
                             var childMesh = child;
-                            // childMesh.geometry.uvsNeedUpdate = true;
-                            // childMesh.geometry.buffersNeedUpdate = true;
-                            // childMesh.geometry.computeVertexNormals();
                             _this.locateMaterial(childMesh, materials);
                             if (Array.isArray(childMesh.material)) {
                                 childMesh.material.forEach(function (mat) {

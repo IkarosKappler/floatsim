@@ -36,6 +36,7 @@ var NavpointsFragment = /** @class */ (function () {
         // TODO: reuse the vector somehow!
         var vector = new THREE.Vector3(navpoint.position.x, navpoint.position.y, navpoint.position.z);
         var distance = sceneContainer.camera.position.distanceTo(vector);
+        var difference = vector.y - sceneContainer.camera.position.y;
         // How to converting world coordinates to 2D mouse coordinates in ThreeJS
         // Found at
         //    https://discourse.threejs.org/t/how-to-converting-world-coordinates-to-2d-mouse-coordinates-in-threejs/2251
@@ -49,7 +50,7 @@ var NavpointsFragment = /** @class */ (function () {
         if (this.currentFragmentBounds.contains(vector)) {
             // Navpoint is in visible area
             this.drawMarkerAt(vector, colorMarker);
-            this.drawDistanceLabelAt(vector, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
+            this.drawLabelAt(vector.x, vector.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
         else {
             // const directionPoint = { x : vector.x, y : vector.y };
@@ -62,8 +63,9 @@ var NavpointsFragment = /** @class */ (function () {
                 y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
             };
             this.drawMarkerAt(directionPoint, "red");
-            this.drawDistanceLabelAt(directionPoint, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
+            this.drawLabelAt(directionPoint.x, directionPoint.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
+        this.drawLabelAt(vector.x, vector.y + 12, " (".concat(difference < 0 ? "﹀" : "︿", " ").concat(difference.toFixed(1), "m)"));
     };
     NavpointsFragment.prototype.drawMarkerAt = function (center, color) {
         this.hudComponent.hudBitmap.strokeStyle = color;
@@ -76,9 +78,9 @@ var NavpointsFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.closePath();
     };
-    NavpointsFragment.prototype.drawDistanceLabelAt = function (center, label) {
+    NavpointsFragment.prototype.drawLabelAt = function (x, y, label) {
         this.hudComponent.hudBitmap.beginPath();
-        this.hudComponent.hudBitmap.fillText(label, center.x + 10, center.y - 8);
+        this.hudComponent.hudBitmap.fillText(label, x + 10, y - 8);
         // this.hudComponent.hudBitmap.fill();
         this.hudComponent.hudBitmap.closePath();
     };

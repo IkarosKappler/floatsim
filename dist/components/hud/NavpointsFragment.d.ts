@@ -7,7 +7,7 @@ export declare class NavpointsFragment implements RenderableComponent {
     constructor(hudComponent: HudComponent);
     private drawNavpoint;
     private drawMarkerAt;
-    private drawDistanceLabelAt;
+    private drawLabelAt;
     /**
      * @implement RenderableComponent.befoRerender
      */

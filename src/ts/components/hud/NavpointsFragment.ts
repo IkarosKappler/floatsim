@@ -20,6 +20,7 @@ export class NavpointsFragment implements RenderableComponent {
     const vector = new THREE.Vector3(navpoint.position.x, navpoint.position.y, navpoint.position.z);
 
     const distance = sceneContainer.camera.position.distanceTo(vector);
+    const difference = vector.y - sceneContainer.camera.position.y;
 
     // How to converting world coordinates to 2D mouse coordinates in ThreeJS
     // Found at
@@ -36,7 +37,7 @@ export class NavpointsFragment implements RenderableComponent {
     if (this.currentFragmentBounds.contains(vector)) {
       // Navpoint is in visible area
       this.drawMarkerAt(vector, colorMarker);
-      this.drawDistanceLabelAt(vector, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      this.drawLabelAt(vector.x, vector.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
     } else {
       // const directionPoint = { x : vector.x, y : vector.y };
       // // Navpoint is out of visible scope
@@ -48,8 +49,9 @@ export class NavpointsFragment implements RenderableComponent {
         y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
       };
       this.drawMarkerAt(directionPoint, "red");
-      this.drawDistanceLabelAt(directionPoint, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      this.drawLabelAt(directionPoint.x, directionPoint.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
     }
+    this.drawLabelAt(vector.x, vector.y + 12, ` (${difference < 0 ? "﹀" : "︿"} ${difference.toFixed(1)}m)`);
   }
 
   private drawMarkerAt(center: Tuple<number>, color: string) {
@@ -64,9 +66,9 @@ export class NavpointsFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.closePath();
   }
 
-  private drawDistanceLabelAt(center: Tuple<number>, label: string) {
+  private drawLabelAt(x: number, y: number, label: string) {
     this.hudComponent.hudBitmap.beginPath();
-    this.hudComponent.hudBitmap.fillText(label, center.x + 10, center.y - 8);
+    this.hudComponent.hudBitmap.fillText(label, x + 10, y - 8);
     // this.hudComponent.hudBitmap.fill();
     this.hudComponent.hudBitmap.closePath();
   }

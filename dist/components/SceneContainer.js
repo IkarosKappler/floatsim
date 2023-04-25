@@ -322,22 +322,29 @@ var SceneContainer = /** @class */ (function () {
         // URGH, FIX THIS POSITIONING PROBLEM
         var buoyXYCoords = { x: terrain.worldSize.width / 2.0 - 160.0, y: terrain.worldSize.depth / 2.0 - 20.0 };
         var heightValue = terrain.getHeightAt(buoyXYCoords.x, buoyXYCoords.y);
-        var targetPosition = new THREE.Vector3();
-        targetPosition.set(terrain.bounds.min.x + buoyXYCoords.x, terrain.bounds.min.y + heightValue, //  + terrain.mesh.position.y, //50.0, // 10 meters above the ground
+        var targetPositionA = new THREE.Vector3();
+        targetPositionA.set(terrain.bounds.min.x + buoyXYCoords.x, terrain.bounds.min.y + heightValue, //  + terrain.mesh.position.y, //50.0, // 10 meters above the ground
         terrain.bounds.min.z + buoyXYCoords.y);
         // Place buoy 6m above ground
-        targetPosition.add(terrain.mesh.position);
-        targetPosition.y += 6.0;
-        this.navpoints.push({ position: targetPosition, label: "Nav A" });
-        this.addBuoyAt(targetPosition);
+        targetPositionA.add(terrain.mesh.position);
+        targetPositionA.y += 6.0;
+        var targetPositionB = targetPositionA.clone();
+        targetPositionB.x -= 9.0;
+        this.navpoints.push({ position: targetPositionA, label: "Nav A" });
+        this.navpoints.push({ position: targetPositionB, label: "Nav B" });
+        this.addBuoysAt([targetPositionA, targetPositionB]);
     };
-    SceneContainer.prototype.addBuoyAt = function (targetPosition) {
+    SceneContainer.prototype.addBuoysAt = function (targetPositions) {
+        var _this = this;
+        if (targetPositions.length === 0) {
+            return;
+        }
         // Also load visual nav buoys
         var basePath = "resources/meshes/wavefront/buoy-blender/";
         // const objFileName = "buoy-a.obj";
         // const objFileName = "buoy-a-v2-lowpoly-centered.obj";
         var objFileName = "buoy-blender-v1.obj";
-        var targetBounds = { width: 3.0, depth: 3.0, height: 4.0 };
+        var targetBounds = { width: 1.2, depth: 1.2, height: 1.5 };
         // const heightValue = terrain.getHeightAt(buoyXYCoords.x, buoyXYCoords.y);
         // const targetPosition = new THREE.Vector3();
         // targetPosition.set(
@@ -373,9 +380,21 @@ var SceneContainer = /** @class */ (function () {
                         childMesh.material.needsUpdate = true;
                     }
                 }
+                // Clone.
             });
+            // if ((loadedObject as THREE.Mesh).isMesh) {
+            console.log("Creating buoy clones ...", targetPositions.length);
+            for (var i = 1; i < targetPositions.length; i++) {
+                // const buoyCopy = new THREE.InstancedMesh(loadedObject.geometry, loadedObject.geometry);
+                var buoyCopy = loadedObject.clone();
+                buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
+                _this.scene.add(buoyCopy);
+            }
+            // } else {
+            //   console.warn("[Warning] Cannot add instanced mesh copies of the buoy mesh. Loaded object is not a THREE.Mesh instance.");
+            // }
         };
-        new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, buoyObjectLoaded, buoyMaterialsLoaded);
+        new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPositions[0] }, buoyObjectLoaded, buoyMaterialsLoaded);
     };
     SceneContainer.prototype.getShipVerticalInclination = function () {
         var worldDir = new THREE.Vector3();
