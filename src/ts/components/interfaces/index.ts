@@ -116,6 +116,7 @@ export interface TextureData {
 
 export interface Navpoint {
   position: Triple<number>;
+  label: string;
 }
 
 export interface ISceneContainer {

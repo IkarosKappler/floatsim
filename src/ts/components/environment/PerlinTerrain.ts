@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 import { CausticShaderMaterial } from "../../utils/texture/CausticShaderMaterial";
-import { IHeightMap, Size3Immutable, TextureData } from "../interfaces";
+import { IHeightMap, Size3Immutable, TextureData, Triple } from "../interfaces";
 import { bounds2size } from "../../utils/Helpers";
 
 export class PerlinTerrain {
@@ -44,6 +44,21 @@ export class PerlinTerrain {
     const i: number = this.heightMap.getOffset(xRel, zRel);
     return this.heightMap.data[i] * this.worldSize.height;
   }
+
+  /**
+   * Get the absolute position in this terrain for the given x-z coordinates,
+   * the y position relative to bounds.min.y at the
+   * given relative world coordinates. World coordinates go from
+   *   - 0 <= x < width
+   *   - 0 <= y < depth
+   *
+   * @param {Triple<number>} position - The x-z position to use. Result will be stored in the y component.
+   * @returns {Triple<number>} The same vector but with new y value.
+   */
+  // getThreePositionAt(position: Triple<number>): Triple<number> {
+  //   position.y = this.bounds.min.y + this.getHeightAt(position.x, position.z);
+  //   return position;
+  // }
 
   /**
    * A static helper function to convert a heightmap to a plane geometry. Useful if

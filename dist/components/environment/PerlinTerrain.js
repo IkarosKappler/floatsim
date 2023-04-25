@@ -56,6 +56,20 @@ var PerlinTerrain = /** @class */ (function () {
         return this.heightMap.data[i] * this.worldSize.height;
     };
     /**
+     * Get the absolute position in this terrain for the given x-z coordinates,
+     * the y position relative to bounds.min.y at the
+     * given relative world coordinates. World coordinates go from
+     *   - 0 <= x < width
+     *   - 0 <= y < depth
+     *
+     * @param {Triple<number>} position - The x-z position to use. Result will be stored in the y component.
+     * @returns {Triple<number>} The same vector but with new y value.
+     */
+    // getThreePositionAt(position: Triple<number>): Triple<number> {
+    //   position.y = this.bounds.min.y + this.getHeightAt(position.x, position.z);
+    //   return position;
+    // }
+    /**
      * A static helper function to convert a heightmap to a plane geometry. Useful if
      * you need the geometry without the specific terrain material.
      * @param heightMap

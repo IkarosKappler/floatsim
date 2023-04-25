@@ -49,7 +49,7 @@ var NavpointsFragment = /** @class */ (function () {
         if (this.currentFragmentBounds.contains(vector)) {
             // Navpoint is in visible area
             this.drawMarkerAt(vector, colorMarker);
-            this.drawDistanceLabelAt(vector, "".concat(distance.toFixed(1), "m"));
+            this.drawDistanceLabelAt(vector, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
         else {
             // const directionPoint = { x : vector.x, y : vector.y };
@@ -62,6 +62,7 @@ var NavpointsFragment = /** @class */ (function () {
                 y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
             };
             this.drawMarkerAt(directionPoint, "red");
+            this.drawDistanceLabelAt(directionPoint, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
     };
     NavpointsFragment.prototype.drawMarkerAt = function (center, color) {

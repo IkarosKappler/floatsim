@@ -13,7 +13,7 @@ var AudioPlayer = /** @class */ (function () {
         var _this = this;
         this.audioNode = document.createElement("audio");
         this.audioNode.addEventListener("canplay", function () {
-            console.log("canplay", _this.isPlayRequested);
+            // console.log("canplay", this.isPlayRequested);
             _this.isReady = true;
             if (_this.isPlayRequested) {
                 _this.play();

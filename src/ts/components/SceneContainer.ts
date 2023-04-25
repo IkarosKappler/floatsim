@@ -28,7 +28,7 @@ import { Params } from "../utils/Params";
 import { PerlinTexture } from "../utils/texture/PerlinTexture";
 import { AudioPlayer } from "../utils/AudioPlayer";
 import { FloatingParticles } from "./environment/FloatingParticles";
-import { Concrete } from "./environment/Concrete";
+import { ObjFileHandler } from "../io/ObjFileHandler";
 import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 import { CockpitScene } from "./cockpit/CockpitScene";
 
@@ -279,13 +279,13 @@ export class SceneContainer implements ISceneContainer {
     });
     // Enable and disable mouse controls when mouse leaves/re-enters the screen.
     this.renderer.domElement.addEventListener("mouseleave", () => {
-      console.log("leave");
+      // console.log("leave");
       _self.controls.enabled = false;
     });
     this.renderer.domElement.addEventListener("mouseenter", () => {
-      console.log("enter");
+      // console.log("enter");
       _self.controls.enabled = true;
-      console.log(_self.controls);
+      // console.log(_self.controls);
     });
 
     // Call the rendering function. This will cause and infinite recursion (we want
@@ -369,7 +369,7 @@ export class SceneContainer implements ISceneContainer {
       this.addVisibleBoundingBox(loadedObject);
       this.collidableMeshes.push(loadedObject);
     };
-    new Concrete(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
+    new ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
   addGroundBuoys(terrain: PerlinTerrain) {
@@ -405,11 +405,80 @@ export class SceneContainer implements ISceneContainer {
   }
 
   addNavpoints(terrain: PerlinTerrain) {
-    const navPointA = { position: new THREE.Vector3(130.0, 0.0, -135.0) };
-    const navPointB = { position: new THREE.Vector3(-130.0, 0.0, 135.0) };
-    navPointA.position.y += terrain.bounds.min.y;
-    navPointB.position.y += terrain.bounds.min.y;
-    this.navpoints.push(navPointA, navPointB);
+    // // Also load visual nav buoys
+    // const basePath = "resources/meshes/wavefront/buoy-blender/";
+    // // const objFileName = "buoy-a.obj";
+    // // const objFileName = "buoy-a-v2-lowpoly-centered.obj";
+    // const objFileName = "buoy-blender-v1.obj";
+    // const targetBounds = { width: 4.0, depth: 4.0, height: 4.0 };
+    // Find center (our location) and add something
+    // URGH, FIX THIS POSITIONING PROBLEM
+    const buoyXYCoords = { x: terrain.worldSize.width / 2.0 - 160.0, y: terrain.worldSize.depth / 2.0 - 20.0 };
+
+    const heightValue = terrain.getHeightAt(buoyXYCoords.x, buoyXYCoords.y);
+    const targetPosition = new THREE.Vector3();
+    targetPosition.set(
+      terrain.bounds.min.x + buoyXYCoords.x,
+      terrain.bounds.min.y + heightValue, //  + terrain.mesh.position.y, //50.0, // 10 meters above the ground
+      terrain.bounds.min.z + buoyXYCoords.y
+    );
+    // Place buoy 6m above ground
+    targetPosition.add(terrain.mesh.position);
+    targetPosition.y += 6.0;
+    this.navpoints.push({ position: targetPosition, label: "Nav A" });
+    this.addBuoyAt(targetPosition);
+  }
+
+  private addBuoyAt(targetPosition: THREE.Vector3) {
+    // Also load visual nav buoys
+    const basePath = "resources/meshes/wavefront/buoy-blender/";
+    // const objFileName = "buoy-a.obj";
+    // const objFileName = "buoy-a-v2-lowpoly-centered.obj";
+    const objFileName = "buoy-blender-v1.obj";
+    const targetBounds = { width: 3.0, depth: 3.0, height: 3.2 };
+    // const heightValue = terrain.getHeightAt(buoyXYCoords.x, buoyXYCoords.y);
+    // const targetPosition = new THREE.Vector3();
+    // targetPosition.set(
+    //   terrain.bounds.min.x + buoyXYCoords.x,
+    //   terrain.bounds.min.y + heightValue + 50.0, // 10 meters above the ground
+    //   terrain.bounds.min.z + buoyXYCoords.y
+    // );
+    // targetPosition.add(terrain.mesh.position);
+    // targetPosition.y += 2 * 3.0;
+    // this.scene.add(buoy);
+    const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
+      console.log("Buoy mesh loaded");
+      // loadedObject.rotateX(-Math.PI / 2.0);
+      // NOOP
+    };
+    const buoyMaterialsLoaded = (loadedObject: THREE.Object3D) => {
+      console.log("Buoy material loaded");
+      // loadedObject.rotateX(-Math.PI / 2.0);
+      console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
+      loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
+        if ((child as THREE.Mesh).isMesh) {
+          // TODO: check type
+          const childMesh = child as THREE.Mesh;
+          console.log("addBuoyAt", child);
+          if (Array.isArray(childMesh.material)) {
+            childMesh.material.forEach(mat => {
+              mat.side = THREE.BackSide;
+              mat.needsUpdate = true;
+            });
+          } else {
+            childMesh.material.side = THREE.BackSide;
+            childMesh.material.needsUpdate = true;
+          }
+        }
+      });
+    };
+    new ObjFileHandler(this).loadObjFile(
+      basePath,
+      objFileName,
+      { targetBounds, targetPosition },
+      buoyObjectLoaded,
+      buoyMaterialsLoaded
+    );
   }
 
   getShipVerticalInclination() {

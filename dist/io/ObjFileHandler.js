@@ -1,6 +1,6 @@
 "use strict";
 /**
- * A simple test for loading immobile "concrete" assets.
+ * A simple test for loading wavefront OBJ and MTL assets.
  *
  * @author  Ikaros Kappler
  * @version 1.0.0
@@ -30,12 +30,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Concrete = void 0;
+exports.ObjFileHandler = void 0;
 var THREE = __importStar(require("three"));
 var OBJLoader_1 = require("three/examples/jsm/loaders/OBJLoader");
 var MTLLoader_1 = require("three/examples/jsm/loaders/MTLLoader");
-var Concrete = /** @class */ (function () {
-    function Concrete(sceneContainer) {
+var ObjFileHandler = /** @class */ (function () {
+    function ObjFileHandler(sceneContainer) {
         this.sceneContainer = sceneContainer;
     }
     /**
@@ -47,25 +47,11 @@ var Concrete = /** @class */ (function () {
      * @param {Size3Immutable} options.targetBounds
      * @param {TripleImmutable<number>} options.targetPosition
      */
-    Concrete.prototype.loadObjFile = function (basePath, objFileName, options, callback) {
+    ObjFileHandler.prototype.loadObjFile = function (basePath, objFileName, options, onObjectLoaded, onMaterialsLoaded) {
         var _this = this;
         // Try loading the object
         this.loadObj(basePath, objFileName).then(function (loadedObject) {
             console.log("object", loadedObject);
-            var materialFileNames = loadedObject.materialLibraries;
-            if (materialFileNames) {
-                _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
-                    console.log("Materials", materials);
-                    loadedObject.traverse(function (child) {
-                        if (child.isMesh) {
-                            // TODO: check type
-                            var childMesh = child;
-                            childMesh.geometry.computeVertexNormals();
-                            _this.locateMaterial(childMesh, materials);
-                        }
-                    });
-                });
-            } // END if
             if (options && options.targetBounds) {
                 _this.applyScale(loadedObject, options.targetBounds);
             }
@@ -74,9 +60,36 @@ var Concrete = /** @class */ (function () {
             }
             console.log("Loaded OBJ file ", objFileName);
             _this.sceneContainer.scene.add(loadedObject);
-            if (callback) {
-                callback(loadedObject);
+            if (onObjectLoaded) {
+                onObjectLoaded(loadedObject);
             }
+            var materialFileNames = loadedObject.materialLibraries;
+            if (materialFileNames) {
+                _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
+                    console.log("Materials", materials);
+                    loadedObject.traverse(function (child) {
+                        if (child.isMesh) {
+                            // TODO: check type
+                            var childMesh = child;
+                            // childMesh.geometry.uvsNeedUpdate = true;
+                            // childMesh.geometry.buffersNeedUpdate = true;
+                            // childMesh.geometry.computeVertexNormals();
+                            _this.locateMaterial(childMesh, materials);
+                            if (Array.isArray(childMesh.material)) {
+                                childMesh.material.forEach(function (mat) {
+                                    mat.needsUpdate = true;
+                                });
+                            }
+                            else {
+                                childMesh.material.needsUpdate = true;
+                            }
+                        }
+                    });
+                    if (onMaterialsLoaded) {
+                        onMaterialsLoaded(loadedObject);
+                    }
+                });
+            } // END if
         });
     };
     /**
@@ -86,7 +99,7 @@ var Concrete = /** @class */ (function () {
      * @param {string} objFileName - Usually an *.obj file name.
      * @returns {Promise<THREE.Group>} The object group from the file.
      */
-    Concrete.prototype.loadObj = function (basePath, objFileName) {
+    ObjFileHandler.prototype.loadObj = function (basePath, objFileName) {
         var objLoader = new OBJLoader_1.OBJLoader();
         return new Promise(function (accept, reject) {
             objLoader.load(basePath + objFileName, // An *.obj file
@@ -107,7 +120,7 @@ var Concrete = /** @class */ (function () {
      * @param {string[]} materialLibraries - Usually an array of *.mtl file names that are located in the given base path.
      * @returns
      */
-    Concrete.prototype.loadMaterials = function (basePath, materialLibraries) {
+    ObjFileHandler.prototype.loadMaterials = function (basePath, materialLibraries) {
         var promises = [];
         for (var i = 0; i < materialLibraries.length; i++) {
             promises.push(this.loadMaterial(basePath, materialLibraries[i]));
@@ -121,7 +134,7 @@ var Concrete = /** @class */ (function () {
      * @param {string} materialFileName - This should be an *.mtl file.
      * @returns
      */
-    Concrete.prototype.loadMaterial = function (basePath, materialFileName) {
+    ObjFileHandler.prototype.loadMaterial = function (basePath, materialFileName) {
         var mtlLoader = new MTLLoader_1.MTLLoader();
         return new Promise(function (accept, reject) {
             mtlLoader.load(basePath + materialFileName, // "models/monkey.mtl",
@@ -137,14 +150,14 @@ var Concrete = /** @class */ (function () {
             });
         });
     };
-    Concrete.prototype.applyScale = function (object, targetSize) {
+    ObjFileHandler.prototype.applyScale = function (object, targetSize) {
         var objectBounds = new THREE.Box3().setFromObject(object);
         var objectSize = new THREE.Vector3();
         objectBounds.getSize(objectSize);
         object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
         console.log("New scale", object.scale);
     };
-    Concrete.prototype.locateMaterial = function (object, materials) {
+    ObjFileHandler.prototype.locateMaterial = function (object, materials) {
         var materialName = object.material.name;
         console.log("Looking for material named ".concat(materialName));
         if (materialName) {
@@ -163,7 +176,7 @@ var Concrete = /** @class */ (function () {
             }
         }
     };
-    return Concrete;
+    return ObjFileHandler;
 }());
-exports.Concrete = Concrete;
-//# sourceMappingURL=Concrete.js.map
+exports.ObjFileHandler = ObjFileHandler;
+//# sourceMappingURL=ObjFileHandler.js.map

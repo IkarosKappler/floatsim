@@ -1,5 +1,5 @@
 /**
- * A simple test for loading immobile "concrete" assets.
+ * A simple test for loading wavefront OBJ and MTL assets.
  *
  * @author  Ikaros Kappler
  * @version 1.0.0
@@ -8,11 +8,11 @@
 
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { SceneContainer } from "../SceneContainer";
+import { SceneContainer } from "../components/SceneContainer";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
-import { Size3Immutable, TripleImmutable } from "../interfaces";
+import { Size3Immutable, TripleImmutable } from "../components/interfaces";
 
-export class Concrete {
+export class ObjFileHandler {
   private readonly sceneContainer: SceneContainer;
 
   constructor(sceneContainer: SceneContainer) {
@@ -32,11 +32,25 @@ export class Concrete {
     basePath: string,
     objFileName: string,
     options?: { targetBounds?: Size3Immutable; targetPosition?: TripleImmutable<number> },
-    callback?: (loadedObject: THREE.Object3D) => void
+    onObjectLoaded?: (loadedObject: THREE.Object3D) => void,
+    onMaterialsLoaded?: (loadedObject: THREE.Object3D) => void
   ) {
     // Try loading the object
     this.loadObj(basePath, objFileName).then((loadedObject: THREE.Group) => {
       console.log("object", loadedObject);
+
+      if (options && options.targetBounds) {
+        this.applyScale(loadedObject, options.targetBounds);
+      }
+      if (options && options.targetPosition) {
+        loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
+      }
+      console.log("Loaded OBJ file ", objFileName);
+      this.sceneContainer.scene.add(loadedObject);
+      if (onObjectLoaded) {
+        onObjectLoaded(loadedObject);
+      }
+
       const materialFileNames: Array<string> = (loadedObject as any).materialLibraries;
       if (materialFileNames) {
         this.loadMaterials(basePath, materialFileNames).then((materials: Record<string, THREE.Material>[]) => {
@@ -45,23 +59,24 @@ export class Concrete {
             if ((child as THREE.Mesh).isMesh) {
               // TODO: check type
               const childMesh = child as THREE.Mesh;
-              childMesh.geometry.computeVertexNormals();
+              // childMesh.geometry.uvsNeedUpdate = true;
+              // childMesh.geometry.buffersNeedUpdate = true;
+              // childMesh.geometry.computeVertexNormals();
               this.locateMaterial(childMesh, materials);
+              if (Array.isArray(childMesh.material)) {
+                childMesh.material.forEach(mat => {
+                  mat.needsUpdate = true;
+                });
+              } else {
+                childMesh.material.needsUpdate = true;
+              }
             }
           });
+          if (onMaterialsLoaded) {
+            onMaterialsLoaded(loadedObject);
+          }
         });
       } // END if
-
-      if (options && options.targetBounds) {
-        this.applyScale(loadedObject, options.targetBounds);
-      }
-      if (options && options.targetPosition) {
-        loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
-      }
-      this.sceneContainer.scene.add(loadedObject);
-      if (callback) {
-        callback(loadedObject);
-      }
     });
   }
 

@@ -16,7 +16,7 @@ export class AudioPlayer {
 
     this.audioNode = document.createElement("audio");
     this.audioNode.addEventListener("canplay", () => {
-      console.log("canplay", this.isPlayRequested);
+      // console.log("canplay", this.isPlayRequested);
       this.isReady = true;
       if (this.isPlayRequested) {
         this.play();

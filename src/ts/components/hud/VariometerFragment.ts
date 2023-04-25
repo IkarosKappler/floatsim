@@ -46,9 +46,9 @@ export class VariometerFragment implements RenderableComponent {
       width: this.currentHudBounds.height / 40.0
     };
 
-    if (this.loopCounter++ < 20) {
-      console.log("angle", angle * RAD2DEG, "anglePct", anglePct, "zeroOffsetV", zeroOffsetV);
-    }
+    // if (this.loopCounter++ < 20) {
+    //   console.log("angle", angle * RAD2DEG, "anglePct", anglePct, "zeroOffsetV", zeroOffsetV);
+    // }
 
     this.hudComponent.hudBitmap.save();
 

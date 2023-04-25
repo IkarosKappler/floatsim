@@ -36,7 +36,7 @@ export class NavpointsFragment implements RenderableComponent {
     if (this.currentFragmentBounds.contains(vector)) {
       // Navpoint is in visible area
       this.drawMarkerAt(vector, colorMarker);
-      this.drawDistanceLabelAt(vector, `${distance.toFixed(1)}m`);
+      this.drawDistanceLabelAt(vector, `${navpoint.label} (${distance.toFixed(1)}m)`);
     } else {
       // const directionPoint = { x : vector.x, y : vector.y };
       // // Navpoint is out of visible scope
@@ -48,6 +48,7 @@ export class NavpointsFragment implements RenderableComponent {
         y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
       };
       this.drawMarkerAt(directionPoint, "red");
+      this.drawDistanceLabelAt(directionPoint, `${navpoint.label} (${distance.toFixed(1)}m)`);
     }
   }
 

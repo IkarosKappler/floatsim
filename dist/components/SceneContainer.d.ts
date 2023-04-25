@@ -36,6 +36,7 @@ export declare class SceneContainer implements ISceneContainer {
     loadConcrete(terrain: PerlinTerrain): void;
     addGroundBuoys(terrain: PerlinTerrain): void;
     addNavpoints(terrain: PerlinTerrain): void;
+    private addBuoyAt;
     getShipVerticalInclination(): number;
     addVisibleBoundingBox(object: THREE.Object3D): void;
     initializeAudio(): Promise<void>;

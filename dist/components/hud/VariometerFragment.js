@@ -7,7 +7,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VariometerFragment = void 0;
 var Helpers_1 = require("../../utils/Helpers");
-var constants_1 = require("../constants");
 var VariometerFragment = /** @class */ (function () {
     function VariometerFragment(hudComponent) {
         this.loopCounter = 0;
@@ -33,9 +32,9 @@ var VariometerFragment = /** @class */ (function () {
             height: this.currentHudBounds.height / 20.0,
             width: this.currentHudBounds.height / 40.0
         };
-        if (this.loopCounter++ < 20) {
-            console.log("angle", angle * constants_1.RAD2DEG, "anglePct", anglePct, "zeroOffsetV", zeroOffsetV);
-        }
+        // if (this.loopCounter++ < 20) {
+        //   console.log("angle", angle * RAD2DEG, "anglePct", anglePct, "zeroOffsetV", zeroOffsetV);
+        // }
         this.hudComponent.hudBitmap.save();
         if (tweakParams.highlightHudFragments) {
             var colorStyleBg = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
