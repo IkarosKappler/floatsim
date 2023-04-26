@@ -39,6 +39,8 @@ export interface TweakParams {
     cutsceneShutterValue: number;
     lineHeight: number;
     fontSize: number;
+    maxShipUpAngle: number;
+    minShipUpAngle: number;
 }
 export interface IDimension2 {
     width: number;

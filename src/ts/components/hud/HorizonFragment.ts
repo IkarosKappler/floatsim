@@ -32,8 +32,11 @@ export class HorizonFragment implements RenderableComponent {
     this.drawLineWithGap(this.currentFragmentBounds.max.x, 0.2, 0.9, -this.currentFragmentBounds.width * 0.45, y);
   }
 
-  private drawDynamicHorizon(shipRotation: number) {
+  private drawDynamicHorizon(minShipUpAngle: number, maxShipUpAngle: number, shipRotation: number) {
     // Draw artificial horizon
+
+    // maxShipUpAngle: Math.PI * 0.25, // 45 degree
+    // minShipUpAngle: -Math.PI * 0.25 // -45 degree
 
     // TODO: read these from the global scene config
     const defaultZero = Math.PI * 0.5;
@@ -85,7 +88,7 @@ export class HorizonFragment implements RenderableComponent {
 
     const center = this.currentFragmentBounds.getCenter();
     this.drawStaticHorizon(this.currentFragmentBounds.min.y + this.currentFragmentBounds.height / 2);
-    this.drawDynamicHorizon(data.shipRotation.upAngle);
+    this.drawDynamicHorizon(tweakParams.minShipUpAngle, tweakParams.maxShipUpAngle, data.shipRotation.upAngle);
     this.hudComponent.hudBitmap.stroke();
 
     this.hudComponent.hudBitmap.restore();

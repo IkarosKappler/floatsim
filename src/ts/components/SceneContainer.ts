@@ -86,7 +86,9 @@ export class SceneContainer implements ISceneContainer {
       highlightHudFragments: false,
       cutsceneShutterValue: 1.0,
       lineHeight: 14,
-      fontSize: 14
+      fontSize: 14,
+      maxShipUpAngle: Math.PI * 0.25, // 45 degree
+      minShipUpAngle: -Math.PI * 0.25 // -45 degree
     };
 
     // Initialize a new THREE renderer (you are also allowed
@@ -202,6 +204,11 @@ export class SceneContainer implements ISceneContainer {
     orbitControls.target.copy(this.cube.position);
     */
 
+    // maxShipUpAngle: Math.PI * 0.5, // 45 degree
+    // minShipUpAngle: -Math.PI * 0.5 // -45 degree
+
+    const fpcDefaultZero = Math.PI * 0.5;
+
     const firstPersonControls = new FirstPersonControls(this.camera, this.renderer.domElement);
     firstPersonControls.movementSpeed = 35; // 50;
     firstPersonControls.lookSpeed = 0.05;
@@ -209,8 +216,11 @@ export class SceneContainer implements ISceneContainer {
     firstPersonControls.lookVertical = true;
     firstPersonControls.constrainVertical = true;
     // PI/2.0 is the middle
-    firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
-    firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
+    // firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
+    // firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
+    // Map [min,max] to [PI,0]
+    firstPersonControls.verticalMin = this.tweakParams.minShipUpAngle + fpcDefaultZero; //  Math.PI * 0.25; // in radians, default PI
+    firstPersonControls.verticalMax = this.tweakParams.maxShipUpAngle + fpcDefaultZero; // Math.PI * 0.75; // in radians, default 0
 
     this.controls = firstPersonControls;
 

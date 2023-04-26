@@ -23,8 +23,10 @@ var HorizonFragment = /** @class */ (function () {
         this.drawLineWithGap(this.currentFragmentBounds.min.x, 0.2, 0.9, this.currentFragmentBounds.width * 0.45, y);
         this.drawLineWithGap(this.currentFragmentBounds.max.x, 0.2, 0.9, -this.currentFragmentBounds.width * 0.45, y);
     };
-    HorizonFragment.prototype.drawDynamicHorizon = function (shipRotation) {
+    HorizonFragment.prototype.drawDynamicHorizon = function (minShipUpAngle, maxShipUpAngle, shipRotation) {
         // Draw artificial horizon
+        // maxShipUpAngle: Math.PI * 0.25, // 45 degree
+        // minShipUpAngle: -Math.PI * 0.25 // -45 degree
         // TODO: read these from the global scene config
         var defaultZero = Math.PI * 0.5;
         var verticalControlMin = Math.PI * 0.25; // in radians, default PI
@@ -40,13 +42,11 @@ var HorizonFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.lineTo(this.currentFragmentBounds.min.x + this.currentFragmentBounds.width * 0.09 + this.currentFragmentBounds.width * 0.315, y);
         this.hudComponent.hudBitmap.moveTo(this.currentFragmentBounds.max.x - this.currentFragmentBounds.width * 0.09, y);
         this.hudComponent.hudBitmap.lineTo(this.currentFragmentBounds.max.x - this.currentFragmentBounds.width * 0.09 - this.currentFragmentBounds.width * 0.315, y);
-        // this.drawLineWithGap(this.currentFragmentBounds.min.y, 0.2, 0.9, -this.currentFragmentBounds.width * 0.45, y);
     };
     /**
      * @implement RenderableComponent.befoRerender
      */
     HorizonFragment.prototype.beforeRender = function (_sceneContainer, data, tweakParams) {
-        // console.log("[NavpointsFragment] beforeRender");
         this.hudComponent.hudBitmap.save();
         if (tweakParams.highlightHudFragments) {
             var colorStyleBg = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.25);
@@ -60,7 +60,7 @@ var HorizonFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.fillStyle = colorFillStyle;
         var center = this.currentFragmentBounds.getCenter();
         this.drawStaticHorizon(this.currentFragmentBounds.min.y + this.currentFragmentBounds.height / 2);
-        this.drawDynamicHorizon(data.shipRotation.upAngle);
+        this.drawDynamicHorizon(tweakParams.minShipUpAngle, tweakParams.maxShipUpAngle, data.shipRotation.upAngle);
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.restore();
     };

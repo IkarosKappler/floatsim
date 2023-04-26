@@ -74,7 +74,9 @@ var SceneContainer = /** @class */ (function () {
             highlightHudFragments: false,
             cutsceneShutterValue: 1.0,
             lineHeight: 14,
-            fontSize: 14
+            fontSize: 14,
+            maxShipUpAngle: Math.PI * 0.25,
+            minShipUpAngle: -Math.PI * 0.25 // -45 degree
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
@@ -162,6 +164,9 @@ var SceneContainer = /** @class */ (function () {
         orbitControls.enableZoom = true;
         orbitControls.target.copy(this.cube.position);
         */
+        // maxShipUpAngle: Math.PI * 0.5, // 45 degree
+        // minShipUpAngle: -Math.PI * 0.5 // -45 degree
+        var fpcDefaultZero = Math.PI * 0.5;
         var firstPersonControls = new FirstPersonControls_js_1.FirstPersonControls(this.camera, this.renderer.domElement);
         firstPersonControls.movementSpeed = 35; // 50;
         firstPersonControls.lookSpeed = 0.05;
@@ -169,8 +174,11 @@ var SceneContainer = /** @class */ (function () {
         firstPersonControls.lookVertical = true;
         firstPersonControls.constrainVertical = true;
         // PI/2.0 is the middle
-        firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
-        firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
+        // firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
+        // firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
+        // Map [min,max] to [PI,0]
+        firstPersonControls.verticalMin = this.tweakParams.minShipUpAngle + fpcDefaultZero; //  Math.PI * 0.25; // in radians, default PI
+        firstPersonControls.verticalMax = this.tweakParams.maxShipUpAngle + fpcDefaultZero; // Math.PI * 0.75; // in radians, default 0
         this.controls = firstPersonControls;
         this.stats = new Stats_1.Stats.Stats();
         document.querySelector("body").appendChild(this.stats.domElement);
