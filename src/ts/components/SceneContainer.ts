@@ -192,21 +192,6 @@ export class SceneContainer implements ISceneContainer {
     // add an orbit control helper.
     var _self = this;
 
-    /*
-    const orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
-    // Always move the point light with the camera. Looks much better ;)
-    orbitControls.addEventListener("change", () => {
-      pointLight.position.copy(_self.camera.position);
-    });
-    orbitControls.enableDamping = true;
-    orbitControls.dampingFactor = 1.0;
-    orbitControls.enableZoom = true;
-    orbitControls.target.copy(this.cube.position);
-    */
-
-    // maxShipUpAngle: Math.PI * 0.5, // 45 degree
-    // minShipUpAngle: -Math.PI * 0.5 // -45 degree
-
     const fpcDefaultZero = Math.PI * 0.5;
 
     const firstPersonControls = new FirstPersonControls(this.camera, this.renderer.domElement);
@@ -216,8 +201,6 @@ export class SceneContainer implements ISceneContainer {
     firstPersonControls.lookVertical = true;
     firstPersonControls.constrainVertical = true;
     // PI/2.0 is the middle
-    // firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
-    // firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
     // Map [min,max] to [PI,0]
     firstPersonControls.verticalMin = this.tweakParams.minShipUpAngle + fpcDefaultZero; //  Math.PI * 0.25; // in radians, default PI
     firstPersonControls.verticalMax = this.tweakParams.maxShipUpAngle + fpcDefaultZero; // Math.PI * 0.75; // in radians, default 0
@@ -229,8 +212,9 @@ export class SceneContainer implements ISceneContainer {
 
     const hudData: HUDData = {
       depth: this.camera.position.y,
-      // shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
-      shipRotation: { upAngle: 0.0 } // this.camera.rotation
+      shipRotation: { upAngle: 0.0 },
+      pressure: 0.0,
+      temperature: 0.0
     };
 
     const terrain = this.makeTerrain();
@@ -264,6 +248,8 @@ export class SceneContainer implements ISceneContainer {
         // Update HUD data
         hudData.shipRotation.upAngle = this.getShipVerticalInclination();
         hudData.depth = this.camera.position.y;
+        hudData.pressure = hudData.depth < 0 ? 1.0 + -0.0981 * hudData.depth : 0.9998; // Fake some nice overair pressure
+        hudData.temperature = hudData.depth < 0 ? 4.0 - Math.exp(hudData.depth / 1000) : 32.0; // Degrees
 
         this.cockpitScene.renderFragment(this.renderer);
         this.hud.renderFragment(this.renderer);

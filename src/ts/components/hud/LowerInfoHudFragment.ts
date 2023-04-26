@@ -70,11 +70,25 @@ export class LowerInfoHudFragment implements RenderableComponent {
       this.hudComponent.hudCanvas.width - hudBounds.width / 2,
       this.hudComponent.hudCanvas.height - hudBounds.height / 2 - tweakParams.lineHeight / 2
     );
-    const hudTextB: string = `Angle(z): ${(hudData.shipRotation.upAngle * RAD2DEG).toFixed(1)}`;
+    const hudTextB: string = `Angle: ${(hudData.shipRotation.upAngle * RAD2DEG).toFixed(1)}`;
     this.hudComponent.hudBitmap.fillText(
       hudTextB,
       this.hudComponent.hudCanvas.width - hudBounds.width / 2,
       this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight / 2
+    );
+    const hudTextC: string = `Press: ${hudData.pressure.toFixed(1)}bar`;
+    this.hudComponent.hudBitmap.fillText(
+      hudTextC,
+      this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+      this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight * 1.5
+    );
+    // °F = °C × (9/5) + 32
+    const degFahrenheit = hudData.temperature * (9 / 5) + 32.0;
+    const hudTextD: string = ` Temp: ${hudData.temperature.toFixed(1)}°C / ${degFahrenheit.toFixed(1)}°F`;
+    this.hudComponent.hudBitmap.fillText(
+      hudTextD,
+      this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+      this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight * 2.5
     );
 
     this.hudComponent.hudBitmap.restore();

@@ -11,6 +11,8 @@ export interface DirectionalRotation {
 export interface HUDData {
   depth: number;
   shipRotation: DirectionalRotation; // Triple<number>;
+  pressure: number;
+  temperature: number;
 }
 
 export interface Tuple<T> {

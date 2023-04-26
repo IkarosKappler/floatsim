@@ -153,19 +153,6 @@ var SceneContainer = /** @class */ (function () {
         // Finally we want to be able to rotate the whole scene with the mouse:
         // add an orbit control helper.
         var _self = this;
-        /*
-        const orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
-        // Always move the point light with the camera. Looks much better ;)
-        orbitControls.addEventListener("change", () => {
-          pointLight.position.copy(_self.camera.position);
-        });
-        orbitControls.enableDamping = true;
-        orbitControls.dampingFactor = 1.0;
-        orbitControls.enableZoom = true;
-        orbitControls.target.copy(this.cube.position);
-        */
-        // maxShipUpAngle: Math.PI * 0.5, // 45 degree
-        // minShipUpAngle: -Math.PI * 0.5 // -45 degree
         var fpcDefaultZero = Math.PI * 0.5;
         var firstPersonControls = new FirstPersonControls_js_1.FirstPersonControls(this.camera, this.renderer.domElement);
         firstPersonControls.movementSpeed = 35; // 50;
@@ -174,8 +161,6 @@ var SceneContainer = /** @class */ (function () {
         firstPersonControls.lookVertical = true;
         firstPersonControls.constrainVertical = true;
         // PI/2.0 is the middle
-        // firstPersonControls.verticalMin = Math.PI * 0.25; // in radians, default PI
-        // firstPersonControls.verticalMax = Math.PI * 0.75; // in radians, default 0
         // Map [min,max] to [PI,0]
         firstPersonControls.verticalMin = this.tweakParams.minShipUpAngle + fpcDefaultZero; //  Math.PI * 0.25; // in radians, default PI
         firstPersonControls.verticalMax = this.tweakParams.maxShipUpAngle + fpcDefaultZero; // Math.PI * 0.75; // in radians, default 0
@@ -184,8 +169,9 @@ var SceneContainer = /** @class */ (function () {
         document.querySelector("body").appendChild(this.stats.domElement);
         var hudData = {
             depth: this.camera.position.y,
-            // shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
-            shipRotation: { upAngle: 0.0 } // this.camera.rotation
+            shipRotation: { upAngle: 0.0 },
+            pressure: 0.0,
+            temperature: 0.0
         };
         var terrain = this.makeTerrain();
         this.terrainSegments.push(terrain);
@@ -212,6 +198,8 @@ var SceneContainer = /** @class */ (function () {
                 // Update HUD data
                 hudData.shipRotation.upAngle = _this.getShipVerticalInclination();
                 hudData.depth = _this.camera.position.y;
+                hudData.pressure = hudData.depth < 0 ? 1.0 + -0.0981 * hudData.depth : 0.9998; // Fake some nice overair pressure
+                hudData.temperature = hudData.depth < 0 ? 4.0 - Math.exp(hudData.depth / 1000) : 32.0; // Degrees
                 _this.cockpitScene.renderFragment(_this.renderer);
                 _this.hud.renderFragment(_this.renderer);
                 terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);

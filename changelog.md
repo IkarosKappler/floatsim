@@ -1,5 +1,6 @@
 - 2023-04-26
   - Chaninging HudData.shiprotation from {y,y,z} to {upAngle}.
+  - Adding virtual horizon to HUD.
 - 2023-04-25
   - Adding simple buoy meshes and navpoint rendering.
 - 2023-04-22
