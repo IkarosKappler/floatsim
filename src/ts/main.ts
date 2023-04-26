@@ -48,4 +48,12 @@ globalThis.addEventListener("load", () => {
     min: 0.0,
     max: 1.0
   });
+  pane.addInput(sceneContainer.tweakParams, "fontSize", {
+    min: 7.0,
+    max: 22.0
+  });
+  pane.addInput(sceneContainer.tweakParams, "lineHeight", {
+    min: 7.0,
+    max: 22.0
+  });
 });

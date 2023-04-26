@@ -84,7 +84,9 @@ export class SceneContainer implements ISceneContainer {
       compassZ: 0,
       isRendering: true,
       highlightHudFragments: false,
-      cutsceneShutterValue: 1.0
+      cutsceneShutterValue: 1.0,
+      lineHeight: 14,
+      fontSize: 14
     };
 
     // Initialize a new THREE renderer (you are also allowed
@@ -217,7 +219,8 @@ export class SceneContainer implements ISceneContainer {
 
     const hudData: HUDData = {
       depth: this.camera.position.y,
-      shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
+      // shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
+      shipRotation: { upAngle: 0.0 } // this.camera.rotation
     };
 
     const terrain = this.makeTerrain();
@@ -249,7 +252,7 @@ export class SceneContainer implements ISceneContainer {
         this.hud.beforeRender(this, hudData, this.tweakParams);
 
         // Update HUD data
-        hudData.shipRotation.z = this.getShipVerticalInclination();
+        hudData.shipRotation.upAngle = this.getShipVerticalInclination();
         hudData.depth = this.camera.position.y;
 
         this.cockpitScene.renderFragment(this.renderer);

@@ -72,7 +72,9 @@ var SceneContainer = /** @class */ (function () {
             compassZ: 0,
             isRendering: true,
             highlightHudFragments: false,
-            cutsceneShutterValue: 1.0
+            cutsceneShutterValue: 1.0,
+            lineHeight: 14,
+            fontSize: 14
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
@@ -174,7 +176,8 @@ var SceneContainer = /** @class */ (function () {
         document.querySelector("body").appendChild(this.stats.domElement);
         var hudData = {
             depth: this.camera.position.y,
-            shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
+            // shipRotation: { x: 0.0, y: 0.0, z: 0.0 } // this.camera.rotation
+            shipRotation: { upAngle: 0.0 } // this.camera.rotation
         };
         var terrain = this.makeTerrain();
         this.terrainSegments.push(terrain);
@@ -199,7 +202,7 @@ var SceneContainer = /** @class */ (function () {
                 _this.cockpitScene.beforeRender(_this, hudData, _this.tweakParams);
                 _this.hud.beforeRender(_this, hudData, _this.tweakParams);
                 // Update HUD data
-                hudData.shipRotation.z = _this.getShipVerticalInclination();
+                hudData.shipRotation.upAngle = _this.getShipVerticalInclination();
                 hudData.depth = _this.camera.position.y;
                 _this.cockpitScene.renderFragment(_this.renderer);
                 _this.hud.renderFragment(_this.renderer);

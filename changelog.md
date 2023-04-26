@@ -1,3 +1,7 @@
+- 2023-04-26
+  - Chaninging HudData.shiprotation from {y,y,z} to {upAngle}.
+- 2023-04-25
+  - Adding simple buoy meshes and navpoint rendering.
 - 2023-04-22
   - Refactored the Caustic shader library (updating exports).
   - Refactoring test cutscene shader to shader library in the simulation.

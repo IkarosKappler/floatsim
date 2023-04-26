@@ -37,7 +37,7 @@ export class LowerInfoHudFragment implements RenderableComponent {
     });
 
     // Update HUD graphics.
-    this.hudComponent.hudBitmap.font = "Normal 16px Arial";
+    //this.hudComponent.hudBitmap.font = "Normal 16px unifontregular, Monospace";
     this.hudComponent.hudBitmap.textAlign = "center";
     // Clear only the lower HUD rect?
     // Or clear the whole scene?
@@ -68,13 +68,13 @@ export class LowerInfoHudFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.fillText(
       hudTextA,
       this.hudComponent.hudCanvas.width - hudBounds.width / 2,
-      this.hudComponent.hudCanvas.height - hudBounds.height / 2 - 12
+      this.hudComponent.hudCanvas.height - hudBounds.height / 2 - tweakParams.lineHeight / 2
     );
-    const hudTextB: string = `Angle(z): ${(hudData.shipRotation.z * RAD2DEG).toFixed(1)}`;
+    const hudTextB: string = `Angle(z): ${(hudData.shipRotation.upAngle * RAD2DEG).toFixed(1)}`;
     this.hudComponent.hudBitmap.fillText(
       hudTextB,
       this.hudComponent.hudCanvas.width - hudBounds.width / 2,
-      this.hudComponent.hudCanvas.height - hudBounds.height / 2 + 12
+      this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight / 2
     );
 
     this.hudComponent.hudBitmap.restore();

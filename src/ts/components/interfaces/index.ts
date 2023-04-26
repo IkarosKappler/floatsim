@@ -4,9 +4,13 @@
 
 import { PerlinTerrain } from "../environment/PerlinTerrain";
 
+export interface DirectionalRotation {
+  upAngle: number;
+}
+
 export interface HUDData {
   depth: number;
-  shipRotation: Triple<number>;
+  shipRotation: DirectionalRotation; // Triple<number>;
 }
 
 export interface Tuple<T> {
@@ -42,6 +46,8 @@ export interface TweakParams {
   highlightHudFragments: boolean;
   // Must be in [0.0..1.0]
   cutsceneShutterValue: number;
+  lineHeight: number;
+  fontSize: number;
 }
 
 export interface IDimension2 {

@@ -19,7 +19,7 @@ var VariometerFragment = /** @class */ (function () {
      */
     VariometerFragment.prototype.beforeRender = function (_sceneContainer, hudData, tweakParams) {
         // Calculate the current view angle
-        var angle = hudData.shipRotation.z;
+        var angle = hudData.shipRotation.upAngle;
         // Define the upper and the lower bounds for the displayed value
         var MAX_ANGLE = Math.PI / 2.0;
         var MIN_ANGLE = -Math.PI / 2.0;
@@ -66,18 +66,18 @@ var VariometerFragment = /** @class */ (function () {
         var mainStep = this.currentHudBounds.height / 6;
         this.hudComponent.hudBitmap.strokeStyle = colorStyle;
         this.hudComponent.hudBitmap.fillStyle = colorStyle;
-        this.drawRulerSteps(-mainStep, stepValue, zeroOffsetV, triangleSize);
+        this.drawRulerSteps(-mainStep, stepValue, zeroOffsetV, triangleSize, tweakParams.lineHeight);
         var colorWarningStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.warningColor, 1.0);
         this.hudComponent.hudBitmap.strokeStyle = colorWarningStyle;
         this.hudComponent.hudBitmap.fillStyle = colorWarningStyle;
-        this.drawRulerSteps(mainStep, -stepValue, zeroOffsetV, triangleSize);
+        this.drawRulerSteps(mainStep, -stepValue, zeroOffsetV, triangleSize, tweakParams.lineHeight);
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.closePath();
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.closePath();
         this.hudComponent.hudBitmap.restore();
     };
-    VariometerFragment.prototype.drawRulerSteps = function (mainStepPixels, stepValue, zeroOffsetV, triangleSize) {
+    VariometerFragment.prototype.drawRulerSteps = function (mainStepPixels, stepValue, zeroOffsetV, triangleSize, lineHeight) {
         // var mainStep = this.currentHudBounds.height / 8.0;
         this.hudComponent.hudBitmap.beginPath();
         var offsetV = zeroOffsetV;
@@ -111,7 +111,7 @@ var VariometerFragment = /** @class */ (function () {
         while (offsetV >= 0 && offsetV < this.currentHudBounds.height) {
             offsetV += mainStepPixels;
             i++;
-            this.hudComponent.hudBitmap.fillText("".concat(i * stepValue, "\u00B0"), this.currentHudBounds.min.x + triangleSize.width + 1 + 16, this.currentHudBounds.min.y + offsetV);
+            this.hudComponent.hudBitmap.fillText("".concat(i * stepValue, "\u00B0"), this.currentHudBounds.min.x + triangleSize.width + 1 + 16, this.currentHudBounds.min.y + offsetV + lineHeight / 2);
         }
     };
     VariometerFragment.prototype.drawZeroAt = function (zeroOffsetV, triangleSize) {

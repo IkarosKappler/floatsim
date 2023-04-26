@@ -2,9 +2,12 @@
  * Global interfaces.
  */
 import { PerlinTerrain } from "../environment/PerlinTerrain";
+export interface DirectionalRotation {
+    upAngle: number;
+}
 export interface HUDData {
     depth: number;
-    shipRotation: Triple<number>;
+    shipRotation: DirectionalRotation;
 }
 export interface Tuple<T> {
     x: T;
@@ -34,6 +37,8 @@ export interface TweakParams {
     isRendering: boolean;
     highlightHudFragments: boolean;
     cutsceneShutterValue: number;
+    lineHeight: number;
+    fontSize: number;
 }
 export interface IDimension2 {
     width: number;

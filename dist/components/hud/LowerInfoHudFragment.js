@@ -29,7 +29,7 @@ var LowerInfoHudFragment = /** @class */ (function () {
             height: 80
         });
         // Update HUD graphics.
-        this.hudComponent.hudBitmap.font = "Normal 16px Arial";
+        //this.hudComponent.hudBitmap.font = "Normal 16px unifontregular, Monospace";
         this.hudComponent.hudBitmap.textAlign = "center";
         // Clear only the lower HUD rect?
         // Or clear the whole scene?
@@ -52,9 +52,9 @@ var LowerInfoHudFragment = /** @class */ (function () {
         // Draw HUD in the lower right corner
         this.hudComponent.hudBitmap.fillStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.75);
         var hudTextA = "Depth: ".concat(hudData.depth.toFixed(1), "m\n");
-        this.hudComponent.hudBitmap.fillText(hudTextA, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 - 12);
-        var hudTextB = "Angle(z): ".concat((hudData.shipRotation.z * constants_1.RAD2DEG).toFixed(1));
-        this.hudComponent.hudBitmap.fillText(hudTextB, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 + 12);
+        this.hudComponent.hudBitmap.fillText(hudTextA, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 - tweakParams.lineHeight / 2);
+        var hudTextB = "Angle(z): ".concat((hudData.shipRotation.upAngle * constants_1.RAD2DEG).toFixed(1));
+        this.hudComponent.hudBitmap.fillText(hudTextB, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight / 2);
         this.hudComponent.hudBitmap.restore();
     };
     /**

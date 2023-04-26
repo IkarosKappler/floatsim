@@ -9,7 +9,6 @@ import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
 import { HudComponent } from "./HudComponent";
 
 import { IDimension2Immutable, HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
-import { RAD2DEG } from "../constants";
 
 export class VariometerFragment implements RenderableComponent {
   private hudComponent: HudComponent;
@@ -28,7 +27,7 @@ export class VariometerFragment implements RenderableComponent {
    */
   beforeRender(_sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams) {
     // Calculate the current view angle
-    const angle = hudData.shipRotation.z;
+    const angle = hudData.shipRotation.upAngle;
 
     // Define the upper and the lower bounds for the displayed value
     const MAX_ANGLE = Math.PI / 2.0;
@@ -95,11 +94,11 @@ export class VariometerFragment implements RenderableComponent {
     var mainStep = this.currentHudBounds.height / 6;
     this.hudComponent.hudBitmap.strokeStyle = colorStyle;
     this.hudComponent.hudBitmap.fillStyle = colorStyle;
-    this.drawRulerSteps(-mainStep, stepValue, zeroOffsetV, triangleSize);
+    this.drawRulerSteps(-mainStep, stepValue, zeroOffsetV, triangleSize, tweakParams.lineHeight);
     const colorWarningStyle = getColorStyle(this.hudComponent.warningColor, 1.0);
     this.hudComponent.hudBitmap.strokeStyle = colorWarningStyle;
     this.hudComponent.hudBitmap.fillStyle = colorWarningStyle;
-    this.drawRulerSteps(mainStep, -stepValue, zeroOffsetV, triangleSize);
+    this.drawRulerSteps(mainStep, -stepValue, zeroOffsetV, triangleSize, tweakParams.lineHeight);
     this.hudComponent.hudBitmap.stroke();
     this.hudComponent.hudBitmap.closePath();
 
@@ -109,7 +108,13 @@ export class VariometerFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.restore();
   }
 
-  private drawRulerSteps(mainStepPixels: number, stepValue: number, zeroOffsetV: number, triangleSize: IDimension2Immutable) {
+  private drawRulerSteps(
+    mainStepPixels: number,
+    stepValue: number,
+    zeroOffsetV: number,
+    triangleSize: IDimension2Immutable,
+    lineHeight: number
+  ) {
     // var mainStep = this.currentHudBounds.height / 8.0;
     this.hudComponent.hudBitmap.beginPath();
     var offsetV = zeroOffsetV;
@@ -189,7 +194,7 @@ export class VariometerFragment implements RenderableComponent {
       this.hudComponent.hudBitmap.fillText(
         `${i * stepValue}°`,
         this.currentHudBounds.min.x + triangleSize.width + 1 + 16,
-        this.currentHudBounds.min.y + offsetV
+        this.currentHudBounds.min.y + offsetV + lineHeight / 2
       );
     }
   }

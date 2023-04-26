@@ -32,10 +32,11 @@ var VariometerFragment_1 = require("./VariometerFragment");
 // import { SonarComponent } from "./cockpit/SonarComponent";
 var cutscene_shader_material_glsl_1 = require("../../utils/texture/shaders/cutscene_shader_material.glsl");
 var NavpointsFragment_1 = require("./NavpointsFragment");
+var HorizonFragment_1 = require("./HorizonFragment");
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor, warningColor) {
-        console.log("HudComponent vertex shader", cutscene_shader_material_glsl_1.Cutscene_Shader.vertex);
-        console.log("HudComponent fragment shader", cutscene_shader_material_glsl_1.Cutscene_Shader.fragment);
+        // console.log("HudComponent vertex shader", Cutscene_Shader.vertex);
+        // console.log("HudComponent fragment shader", Cutscene_Shader.fragment);
         this.primaryColor = primaryColor;
         this.warningColor = warningColor;
         // We will use 2D canvas element to render our HUD.
@@ -94,17 +95,20 @@ var HudComponent = /** @class */ (function () {
         this.variometer = new VariometerFragment_1.VariometerFragment(this);
         // Create Navpoints fragment
         this.navpoints = new NavpointsFragment_1.NavpointsFragment(this);
+        this.horizon = new HorizonFragment_1.HorizonFragment(this);
     }
     /**
      * @implement RenderableComponent.beforeRender
      */
     HudComponent.prototype.beforeRender = function (sceneContainer, hudData, tweakParams) {
         // Apply tweak params
+        this.hudBitmap.font = "Normal ".concat(tweakParams.fontSize, "px unifontregular, Monospace");
         this.compass.beforeRender(sceneContainer, hudData, tweakParams);
         this.lowerInfoHud.beforeRender(sceneContainer, hudData, tweakParams);
         this.depthMeter.beforeRender(sceneContainer, hudData, tweakParams);
         this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
         this.navpoints.beforeRender(sceneContainer, hudData, tweakParams);
+        this.horizon.beforeRender(sceneContainer, hudData, tweakParams);
         this.hudDynamicTexture.needsUpdate = true;
         this.hudMaterial.uniforms.u_shutter_amount.value = tweakParams.cutsceneShutterValue;
         this.hudMaterial.uniformsNeedUpdate = true;
@@ -134,6 +138,7 @@ var HudComponent = /** @class */ (function () {
         this.depthMeter.updateSize(width, height);
         this.variometer.updateSize(width, height);
         this.navpoints.updateSize(width, height);
+        this.horizon.updateSize(width, height);
     };
     return HudComponent;
 }());
