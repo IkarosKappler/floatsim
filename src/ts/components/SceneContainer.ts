@@ -105,7 +105,7 @@ export class SceneContainer implements ISceneContainer {
     this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 10, 10000);
+    this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 10, 10000);
 
     this.fogHandler = new FogHandler(this);
     this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
@@ -202,8 +202,8 @@ export class SceneContainer implements ISceneContainer {
     firstPersonControls.constrainVertical = true;
     // PI/2.0 is the middle
     // Map [min,max] to [PI,0]
-    firstPersonControls.verticalMin = this.tweakParams.minShipUpAngle + fpcDefaultZero; //  Math.PI * 0.25; // in radians, default PI
-    firstPersonControls.verticalMax = this.tweakParams.maxShipUpAngle + fpcDefaultZero; // Math.PI * 0.75; // in radians, default 0
+    firstPersonControls.verticalMin = this.tweakParams.minShipUpAngle + fpcDefaultZero;
+    firstPersonControls.verticalMax = this.tweakParams.maxShipUpAngle + fpcDefaultZero;
 
     this.controls = firstPersonControls;
 
@@ -212,6 +212,7 @@ export class SceneContainer implements ISceneContainer {
 
     const hudData: HUDData = {
       depth: this.camera.position.y,
+      groundDepth: 0.0,
       shipRotation: { upAngle: 0.0 },
       pressure: 0.0,
       temperature: 0.0
@@ -248,6 +249,7 @@ export class SceneContainer implements ISceneContainer {
         // Update HUD data
         hudData.shipRotation.upAngle = this.getShipVerticalInclination();
         hudData.depth = this.camera.position.y;
+        hudData.groundDepth = this.getGroundDepthAt(this.camera.position.x, this.camera.position.z, terrain) - hudData.depth;
         hudData.pressure = hudData.depth < 0 ? 1.0 + -0.0981 * hudData.depth : 0.9998; // Fake some nice overair pressure
         hudData.temperature = hudData.depth < 0 ? 4.0 - Math.exp(hudData.depth / 1000) : 32.0; // Degrees
 
@@ -330,7 +332,6 @@ export class SceneContainer implements ISceneContainer {
       )
     );
     const terrainTexture = new PerlinTexture(terrainData, terrainSize);
-    // const terrain = new PerlinTerrain(terrainData, terrainSize, terrainTexture);
     const terrain = new PerlinTerrain(terrainData, terrainBounds, terrainTexture);
 
     console.log("terrainData", terrainData);
@@ -361,7 +362,7 @@ export class SceneContainer implements ISceneContainer {
     const objFileName = "newscene.obj";
     const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
     const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
-    targetPosition.y = terrain.getHeightAt(targetPosition.x, targetPosition.z);
+    targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
     targetPosition.y += terrain.bounds.min.y;
     console.log("targetPosition", targetPosition);
     const callback = (loadedObject: THREE.Object3D) => {
@@ -375,7 +376,7 @@ export class SceneContainer implements ISceneContainer {
     // Test x-y- height positioning in the terrain class
     const countPerAxis = 25;
     const stepSizeX = terrain.worldSize.width / countPerAxis;
-    const stepSizeY = terrain.worldSize.depth / countPerAxis;
+    const stepSizeZ = terrain.worldSize.depth / countPerAxis;
     console.log(
       "terrain.worldSize.width",
       terrain.worldSize.width,
@@ -385,36 +386,28 @@ export class SceneContainer implements ISceneContainer {
       terrain.worldSize.height,
       "stepSizeX",
       stepSizeX,
-      "stepSizeY",
-      stepSizeY,
+      "stepSizeZ",
+      stepSizeZ,
       "terrain.bounds",
       terrain.bounds
     );
     const buoyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     for (var x = 0; x < terrain.worldSize.width; x += stepSizeX) {
-      for (var y = 0; y < terrain.worldSize.depth; y += stepSizeY) {
-        const heightValue = terrain.getHeightAt(x, y);
+      for (var z = 0; z < terrain.worldSize.depth; z += stepSizeZ) {
+        const heightValue = terrain.getHeightAtRelativePosition(x, z);
         const buoy = new THREE.Mesh(new THREE.SphereGeometry(1.5), buoyMaterial);
-        buoy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.y + heightValue, terrain.bounds.min.z + y);
+        buoy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.y + heightValue, terrain.bounds.min.z + z);
         buoy.position.add(terrain.mesh.position);
-        buoy.position.y += 2 * 3.0;
+        buoy.position.y += 6.0; // Add 6m so the ground buoys are definitely visible (above ground)
         this.scene.add(buoy);
       }
     }
   }
 
   addNavpoints(terrain: PerlinTerrain) {
-    // // Also load visual nav buoys
-    // const basePath = "resources/meshes/wavefront/buoy-blender/";
-    // // const objFileName = "buoy-a.obj";
-    // // const objFileName = "buoy-a-v2-lowpoly-centered.obj";
-    // const objFileName = "buoy-blender-v1.obj";
-    // const targetBounds = { width: 4.0, depth: 4.0, height: 4.0 };
-    // Find center (our location) and add something
     // URGH, FIX THIS POSITIONING PROBLEM
     const buoyXYCoords = { x: terrain.worldSize.width / 2.0 - 160.0, y: terrain.worldSize.depth / 2.0 - 20.0 };
-
-    const heightValue = terrain.getHeightAt(buoyXYCoords.x, buoyXYCoords.y);
+    const heightValue = terrain.getHeightAtRelativePosition(buoyXYCoords.x, buoyXYCoords.y);
     const targetPositionA = new THREE.Vector3();
     targetPositionA.set(
       terrain.bounds.min.x + buoyXYCoords.x,
@@ -437,23 +430,10 @@ export class SceneContainer implements ISceneContainer {
     }
     // Also load visual nav buoys
     const basePath = "resources/meshes/wavefront/buoy-blender/";
-    // const objFileName = "buoy-a.obj";
-    // const objFileName = "buoy-a-v2-lowpoly-centered.obj";
     const objFileName = "buoy-blender-v1.obj";
     const targetBounds = { width: 1.2, depth: 1.2, height: 1.5 };
-    // const heightValue = terrain.getHeightAt(buoyXYCoords.x, buoyXYCoords.y);
-    // const targetPosition = new THREE.Vector3();
-    // targetPosition.set(
-    //   terrain.bounds.min.x + buoyXYCoords.x,
-    //   terrain.bounds.min.y + heightValue + 50.0, // 10 meters above the ground
-    //   terrain.bounds.min.z + buoyXYCoords.y
-    // );
-    // targetPosition.add(terrain.mesh.position);
-    // targetPosition.y += 2 * 3.0;
-    // this.scene.add(buoy);
     const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
       console.log("Buoy mesh loaded");
-      // loadedObject.rotateX(-Math.PI / 2.0);
       // NOOP
     };
     const buoyMaterialsLoaded = (loadedObject: THREE.Object3D) => {
@@ -477,17 +457,12 @@ export class SceneContainer implements ISceneContainer {
         }
         // Clone.
       });
-      // if ((loadedObject as THREE.Mesh).isMesh) {
       console.log("Creating buoy clones ...", targetPositions.length);
       for (var i = 1; i < targetPositions.length; i++) {
-        // const buoyCopy = new THREE.InstancedMesh(loadedObject.geometry, loadedObject.geometry);
         const buoyCopy = loadedObject.clone();
         buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
         this.scene.add(buoyCopy);
       }
-      // } else {
-      //   console.warn("[Warning] Cannot add instanced mesh copies of the buoy mesh. Loaded object is not a THREE.Mesh instance.");
-      // }
     };
     new ObjFileHandler(this).loadObjFile(
       basePath,
@@ -505,6 +480,15 @@ export class SceneContainer implements ISceneContainer {
     const isNegative = worldDir.y < 0;
     const angle = worldDir.angleTo(horizontalVector);
     return isNegative ? -angle : angle;
+  }
+
+  getGroundDepthAt(xPosAbs: number, zPosAbs: number, terrain: PerlinTerrain) {
+    // TODO: find containing terrain segment
+    if (terrain.containsAbsolutePosition(xPosAbs, zPosAbs)) {
+      return terrain.getHeightAtWorldPosition(xPosAbs, zPosAbs);
+    } else {
+      return Number.NEGATIVE_INFINITY;
+    }
   }
 
   addVisibleBoundingBox(object: THREE.Object3D) {

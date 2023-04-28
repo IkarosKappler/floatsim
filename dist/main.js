@@ -75,5 +75,6 @@ globalThis.addEventListener("load", function () {
         min: 7.0,
         max: 22.0
     });
+    pane.expanded = false;
 });
 //# sourceMappingURL=main.js.map

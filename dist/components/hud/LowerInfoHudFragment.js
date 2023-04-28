@@ -51,16 +51,52 @@ var LowerInfoHudFragment = /** @class */ (function () {
         this.hudComponent.hudBitmap.stroke();
         // Draw HUD in the lower right corner
         this.hudComponent.hudBitmap.fillStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.75);
+        var offsetY = hudBounds.min.y + tweakParams.lineHeight;
         var hudTextA = "Depth: ".concat(hudData.depth.toFixed(1), "m\n");
-        this.hudComponent.hudBitmap.fillText(hudTextA, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 - tweakParams.lineHeight / 2);
-        var hudTextB = "Angle: ".concat((hudData.shipRotation.upAngle * constants_1.RAD2DEG).toFixed(1));
-        this.hudComponent.hudBitmap.fillText(hudTextB, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight / 2);
-        var hudTextC = "Press: ".concat(hudData.pressure.toFixed(1), "bar");
-        this.hudComponent.hudBitmap.fillText(hudTextC, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight * 1.5);
+        var hudTextB = "Grnd: ".concat(hudData.groundDepth.toFixed(1), "m\n");
+        var hudTextC = "Angle: ".concat((hudData.shipRotation.upAngle * constants_1.RAD2DEG).toFixed(1));
+        var hudTextD = "Press: ".concat(hudData.pressure.toFixed(1), "bar");
         // °F = °C × (9/5) + 32
         var degFahrenheit = hudData.temperature * (9 / 5) + 32.0;
-        var hudTextD = " Temp: ".concat(hudData.temperature.toFixed(1), "\u00B0C / ").concat(degFahrenheit.toFixed(1), "\u00B0F");
-        this.hudComponent.hudBitmap.fillText(hudTextD, this.hudComponent.hudCanvas.width - hudBounds.width / 2, this.hudComponent.hudCanvas.height - hudBounds.height / 2 + tweakParams.lineHeight * 2.5);
+        var hudTextE = " Temp: ".concat(hudData.temperature.toFixed(1), "\u00B0C / ").concat(degFahrenheit.toFixed(1), "\u00B0F");
+        var textArray = [hudTextA, hudTextB, hudTextC, hudTextD, hudTextE];
+        for (var i = 0; i < textArray.length; i++) {
+            this.hudComponent.hudBitmap.fillText(textArray[i], this.hudComponent.hudCanvas.width - hudBounds.width / 2, offsetY + i * tweakParams.lineHeight);
+        }
+        /*
+        const hudTextA: string = `Depth: ${hudData.depth.toFixed(1)}m\n`;
+        this.hudComponent.hudBitmap.fillText(
+          hudTextA,
+          this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+          offsetY - tweakParams.lineHeight / 2
+        );
+        const hudTextB: string = `Grnd: ${hudData.groundDepth.toFixed(1)}m\n`;
+        this.hudComponent.hudBitmap.fillText(
+          hudTextB,
+          this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+          offsetY - tweakParams.lineHeight / 2
+        );
+        const hudTextC: string = `Angle: ${(hudData.shipRotation.upAngle * RAD2DEG).toFixed(1)}`;
+        this.hudComponent.hudBitmap.fillText(
+          hudTextC,
+          this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+          offsetY + tweakParams.lineHeight / 2
+        );
+        const hudTextD: string = `Press: ${hudData.pressure.toFixed(1)}bar`;
+        this.hudComponent.hudBitmap.fillText(
+          hudTextD,
+          this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+          offsetY + tweakParams.lineHeight * 1.5
+        );
+        // °F = °C × (9/5) + 32
+        const degFahrenheit = hudData.temperature * (9 / 5) + 32.0;
+        const hudTextE: string = ` Temp: ${hudData.temperature.toFixed(1)}°C / ${degFahrenheit.toFixed(1)}°F`;
+        this.hudComponent.hudBitmap.fillText(
+          hudTextE,
+          this.hudComponent.hudCanvas.width - hudBounds.width / 2,
+          offsetY + tweakParams.lineHeight * 2.5
+        );
+          */
         this.hudComponent.hudBitmap.restore();
     };
     /**

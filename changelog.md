@@ -1,3 +1,5 @@
+- 2023-04-29
+  - Added HUD param: groundDepth.
 - 2023-04-26
   - Chaninging HudData.shiprotation from {y,y,z} to {upAngle}.
   - Adding virtual horizon to HUD.

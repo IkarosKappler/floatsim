@@ -7,6 +7,7 @@ export interface DirectionalRotation {
 }
 export interface HUDData {
     depth: number;
+    groundDepth: number;
     shipRotation: DirectionalRotation;
     pressure: number;
     temperature: number;

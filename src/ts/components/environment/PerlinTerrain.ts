@@ -26,16 +26,35 @@ export class PerlinTerrain {
   }
 
   /**
+   * Get the absolute height position, at the given absolute world coordinates. World coordinates
+   * don't have any bouds. If the given coordinates a beyond the limits of this terrain segment
+   * then the closest bound position is used.
+   *
+   * @param {number} absX - The first coordinate along the `width` axis (local coordinates).
+   * @param {number} absZ - The second coordinate along the `depth` axis (local coordinates).
+   * @returns {number} The absolute height value along the `height` (=y) axis.
+   */
+  getHeightAtWorldPosition(absX: number, absZ: number): number {
+    return (
+      this.mesh.position.y +
+      this.getHeightAtRelativePosition(
+        absX - this.mesh.position.x + this.worldSize.width / 2,
+        absZ - this.mesh.position.z + this.worldSize.depth / 2
+      )
+    );
+  }
+
+  /**
    * Get the relative height value, the y position relative to bounds.min.y at the
-   * given relative world coordinates. World coordinates go from
+   * given relative world (local) coordinates. Local coordinates go from
    *   - 0 <= x < width
    *   - 0 <= y < depth
    *
-   * @param {number} x - The first coordinate along the `width` axis.
-   * @param {number} z - The second coordinate along the `depth` axis.
+   * @param {number} x - The first coordinate along the `width` axis (local coordinates).
+   * @param {number} z - The second coordinate along the `depth` axis (local coordinates).
    * @returns {number} The height value along the `height` (=y) axis relative to bounds.min.y.
    */
-  getHeightAt(x: number, z: number): number {
+  getHeightAtRelativePosition(x: number, z: number): number {
     // Convert absolute positions inside [0..x..width] and [0..y..depth]
     // to relative values inside the height map.
     const xRel: number = Math.floor((x / this.worldSize.width) * this.heightMap.widthSegments);
@@ -43,6 +62,19 @@ export class PerlinTerrain {
     // const i: number = Math.max(0, Math.min(zRel * this.heightMap.depthSegments + xRel, this.heightMap.data.length - 1));
     const i: number = this.heightMap.getOffset(xRel, zRel);
     return this.heightMap.data[i] * this.worldSize.height;
+  }
+
+  /**
+   * Check if the given world coordinates are located in this segment's bounds.
+   *
+   * @param {number} absX - The x position in world coordinates.
+   * @param {number} absZ - The z position in world coordinates.
+   * @returns {boolean}
+   */
+  containsAbsolutePosition(absX: number, absZ: number): boolean {
+    const relX = absX - this.mesh.position.x + this.worldSize.width / 2;
+    const relZ = absZ - this.mesh.position.z + this.worldSize.depth / 2;
+    return relX >= 0 && relX < this.worldSize.width && relZ >= 0 && relZ < this.worldSize.depth;
   }
 
   /**
