@@ -32,10 +32,10 @@ exports.PhysicsHandler = void 0;
 var THREE = __importStar(require("three"));
 var generateDemoHeight_1 = require("../utils/generateDemoHeight");
 // Heightfield parameters
-var terrainWidthExtents = 100;
-var terrainDepthExtents = 100;
-var terrainWidthSegmentCount = 128;
-var terrainDepthSegmentCount = 128;
+// const terrainWidthExtents = 100;
+// const terrainDepthExtents = 100;
+// const terrainWidthSegmentCount = 128;
+// const terrainDepthSegmentCount = 128;
 var terrainMaxHeight = 8;
 var terrainMinHeight = -2;
 var time = 0;
@@ -49,13 +49,24 @@ var PhysicsHandler = /** @class */ (function () {
         this.ammoHeightData = null;
         this.physicsWorld = null;
         this.dynamicObjects = [];
+        this.terrainWidthExtents = 100;
+        this.terrainDepthExtents = 100;
+        // Will be overridden
+        this.terrainWidthSegmentCount = 128;
+        this.terrainDepthSegmentCount = 128;
         this.collisionConfiguration = null;
         this.dispatcher = null;
         this.broadphase = null;
         this.solver = null;
         this.sceneContainer = sceneContainer;
         this.terrain = terrain;
-        this.heightData = (0, generateDemoHeight_1.generateDemoHeight)(terrainWidthSegmentCount, terrainDepthSegmentCount, terrainMinHeight, terrainMaxHeight);
+        this.heightData = (0, generateDemoHeight_1.generateDemoHeight)(this.terrainWidthSegmentCount, this.terrainDepthSegmentCount, terrainMinHeight, terrainMaxHeight);
+        // this.heightData = terrain.heightMap.data;
+        // this.terrainDepthSegmentCount = terrain.heightMap.depthSegments;
+        // this.terrainWidthSegmentCount = terrain.heightMap.widthSegments;
+        // // This will enable the real world settings of the terrain (large)
+        // // this.terrainWidthExtents = terrain.worldSize.width;
+        // // this.terrainDepthExtents = terrain.worldSize.depth;
         this.initTestGraphics();
     }
     PhysicsHandler.prototype.start = function () {
@@ -83,7 +94,7 @@ var PhysicsHandler = /** @class */ (function () {
         });
     };
     PhysicsHandler.prototype.initTestGraphics = function () {
-        var geometry = new THREE.PlaneGeometry(terrainWidthExtents, terrainDepthExtents, terrainWidthSegmentCount - 1, terrainDepthSegmentCount - 1);
+        var geometry = new THREE.PlaneGeometry(this.terrainWidthExtents, this.terrainDepthExtents, this.terrainWidthSegmentCount - 1, this.terrainDepthSegmentCount - 1);
         geometry.rotateX(-Math.PI / 2);
         // TODO: use setXYZ and count from BufferAttribute
         var vertices = geometry.attributes.position.array;
@@ -192,14 +203,14 @@ var generateObject = function (physicsHandler) {
             shape = new physicsHandler.ammo.btConeShape(radius, height);
             break;
     }
-    threeObject.position.set((Math.random() - 0.5) * terrainWidthSegmentCount * 0.6, terrainMaxHeight + objectSize + 2, (Math.random() - 0.5) * terrainDepthSegmentCount * 0.6);
+    threeObject.position.set((Math.random() - 0.5) * physicsHandler.terrainWidthSegmentCount * 0.6, terrainMaxHeight + objectSize + 2, (Math.random() - 0.5) * physicsHandler.terrainDepthSegmentCount * 0.6);
     var mass = objectSize * 5;
     var localInertia = new physicsHandler.ammo.btVector3(0, 0, 0);
     shape.calculateLocalInertia(mass, localInertia);
     var transform = new physicsHandler.ammo.btTransform();
     transform.setIdentity();
     var pos = threeObject.position;
-    transform.setOrigin(new physicsHandler.ammo.btVector3(pos.x, pos.y, pos.z));
+    transform.setOrigin(new physicsHandler.ammo.btVector3(pos.x, pos.y + 50, pos.z));
     var motionState = new physicsHandler.ammo.btDefaultMotionState(transform);
     var rbInfo = new physicsHandler.ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
     var body = new physicsHandler.ammo.btRigidBody(rbInfo);
@@ -224,12 +235,12 @@ var createTerrainShape = function (physicsHandler) {
     // Set this to your needs (inverts the triangles)
     var flipQuadEdges = false;
     // Creates height data buffer in Ammo heap
-    physicsHandler.ammoHeightData = physicsHandler.ammo._malloc(4 * terrainWidthSegmentCount * terrainDepthSegmentCount);
+    physicsHandler.ammoHeightData = physicsHandler.ammo._malloc(4 * physicsHandler.terrainWidthSegmentCount * physicsHandler.terrainDepthSegmentCount);
     // Copy the javascript height data array to the Ammo one.
     var p = 0;
     var p2 = 0;
-    for (var j = 0; j < terrainDepthSegmentCount; j++) {
-        for (var i = 0; i < terrainWidthSegmentCount; i++) {
+    for (var j = 0; j < physicsHandler.terrainDepthSegmentCount; j++) {
+        for (var i = 0; i < physicsHandler.terrainWidthSegmentCount; i++) {
             // write 32-bit float data to memory
             physicsHandler.ammo.HEAPF32[(physicsHandler.ammoHeightData + p2) >> 2] = physicsHandler.heightData[p];
             p++;
@@ -238,10 +249,10 @@ var createTerrainShape = function (physicsHandler) {
         }
     }
     // Creates the heightfield physics shape
-    var heightFieldShape = new physicsHandler.ammo.btHeightfieldTerrainShape(terrainWidthSegmentCount, terrainDepthSegmentCount, physicsHandler.ammoHeightData, heightScale, terrainMinHeight, terrainMaxHeight, upAxis, hdt, flipQuadEdges);
+    var heightFieldShape = new physicsHandler.ammo.btHeightfieldTerrainShape(physicsHandler.terrainWidthSegmentCount, physicsHandler.terrainDepthSegmentCount, physicsHandler.ammoHeightData, heightScale, terrainMinHeight, terrainMaxHeight, upAxis, hdt, flipQuadEdges);
     // Set horizontal scale
-    var scaleX = terrainWidthExtents / (terrainWidthSegmentCount - 1);
-    var scaleZ = terrainDepthExtents / (terrainDepthSegmentCount - 1);
+    var scaleX = physicsHandler.terrainWidthExtents / (physicsHandler.terrainWidthSegmentCount - 1);
+    var scaleZ = physicsHandler.terrainDepthExtents / (physicsHandler.terrainDepthSegmentCount - 1);
     heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, 1, scaleZ));
     heightFieldShape.setMargin(0.05);
     return heightFieldShape;

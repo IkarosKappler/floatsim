@@ -18,6 +18,10 @@ export declare class PhysicsHandler {
     physicsWorld: Ammo.btDiscreteDynamicsWorld;
     readonly dynamicObjects: Array<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>>;
     worldTransform: Ammo.btTransform;
+    terrainWidthExtents: number;
+    terrainDepthExtents: number;
+    terrainWidthSegmentCount: number;
+    terrainDepthSegmentCount: number;
     collisionConfiguration: Ammo.btDefaultCollisionConfiguration;
     dispatcher: Ammo.btCollisionDispatcher;
     broadphase: Ammo.btDbvtBroadphase;

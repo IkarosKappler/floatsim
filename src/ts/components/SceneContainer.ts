@@ -88,7 +88,8 @@ export class SceneContainer implements ISceneContainer {
       lineHeight: 14,
       fontSize: 14,
       maxShipUpAngle: Math.PI * 0.25, // 45 degree
-      minShipUpAngle: -Math.PI * 0.25 // -45 degree
+      minShipUpAngle: -Math.PI * 0.25, // -45 degree
+      cameraFov: 30
     };
 
     // Initialize a new THREE renderer (you are also allowed
@@ -105,7 +106,7 @@ export class SceneContainer implements ISceneContainer {
     this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 10, 10000);
+    this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 10, 10000);
 
     this.fogHandler = new FogHandler(this);
     this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
@@ -312,8 +313,8 @@ export class SceneContainer implements ISceneContainer {
     //--- MAKE TERRAIN ---
     const zStartOffset = -320.0; // for ImprovedNoise
     // const zStartOffset = 300.0; // for Custom noise
-    const worldWidthSegments = 256;
-    const worldDepthSegments = 256;
+    const worldWidthSegments = 256; // 256;
+    const worldDepthSegments = 256; // 256;
     const perlinOptions = { iterations: 5, quality: 2.5 };
     const terrainData: IHeightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
 
@@ -362,8 +363,9 @@ export class SceneContainer implements ISceneContainer {
     const objFileName = "newscene.obj";
     const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
     const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
-    targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
-    targetPosition.y += terrain.bounds.min.y;
+    // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
+    // targetPosition.y += terrain.bounds.min.y;
+    targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
     console.log("targetPosition", targetPosition);
     const callback = (loadedObject: THREE.Object3D) => {
       this.addVisibleBoundingBox(loadedObject);

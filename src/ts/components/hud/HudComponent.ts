@@ -13,7 +13,7 @@ import { HorizonFragment } from "./HorizonFragment";
 export class HudComponent implements RenderableComponent {
   readonly hudCanvas: HTMLCanvasElement;
   readonly hudBitmap: CanvasRenderingContext2D;
-  private hudCamera: THREE.Camera; // THREE.OrthographicCamera;
+  readonly hudCamera: THREE.Camera; // THREE.OrthographicCamera;
   readonly hudScene: THREE.Scene;
   private hudImage: HTMLImageElement;
   private hudDynamicTexture: THREE.Texture;

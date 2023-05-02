@@ -18,7 +18,6 @@ export class NavpointsFragment implements RenderableComponent {
 
     // TODO: reuse the vector somehow!
     const vector = new THREE.Vector3(navpoint.position.x, navpoint.position.y, navpoint.position.z);
-
     const distance = sceneContainer.camera.position.distanceTo(vector);
     const difference = vector.y - sceneContainer.camera.position.y;
 
@@ -26,14 +25,13 @@ export class NavpointsFragment implements RenderableComponent {
     // Found at
     //    https://discourse.threejs.org/t/how-to-converting-world-coordinates-to-2d-mouse-coordinates-in-threejs/2251
     vector.project(sceneContainer.camera);
-
     //  This only converts a vector to normalized device space. You still have to map the vector to 2D screen space. Something like:
     // TODO: fetch real renderer size here!
     vector.x = ((vector.x + 1) * sceneContainer.rendererSize.width) / 2;
     vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
     vector.z = 0;
-    const colorMarker = getColorStyle(this.hudComponent.primaryColor, 1.0);
 
+    const colorMarker = getColorStyle(this.hudComponent.primaryColor, 1.0);
     if (this.currentFragmentBounds.contains(vector)) {
       // Navpoint is in visible area
       this.drawMarkerAt(vector, colorMarker);

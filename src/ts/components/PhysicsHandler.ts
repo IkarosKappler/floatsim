@@ -15,10 +15,10 @@ type TAmmo = typeof Ammo;
 type AmmoShapeType = Ammo.btSphereShape | Ammo.btBoxShape | Ammo.btCylinderShape | Ammo.btConeShape;
 
 // Heightfield parameters
-const terrainWidthExtents = 100;
-const terrainDepthExtents = 100;
-const terrainWidthSegmentCount = 128;
-const terrainDepthSegmentCount = 128;
+// const terrainWidthExtents = 100;
+// const terrainDepthExtents = 100;
+// const terrainWidthSegmentCount = 128;
+// const terrainDepthSegmentCount = 128;
 const terrainMaxHeight = 8;
 const terrainMinHeight = -2;
 
@@ -38,6 +38,13 @@ export class PhysicsHandler {
   readonly dynamicObjects: Array<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>> = [];
   worldTransform: Ammo.btTransform;
 
+  terrainWidthExtents: number = 100;
+  terrainDepthExtents: number = 100;
+
+  // Will be overridden
+  terrainWidthSegmentCount: number = 128;
+  terrainDepthSegmentCount: number = 128;
+
   collisionConfiguration: Ammo.btDefaultCollisionConfiguration = null;
   dispatcher: Ammo.btCollisionDispatcher = null;
   broadphase: Ammo.btDbvtBroadphase = null;
@@ -47,7 +54,18 @@ export class PhysicsHandler {
     this.sceneContainer = sceneContainer;
     this.terrain = terrain;
 
-    this.heightData = generateDemoHeight(terrainWidthSegmentCount, terrainDepthSegmentCount, terrainMinHeight, terrainMaxHeight);
+    this.heightData = generateDemoHeight(
+      this.terrainWidthSegmentCount,
+      this.terrainDepthSegmentCount,
+      terrainMinHeight,
+      terrainMaxHeight
+    );
+    // this.heightData = terrain.heightMap.data;
+    // this.terrainDepthSegmentCount = terrain.heightMap.depthSegments;
+    // this.terrainWidthSegmentCount = terrain.heightMap.widthSegments;
+    // // This will enable the real world settings of the terrain (large)
+    // // this.terrainWidthExtents = terrain.worldSize.width;
+    // // this.terrainDepthExtents = terrain.worldSize.depth;
 
     this.initTestGraphics();
   }
@@ -90,10 +108,10 @@ export class PhysicsHandler {
 
   initTestGraphics() {
     const geometry = new THREE.PlaneGeometry(
-      terrainWidthExtents,
-      terrainDepthExtents,
-      terrainWidthSegmentCount - 1,
-      terrainDepthSegmentCount - 1
+      this.terrainWidthExtents,
+      this.terrainDepthExtents,
+      this.terrainWidthSegmentCount - 1,
+      this.terrainDepthSegmentCount - 1
     );
 
     geometry.rotateX(-Math.PI / 2);
@@ -224,9 +242,9 @@ const generateObject = (physicsHandler: PhysicsHandler) => {
   }
 
   threeObject.position.set(
-    (Math.random() - 0.5) * terrainWidthSegmentCount * 0.6,
+    (Math.random() - 0.5) * physicsHandler.terrainWidthSegmentCount * 0.6,
     terrainMaxHeight + objectSize + 2,
-    (Math.random() - 0.5) * terrainDepthSegmentCount * 0.6
+    (Math.random() - 0.5) * physicsHandler.terrainDepthSegmentCount * 0.6
   );
 
   const mass: number = objectSize * 5;
@@ -235,7 +253,7 @@ const generateObject = (physicsHandler: PhysicsHandler) => {
   const transform: Ammo.btTransform = new physicsHandler.ammo.btTransform();
   transform.setIdentity();
   const pos = threeObject.position;
-  transform.setOrigin(new physicsHandler.ammo.btVector3(pos.x, pos.y, pos.z));
+  transform.setOrigin(new physicsHandler.ammo.btVector3(pos.x, pos.y + 50, pos.z));
   const motionState: Ammo.btDefaultMotionState = new physicsHandler.ammo.btDefaultMotionState(transform);
   const rbInfo: Ammo.btRigidBodyConstructionInfo = new physicsHandler.ammo.btRigidBodyConstructionInfo(
     mass,
@@ -275,14 +293,16 @@ const createTerrainShape = (physicsHandler: PhysicsHandler) => {
   const flipQuadEdges = false;
 
   // Creates height data buffer in Ammo heap
-  physicsHandler.ammoHeightData = physicsHandler.ammo._malloc(4 * terrainWidthSegmentCount * terrainDepthSegmentCount);
+  physicsHandler.ammoHeightData = physicsHandler.ammo._malloc(
+    4 * physicsHandler.terrainWidthSegmentCount * physicsHandler.terrainDepthSegmentCount
+  );
 
   // Copy the javascript height data array to the Ammo one.
   let p = 0;
   let p2 = 0;
 
-  for (let j = 0; j < terrainDepthSegmentCount; j++) {
-    for (let i = 0; i < terrainWidthSegmentCount; i++) {
+  for (let j = 0; j < physicsHandler.terrainDepthSegmentCount; j++) {
+    for (let i = 0; i < physicsHandler.terrainWidthSegmentCount; i++) {
       // write 32-bit float data to memory
       physicsHandler.ammo.HEAPF32[(physicsHandler.ammoHeightData + p2) >> 2] = physicsHandler.heightData[p];
 
@@ -295,8 +315,8 @@ const createTerrainShape = (physicsHandler: PhysicsHandler) => {
 
   // Creates the heightfield physics shape
   const heightFieldShape = new physicsHandler.ammo.btHeightfieldTerrainShape(
-    terrainWidthSegmentCount,
-    terrainDepthSegmentCount,
+    physicsHandler.terrainWidthSegmentCount,
+    physicsHandler.terrainDepthSegmentCount,
     physicsHandler.ammoHeightData,
     heightScale,
     terrainMinHeight,
@@ -307,8 +327,8 @@ const createTerrainShape = (physicsHandler: PhysicsHandler) => {
   );
 
   // Set horizontal scale
-  const scaleX = terrainWidthExtents / (terrainWidthSegmentCount - 1);
-  const scaleZ = terrainDepthExtents / (terrainDepthSegmentCount - 1);
+  const scaleX = physicsHandler.terrainWidthExtents / (physicsHandler.terrainWidthSegmentCount - 1);
+  const scaleZ = physicsHandler.terrainDepthExtents / (physicsHandler.terrainDepthSegmentCount - 1);
   heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, 1, scaleZ));
 
   heightFieldShape.setMargin(0.05);

@@ -5,7 +5,8 @@ globalThis.addEventListener("load", function () {
   const tweakParams = {
     iterations: 5,
     quality: 2.5,
-    y: 0.0
+    y: 0.0,
+    useHeightMapTexture: true
   };
 
   // Initialize a new THREE renderer (you are also allowed
@@ -81,7 +82,9 @@ globalThis.addEventListener("load", function () {
     heightMap.bilinearSmoothstep(2);
 
     var geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, worldSize);
-    var mesh = new THREE.Mesh(geometry, planeMaterial);
+    var perlinTexture = new PerlinTexture(heightMap, worldSize);
+    var material = new THREE.MeshPhongMaterial({ color: 0x00ff00, map: new THREE.CanvasTexture(perlinTexture.imageCanvas) });
+    var mesh = new THREE.Mesh(geometry, tweakParams.useHeightMapTexture ? material : planeMaterial);
     meshes.push(mesh);
     // mesh.scale.set(0.01, 0.01, 0.01);
     mesh.position.set(offsetX * terrainSize.width, 0, offsetY * terrainSize.depth);
@@ -157,6 +160,7 @@ globalThis.addEventListener("load", function () {
       min: 0.0,
       max: 5.0
     });
+    pane.addInput(tweakParams, "useHeightMapTexture", {});
     pane.on("change", ev => {
       // console.log("changed: " + JSON.stringify(ev.value));
       rebuildTerrain();

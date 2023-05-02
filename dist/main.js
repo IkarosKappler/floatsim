@@ -60,9 +60,6 @@ globalThis.addEventListener("load", function () {
     });
     pane.addInput(sceneContainer.tweakParams, "isRendering");
     pane.addInput(sceneContainer.tweakParams, "highlightHudFragments");
-    // pane.on("change", (ev: TweakPane.TpChangeEvent<number>) => {
-    //   console.log("changed: " + JSON.stringify(ev.value));
-    // });
     pane.addInput(sceneContainer.tweakParams, "cutsceneShutterValue", {
         min: 0.0,
         max: 1.0
@@ -74,6 +71,16 @@ globalThis.addEventListener("load", function () {
     pane.addInput(sceneContainer.tweakParams, "lineHeight", {
         min: 7.0,
         max: 22.0
+    });
+    pane
+        .addInput(sceneContainer.tweakParams, "cameraFov", {
+        min: 10.0,
+        max: 90.0
+    })
+        .on("change", function (ev) {
+        console.log(" cameraFovchanged: " + JSON.stringify(ev.value));
+        sceneContainer.camera.fov = ev.value;
+        sceneContainer.camera.updateProjectionMatrix();
     });
     pane.expanded = false;
 });

@@ -57,9 +57,13 @@ var PerlinHeightMap = /** @class */ (function () {
             for (var i = 0; i < size; i++) {
                 var x = i % widthSegments, y = ~~(i / widthSegments);
                 var pValue = getHeight(x / resolution, y / resolution, z);
-                minHeightValue = Math.min(minHeightValue, pValue);
-                maxHeightValue = Math.max(maxHeightValue, pValue);
+                // minHeightValue = Math.min(minHeightValue, pValue);
+                // maxHeightValue = Math.max(maxHeightValue, pValue);
                 this.data[i] += Math.abs(pValue * resolution * depthFactor);
+                if (j + 1 === iterations) {
+                    minHeightValue = Math.min(minHeightValue, this.data[i]);
+                    maxHeightValue = Math.max(maxHeightValue, this.data[i]);
+                }
             }
             resolution *= qualityFactor;
             // quality *= quality;
@@ -90,14 +94,6 @@ var PerlinHeightMap = /** @class */ (function () {
         // const squareArea = squareSize * squareSize;
         for (var x = 0; x < this.widthSegments; x++) {
             for (var z = 0; z < this.depthSegments; z++) {
-                // const values = [
-                //   [this.getValueAt(x, z), z + 1 < this.depthSegments ? this.getValueAt(x, z + 1) : this.getValueAt(x, z)],
-                //   [
-                //     x + 1 < this.widthSegments ? this.getValueAt(x + 1, z) : this.getValueAt(x, z),
-                //     x + 1 < this.widthSegments && z + 1 < this.depthSegments ? this.getValueAt(x + 1, z + 1) : this.getValueAt(x, z)
-                //   ]
-                // ];
-                // this.setValueAt(x, z, (values[0][0] + values[0][1] + values[1][0] + values[1][1]) / 4.0);
                 this.setValueAt(x, z, this.aggregateNeightbourValues(x, z, squareSize));
             }
         }

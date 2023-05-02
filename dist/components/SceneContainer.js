@@ -76,7 +76,8 @@ var SceneContainer = /** @class */ (function () {
             lineHeight: 14,
             fontSize: 14,
             maxShipUpAngle: Math.PI * 0.25,
-            minShipUpAngle: -Math.PI * 0.25 // -45 degree
+            minShipUpAngle: -Math.PI * 0.25,
+            cameraFov: 30
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
@@ -91,7 +92,7 @@ var SceneContainer = /** @class */ (function () {
         this.renderer.autoClear = false;
         this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 10, 10000);
+        this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 10, 10000);
         this.fogHandler = new FogHandler_1.FogHandler(this);
         this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
         this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
@@ -250,8 +251,8 @@ var SceneContainer = /** @class */ (function () {
         //--- MAKE TERRAIN ---
         var zStartOffset = -320.0; // for ImprovedNoise
         // const zStartOffset = 300.0; // for Custom noise
-        var worldWidthSegments = 256;
-        var worldDepthSegments = 256;
+        var worldWidthSegments = 256; // 256;
+        var worldDepthSegments = 256; // 256;
         var perlinOptions = { iterations: 5, quality: 2.5 };
         var terrainData = new PerlinHeightMap_1.PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
         var terrainSize = { width: 2048.0, depth: 2048.0, height: 10.0 };
@@ -284,8 +285,9 @@ var SceneContainer = /** @class */ (function () {
         var objFileName = "newscene.obj";
         var targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
         var targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
-        targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
-        targetPosition.y += terrain.bounds.min.y;
+        // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
+        // targetPosition.y += terrain.bounds.min.y;
+        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
         console.log("targetPosition", targetPosition);
         var callback = function (loadedObject) {
             _this.addVisibleBoundingBox(loadedObject);

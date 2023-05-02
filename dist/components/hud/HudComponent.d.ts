@@ -3,7 +3,7 @@ import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../i
 export declare class HudComponent implements RenderableComponent {
     readonly hudCanvas: HTMLCanvasElement;
     readonly hudBitmap: CanvasRenderingContext2D;
-    private hudCamera;
+    readonly hudCamera: THREE.Camera;
     readonly hudScene: THREE.Scene;
     private hudImage;
     private hudDynamicTexture;

@@ -44,6 +44,7 @@ export interface TweakParams {
     fontSize: number;
     maxShipUpAngle: number;
     minShipUpAngle: number;
+    cameraFov: number;
 }
 export interface IDimension2 {
     width: number;
@@ -89,7 +90,7 @@ export interface IHeightMap {
     depthSegments: number;
     minHeightValue: number;
     maxHeightValue: number;
-    data: Float32Array | Uint8Array;
+    data: Float32Array;
     /**
      * Convert a position on the heightmap's x-y-grid to an offset inside the
      * underlying data array.
