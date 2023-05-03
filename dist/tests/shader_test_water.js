@@ -34,7 +34,9 @@ globalThis.addEventListener("load", function () {
   this.scene.add(ah);
 
   //--- BEGIN--- Create Water Shader (TEST)
+  var vertShader_pars = document.getElementById("vertexShader-pars").innerHTML;
   var vertShader = document.getElementById("vertexShader").innerHTML;
+  var fragShader_pars = document.getElementById("fragmentShader-pars").innerHTML;
   var fragShader = document.getElementById("fragmentShader").innerHTML;
 
   //---BEGIN--- Terrain Generation
@@ -83,9 +85,9 @@ globalThis.addEventListener("load", function () {
 
   var uniforms = {
     // Fog
-    fogColor: { type: "t", value: new THREE.Color(0x021a38) }, // TODO: change fog color
-    vFogDepth: { type: "f", value: 0.0021 }, // ???
-    fogDensity: { type: "f", value: 0.0021 }, // TODO: take from FogHandler
+    // fogColor: { type: "t", value: new THREE.Color(0x021a38) }, // TODO: change fog color
+    // vFogDepth: { type: "f", value: 0.0021 }, // ???
+    // fogDensity: { type: "f", value: 0.0021 }, // TODO: take from FogHandler
     // Caustics
     u_zoom: { type: "f", value: 0.5 },
     u_speed: { type: "f", value: 0.4 },
@@ -96,23 +98,109 @@ globalThis.addEventListener("load", function () {
     // u_effect_color: { type: "t", value: new THREE.Color(0.19, 0.86, 0.86) },
     u_effect_color: { type: "t", value: new THREE.Vector4(0.29, 0.75, 0.89) }
   };
-  var waterMaterial = new THREE.ShaderMaterial({
-    uniforms: uniforms,
+  // var waterMaterial = new THREE.ShaderMaterial({
+  //   uniforms: uniforms,
+  //   vertexShader: vertShader,
+  //   fragmentShader: fragShader,
+  //   transparent: true
+  // });
+  var waterMaterial = new THREE.MeshBasicMaterial({
+    // uniforms: uniforms,
     vertexShader: vertShader,
     fragmentShader: fragShader,
-    transparent: true
+    transparent: true,
+    fog: true,
+    fogColor: 0x021a38,
+    vFogDepth: 0.0021,
+    fogDensity: 0.0021,
+    map: dTex
+    // u_zoom: 0.5,
+    // u_speed: 0.4,
+    // u_bright: 32.0,
+    // u_intensity: 0.5,
+    // u_time: this.clock.getDelta(),
+    // u_texture: dTex,
+    // u_effect_color: new THREE.Vector4(0.29, 0.75, 0.89)
   });
+  // How to pass uniforms to my custom shader?
+  //    See https://medium.com/@pailhead011/extending-three-js-materials-with-glsl-78ea7bbb9270
+  waterMaterial.userData.myUniforms = uniforms;
+  waterMaterial.onBeforeCompile = (shader, renderer) => {
+    console.log("onBeforeCompile");
+    console.log(shader.fragmentShader);
+    console.log(shader.vertexShader);
+
+    // shader.uniforms.u_time = waterMaterial.userData.myUniforms.u_time; //pass this input by reference
+    // Pass my uniforms to the shader by reference (!)
+    //    this will make them accessible and changeable later.
+    for (var entry of Object.entries(waterMaterial.userData.myUniforms)) {
+      var uniformName = entry[0];
+      var uniformValue = entry[1];
+      shader.uniforms[uniformName] = uniformValue;
+    }
+
+    // Compare to:
+    //    https://threejs.org/examples/webgl_materials_modified
+    // shader.uniforms.fogColor = { value: new THREE.Vector3(2, 26, 56) };
+    // shader.uniforms.vFogDepth = { value: 0.0021 };
+    // shader.uniforms.fogDensity = { value: 0.0021 };
+    shader.uniforms.u_zoom = { value: 0.5 };
+    shader.uniforms.u_speed = { type: "f", value: 0.4 };
+    shader.uniforms.u_bright = { value: 32.0 };
+    shader.uniforms.u_intensity = { value: 0.5 };
+    // shader.uniforms.u_time = { type: "f", value: this.clock.getDelta() };
+    shader.uniforms.u_texture = { value: dTex }; // This can probably be removed
+    shader.uniforms.u_effect_color = { value: new THREE.Vector4(0.29, 0.75, 0.89) };
+
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <clipping_planes_pars_fragment>",
+        ["#include <clipping_planes_pars_fragment>", fragShader_pars].join("\n")
+      )
+      .replace("#include <dithering_fragment>", ["#include <dithering_fragment>", fragShader].join("\n"));
+
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <clipping_planes_pars_vertex>", ["#include <clipping_planes_pars_vertex>", vertShader_pars].join("\n"))
+      .replace("#include <fog_vertex>", ["#include <fog_vertex>", vertShader].join("\n"));
+  };
   //--- END--- Create Water Shader (TEST)
 
   // Create a geometry conaining the logical 3D information (here: a cube)
   var cubeGeometry = new THREE.BoxGeometry(12, 12, 12);
   // Pick a material, something like MeshBasicMaterial, PhongMaterial,
-  var cubeBaseMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+  // var cubeBaseMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
   // Create the cube from the geometry and the material ...
-  cubeGeometry.clearGroups();
-  cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
-  cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
-  this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, waterMaterial]);
+  // cubeGeometry.clearGroups();
+  // cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
+  // cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
+  // this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, waterMaterial]);
+
+  this.cube = new THREE.Mesh(cubeGeometry, waterMaterial);
+  //  // this.geometry = new THREE.BufferGeometry();
+  // fogColor: 0x021a38,
+  //   vFogDepth: 0.0021,
+  //   fogDensity: 0.0021,
+  // u_zoom: 0.5,
+  //   u_speed: 0.4,
+  //   u_bright: 32.0,
+  //   u_intensity: 0.5,
+  //   u_time: this.clock.getDelta(),
+  //   u_texture: dTex,
+  //   u_effect_color: new THREE.Vector4(0.29, 0.75, 0.89)
+
+  // var fogColor = new Int8Array(3);
+  // fogColor[0] = 2;
+  // fogColor[1] = 26;
+  // fogColor[2] = 56;
+  // this.cube.geometry.setAttribute("fogColor", new THREE.Float32BufferAttribute(fogColor, 3)); // 0x021a38
+  // this.cube.geometry.setAttribute("aSize", new THREE.Float32BufferAttribute(sizes, 1));
+  // this.cube.geometry.setAttribute("aColor", new THREE.Float32BufferAttribute(colors, 4));
+  // this.cube.geometry.setAttribute("aRotation", new THREE.Float32BufferAttribute(angles, 1));
+
+  // this.cube.geometry.attributes.position.needsUpdate = true;
+  // this.cube.geometry.attributes.aSize.needsUpdate = true;
+  // this.cube.geometry.attributes.aColor.needsUpdate = true;
+  // this.cube.geometry.attributes.aRotation.needsUpdate = true;
 
   this.cube.position.set(12, 12, 12);
   // ... and add it to your scene.
@@ -141,15 +229,27 @@ globalThis.addEventListener("load", function () {
   var loopNumber = 0;
   var _render = function () {
     var elapsedTime = _self.clock.getElapsedTime();
+    // if (loopNumber < 10) {
+    //   console.log("elapsedTime", elapsedTime);
+    // }
     _self.stats.update();
     // Let's animate the cube: a rotation.
     _self.cube.rotation.x += 0.01;
     _self.cube.rotation.y += 0.005;
     _self.renderer.render(_self.scene, _self.camera);
 
-    _self.cube.material[1].uniforms.u_time.value = elapsedTime;
-    terrain.causticShaderMaterial.update(elapsedTime, this.scene.fog.color);
-    _self.cube.material[1].uniformsNeedUpdate = true;
+    // _self.cube.material.uniforms.u_time.value = elapsedTime;
+    // TODO: UPDATING THE TIME IS NOT WORKING ANY MORE
+    // var u_time_attribute_array = new Float32Array(1);
+    // u_time_attribute_array[0] = elapsedTime;
+    // var u_time_attribute = new THREE.Float32BufferAttribute(u_time_attribute_array, 1);
+    // _self.cube.geometry.setAttribute("u_time", u_time_attribute);
+    // u_time_attribute.needsUpdate = true;
+    // self.cube.geometry.attributes.u_time.needsUpdate = true;
+    waterMaterial.userData.myUniforms.u_time.value = elapsedTime;
+
+    terrain.causticShaderMaterial.update(elapsedTime, _self.scene.fog.color);
+    _self.cube.material.uniformsNeedUpdate = true;
 
     loopNumber++;
     requestAnimationFrame(_render);
