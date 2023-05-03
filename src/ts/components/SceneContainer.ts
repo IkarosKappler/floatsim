@@ -222,10 +222,13 @@ export class SceneContainer implements ISceneContainer {
     const terrain = this.makeTerrain();
     this.terrainSegments.push(terrain);
 
+    console.log("Terrain Bounds", terrain.bounds);
+
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
-    updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, terrain.bounds, 0.00001));
-    updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, terrain.bounds, 0.00001));
+    const particleDensity = 0.0001;
+    updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, terrain.bounds, particleDensity));
+    updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, terrain.bounds, particleDensity));
 
     // // This is the basic render function. It will be called perpetual, again and again,
     // // depending on your machines possible frame rate.

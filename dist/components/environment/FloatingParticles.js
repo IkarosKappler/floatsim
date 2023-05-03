@@ -30,6 +30,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FloatingParticles = void 0;
 var THREE = __importStar(require("three"));
+var Helpers_1 = require("../../utils/Helpers");
 var distance_pars_vertex = /* glsl */ "\n  varying vec2 vUv;\n  varying float distance;\n  uniform float pointMultiplier;\n  varying float particleDistFactor;\n\n  attribute float aRotation;\n  attribute float aSize;\n  attribute vec4 aColor;\n  varying float vRotation;\n  varying vec4 vColor;\n  ";
 var distance_vertex = /* glsl */ "\n  // 'distance' void main() {\n    float maxDistance = 10.0;\n    vUv = uv;\n\n    float vParticleDensity = 0.0084;\n    distance = - mvPosition.z;\n    particleDistFactor = 1.0 - exp( - vParticleDensity * vParticleDensity * distance * distance );\n\n    vRotation = aRotation;\n    vColor = aColor;\n    gl_PointSize = aSize / particleDistFactor;\n  // }\n  ";
 var distance_pars_fragment = /* glsl */ "\n  varying vec2 vUv;\n  // uniform sampler2D velTex;\n  uniform sampler2D posTex; // TOTO: rename to tDiffuse\n  varying float distance;\n  varying float particleDistFactor;\n\n  varying float vRotation;\n  varying vec4 vColor;\n";
@@ -52,18 +53,19 @@ var FloatingParticles = /** @class */ (function () {
         var sizes = [];
         var angles = [];
         // Compute particle count from particle density and size
-        var boundingBoxSize = new THREE.Vector3();
-        this.containingBox.getSize(boundingBoxSize);
+        // const boundingBoxSize = new THREE.Vector3();
+        // this.containingBox.getSize(boundingBoxSize);
+        var boundingBoxSize = (0, Helpers_1.bounds2size)(this.containingBox);
         // Limit the particle count to one million
-        var particleCount = Math.min(boundingBoxSize.x * boundingBoxSize.y * boundingBoxSize.z * particleDensity, 1000000);
+        var particleCount = Math.min(boundingBoxSize.width * boundingBoxSize.height * boundingBoxSize.depth * particleDensity, 1000000);
         console.log("particleCount", particleCount);
         for (var i = 0; i < particleCount; i++) {
             // const x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
             // const y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
             // const z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
-            var x = this.containingBox.min.x + Math.random() * boundingBoxSize.x;
-            var y = this.containingBox.min.y + Math.random() * boundingBoxSize.y;
-            var z = this.containingBox.min.z + Math.random() * boundingBoxSize.z;
+            var x = this.containingBox.min.x + Math.random() * boundingBoxSize.width;
+            var y = this.containingBox.min.y + Math.random() * boundingBoxSize.height;
+            var z = this.containingBox.min.z + Math.random() * boundingBoxSize.depth;
             var color = new THREE.Color(128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127), 128 + Math.floor(Math.random() * 127));
             var alpha = 0.5 + Math.random() * 0.5;
             var size = Math.random() * 5.0;
@@ -76,6 +78,9 @@ var FloatingParticles = /** @class */ (function () {
                 position: new THREE.Vector3(x, y, z),
                 velocity: new THREE.Vector3(1.0 + Math.random() * 2, 0.0, 1.0 + Math.random() * 2)
             });
+            // if (i < 10) {
+            //   console.log("[FloatingParticles.constructor] Spawning particle at ", x, y, z);
+            // }
         }
         // this.geometry = new THREE.BufferGeometry();
         this.geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -96,23 +101,33 @@ var FloatingParticles = /** @class */ (function () {
             depthTest: false,
             blendDstAlpha: 1500
         });
-        material.onBeforeCompile = function (shader, renderer) {
-            // console.log("onBeforeCompile");
-            // console.log(shader.fragmentShader);
-            // console.log(shader.vertexShader);
-            shader.fragmentShader = shader.fragmentShader
-                .replace("#include <clipping_planes_pars_fragment>", ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n"))
-                .replace("#include <premultiplied_alpha_fragment>", ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n"));
-            shader.vertexShader = shader.vertexShader
-                .replace("#include <clipping_planes_pars_vertex>", ["#include <clipping_planes_pars_vertex>", distance_pars_vertex].join("\n"))
-                .replace("#include <fog_vertex>", ["#include <fog_vertex>", distance_vertex].join("\n"));
-        };
+        // material.onBeforeCompile = (shader, renderer) => {
+        //   // console.log("onBeforeCompile");
+        //   // console.log(shader.fragmentShader);
+        //   // console.log(shader.vertexShader);
+        //   shader.fragmentShader = shader.fragmentShader
+        //     .replace(
+        //       "#include <clipping_planes_pars_fragment>",
+        //       ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n")
+        //     )
+        //     .replace(
+        //       "#include <premultiplied_alpha_fragment>",
+        //       ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n")
+        //     );
+        //   shader.vertexShader = shader.vertexShader
+        //     .replace(
+        //       "#include <clipping_planes_pars_vertex>",
+        //       ["#include <clipping_planes_pars_vertex>", distance_pars_vertex].join("\n")
+        //     )
+        //     .replace("#include <fog_vertex>", ["#include <fog_vertex>", distance_vertex].join("\n"));
+        // };
         // https://stackoverflow.com/questions/67832321/how-to-reuse-the-three-js-fragment-shader-output
         var points = new THREE.Points(this.geometry, material);
         this.sceneContainer.scene.add(points);
     };
     // @implement UpdateableComponent
     FloatingParticles.prototype.update = function (elapsedTime, _deltaTime) {
+        // console.log("[FloatingParticles.update]");
         var positions = [];
         for (var i = 0; i < this.particles.length; i++) {
             positions.push(this.particles[i].position.x + this.particles[i].velocity.x * elapsedTime);

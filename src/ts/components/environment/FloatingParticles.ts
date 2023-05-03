@@ -6,7 +6,8 @@
 
 import * as THREE from "three";
 import { SceneContainer } from "../SceneContainer";
-import { UpdateableComponent } from "../interfaces";
+import { Size2Immutable, Size3Immutable, UpdateableComponent } from "../interfaces";
+import { bounds2size } from "../../utils/Helpers";
 
 const distance_pars_vertex = /* glsl */ `
   varying vec2 vUv;
@@ -101,19 +102,23 @@ export class FloatingParticles implements UpdateableComponent {
     const angles: Array<number> = [];
 
     // Compute particle count from particle density and size
-    const boundingBoxSize = new THREE.Vector3();
-    this.containingBox.getSize(boundingBoxSize);
+    // const boundingBoxSize = new THREE.Vector3();
+    // this.containingBox.getSize(boundingBoxSize);
+    const boundingBoxSize: Size3Immutable = bounds2size(this.containingBox);
     // Limit the particle count to one million
-    const particleCount: number = Math.min(boundingBoxSize.x * boundingBoxSize.y * boundingBoxSize.z * particleDensity, 1000000);
+    const particleCount: number = Math.min(
+      boundingBoxSize.width * boundingBoxSize.height * boundingBoxSize.depth * particleDensity,
+      1000000
+    );
     console.log("particleCount", particleCount);
 
     for (let i = 0; i < particleCount; i++) {
       // const x = initialPosition.x + THREE.MathUtils.randFloatSpread(1000);
       // const y = initialPosition.y + THREE.MathUtils.randFloatSpread(1000);
       // const z = initialPosition.z + THREE.MathUtils.randFloatSpread(1000);
-      const x = this.containingBox.min.x + Math.random() * boundingBoxSize.x;
-      const y = this.containingBox.min.y + Math.random() * boundingBoxSize.y;
-      const z = this.containingBox.min.z + Math.random() * boundingBoxSize.z;
+      const x = this.containingBox.min.x + Math.random() * boundingBoxSize.width;
+      const y = this.containingBox.min.y + Math.random() * boundingBoxSize.height;
+      const z = this.containingBox.min.z + Math.random() * boundingBoxSize.depth;
 
       const color = new THREE.Color(
         128 + Math.floor(Math.random() * 127),
@@ -134,6 +139,9 @@ export class FloatingParticles implements UpdateableComponent {
         position: new THREE.Vector3(x, y, z),
         velocity: new THREE.Vector3(1.0 + Math.random() * 2, 0.0, 1.0 + Math.random() * 2)
       });
+      // if (i < 10) {
+      //   console.log("[FloatingParticles.constructor] Spawning particle at ", x, y, z);
+      // }
     }
 
     // this.geometry = new THREE.BufferGeometry();
@@ -158,28 +166,28 @@ export class FloatingParticles implements UpdateableComponent {
       depthTest: false, // !!! Setting this to true produces flickering!
       blendDstAlpha: 1500
     });
-    material.onBeforeCompile = (shader, renderer) => {
-      // console.log("onBeforeCompile");
-      // console.log(shader.fragmentShader);
-      // console.log(shader.vertexShader);
+    // material.onBeforeCompile = (shader, renderer) => {
+    //   // console.log("onBeforeCompile");
+    //   // console.log(shader.fragmentShader);
+    //   // console.log(shader.vertexShader);
 
-      shader.fragmentShader = shader.fragmentShader
-        .replace(
-          "#include <clipping_planes_pars_fragment>",
-          ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n")
-        )
-        .replace(
-          "#include <premultiplied_alpha_fragment>",
-          ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n")
-        );
+    //   shader.fragmentShader = shader.fragmentShader
+    //     .replace(
+    //       "#include <clipping_planes_pars_fragment>",
+    //       ["#include <clipping_planes_pars_fragment>", distance_pars_fragment].join("\n")
+    //     )
+    //     .replace(
+    //       "#include <premultiplied_alpha_fragment>",
+    //       ["#include <premultiplied_alpha_fragment>", distance_fragment].join("\n")
+    //     );
 
-      shader.vertexShader = shader.vertexShader
-        .replace(
-          "#include <clipping_planes_pars_vertex>",
-          ["#include <clipping_planes_pars_vertex>", distance_pars_vertex].join("\n")
-        )
-        .replace("#include <fog_vertex>", ["#include <fog_vertex>", distance_vertex].join("\n"));
-    };
+    //   shader.vertexShader = shader.vertexShader
+    //     .replace(
+    //       "#include <clipping_planes_pars_vertex>",
+    //       ["#include <clipping_planes_pars_vertex>", distance_pars_vertex].join("\n")
+    //     )
+    //     .replace("#include <fog_vertex>", ["#include <fog_vertex>", distance_vertex].join("\n"));
+    // };
 
     // https://stackoverflow.com/questions/67832321/how-to-reuse-the-three-js-fragment-shader-output
 
@@ -190,6 +198,7 @@ export class FloatingParticles implements UpdateableComponent {
 
   // @implement UpdateableComponent
   update(elapsedTime: number, _deltaTime: number): void {
+    // console.log("[FloatingParticles.update]");
     const positions = [];
     for (var i = 0; i < this.particles.length; i++) {
       positions.push(this.particles[i].position.x + this.particles[i].velocity.x * elapsedTime);
