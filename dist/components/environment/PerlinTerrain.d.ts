@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CausticShaderMaterial } from "../../utils/texture/CausticShaderMaterial";
+import { CausticShaderMaterial2 } from "../../utils/texture/CausticShaderMaterial2";
 import { IHeightMap, Size3Immutable, TextureData } from "../interfaces";
 export declare class PerlinTerrain {
     readonly heightMap: IHeightMap;
@@ -8,7 +8,7 @@ export declare class PerlinTerrain {
     readonly texture: THREE.CanvasTexture;
     readonly geometry: THREE.PlaneGeometry;
     readonly mesh: THREE.Mesh;
-    readonly causticShaderMaterial: CausticShaderMaterial;
+    readonly causticShaderMaterial: CausticShaderMaterial2;
     constructor(heightMap: IHeightMap, worldBunds: THREE.Box3, baseTexture: TextureData);
     /**
      * Get the absolute height position, at the given absolute world coordinates. World coordinates

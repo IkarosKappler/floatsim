@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PerlinTerrain = void 0;
 var THREE = __importStar(require("three"));
-var CausticShaderMaterial_1 = require("../../utils/texture/CausticShaderMaterial");
+var CausticShaderMaterial2_1 = require("../../utils/texture/CausticShaderMaterial2");
 var Helpers_1 = require("../../utils/Helpers");
 var PerlinTerrain = /** @class */ (function () {
     function PerlinTerrain(heightMap, worldBunds, baseTexture) {
@@ -33,7 +33,7 @@ var PerlinTerrain = /** @class */ (function () {
         this.bounds = worldBunds;
         this.worldSize = (0, Helpers_1.bounds2size)(worldBunds);
         this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, this.worldSize);
-        this.causticShaderMaterial = new CausticShaderMaterial_1.CausticShaderMaterial(baseTexture);
+        this.causticShaderMaterial = new CausticShaderMaterial2_1.CausticShaderMaterial2(baseTexture);
         this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
     }
     /**

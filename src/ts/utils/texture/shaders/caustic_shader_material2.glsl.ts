@@ -1,35 +1,22 @@
-<!DOCTYPE html>
-<html> 
-<head> 
-    <meta charset="UTF-8">
-    <title>THREE.js Water Shader Test</title> 
-    <link rel="stylesheet" href="../styles.css" />
-    <script src="../lib/three/build/three.150.min.js"></script>
-    <script>globalThis.three = THREE;
-    </script>
-    <script src="../lib/three/examples/umd/lib/stats.module.js"></script> 
-    <script>
-        globalThis.module = globalThis;
-    </script>
-    <script src="../module.js"></script>
-    <script src="../lib/three/examples/umd/controls/OrbitControls.js"></script>
-    <script>globalThis.three = THREE;</script>
-    <script src="../lib/three/examples/umd/math/ImprovedNoise.js"></script>
-    <script src="../utils/Helpers.js"></script> 
-    <script src="../utils/texture/shaders/caustic_shader_material.glsl.js"></script>
-    <script src="../utils/texture/shaders/caustic_shader_material2.glsl.js"></script>
-    <script src="../utils/texture/CausticShaderMaterial.js"></script> 
-    <script src="../utils/texture/CausticShaderMaterial2.js"></script> 
-    <script src="../utils/texture/PerlinTexture.js"></script> 
-    <script src="../utils/math/perlin.js"></script> 
-    <script src="../utils/math/PerlinHeightMap.js"></script> 
-    <script src="../components/environment/PerlinTerrain.js"></script> 
-    <script src="shader_test_water.js"></script> 
-    <script id="vertexShader-pars" type="x-shader/x-vertex">
+/**
+ * This is the second version of my caustic shader.
+ * It is split into parts with the code for main function(s) and parts
+ * with the uniforms/varying definitions.
+ *
+ * This makes it easy to combine it with existing shaders from THREEJS
+ * by using the onCompile method with text replacement.
+ *
+ * @author  Ikaros Kappler
+ * @date    2023-05-03
+ * @version 1.0.0
+ */
+
+const vertex_pars = /* glsl */ `
         // varying vec2 vUv; 
         varying vec3 vposition;
-    </script>
-    <script id="vertexShader" type="x-shader/x-vertex">
+`;
+
+const vertex = /* glsl */ `
         // varying vec2 vUv; 
         // varying vec3 vposition;
 
@@ -42,9 +29,9 @@
             vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
             gl_Position = projectionMatrix * modelViewPosition; 
         // }
-    </script>
+`;
 
-    <script id="fragmentShader-pars" type="x-shader/x-fragment">
+const fragment_pars = /* glsl */ `
 
         // #define FOG_EXP2 1
 
@@ -75,8 +62,9 @@
 
         // varying vec2 vUv;
         varying vec3 vposition;
-    </script>
-    <script id="fragmentShader" type="x-shader/x-fragment">
+`;
+
+const fragment = /* glsl */ `
 
         // #define FOG_EXP2 1
 
@@ -130,12 +118,11 @@
             // float fogFactor = 1.0 - exp( - fogDensity * fogDensity * vFogDepth * vFogDepth );
             gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
         // }
-    </script>
+`;
 
-</head>
-
-<body> 
-    <div id="Stats-output">
-    </div>
-</body> 
-</html>
+export const Caustic_Shader2 = {
+  fragment,
+  fragment_pars,
+  vertex,
+  vertex_pars
+};

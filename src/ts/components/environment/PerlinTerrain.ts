@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { CausticShaderMaterial } from "../../utils/texture/CausticShaderMaterial";
+import { CausticShaderMaterial2 } from "../../utils/texture/CausticShaderMaterial2";
 import { IHeightMap, Size3Immutable, TextureData, Triple } from "../interfaces";
 import { bounds2size } from "../../utils/Helpers";
 
@@ -14,14 +14,14 @@ export class PerlinTerrain {
   readonly geometry: THREE.PlaneGeometry;
   readonly mesh: THREE.Mesh;
 
-  readonly causticShaderMaterial: CausticShaderMaterial;
+  readonly causticShaderMaterial: CausticShaderMaterial2;
 
   constructor(heightMap: IHeightMap, worldBunds: THREE.Box3, baseTexture: TextureData) {
     this.heightMap = heightMap;
     this.bounds = worldBunds;
     this.worldSize = bounds2size(worldBunds);
     this.geometry = PerlinTerrain.heightMapToPlaneGeometry(heightMap, this.worldSize);
-    this.causticShaderMaterial = new CausticShaderMaterial(baseTexture);
+    this.causticShaderMaterial = new CausticShaderMaterial2(baseTexture);
     this.mesh = new THREE.Mesh(this.geometry, this.causticShaderMaterial.waterMaterial);
   }
 

@@ -1,3 +1,5 @@
+- 2023-05-03
+  - Refactored the caustic shader to a new version to make it usable with existing threejs shaders.
 - 2023-04-29
   - Added HUD param: groundDepth.
 - 2023-04-26

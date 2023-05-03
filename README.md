@@ -102,3 +102,4 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Underwater ambience sound https://pixabay.com/sound-effects/underwater-ambiencewav-14428/
 - Cocopon for Tweakpane https://cocopon.github.io/tweakpane
 - Vector Ruler Generator by robbbb https://robbbb.github.io/VectorRuler/
+- pailhead011 for the tutorial of how to extend existing THREEJS shaders and pass custom uniforms to them https://medium.com/@pailhead011/extending-three-js-materials-with-glsl-78ea7bbb9270
