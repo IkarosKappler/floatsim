@@ -37,6 +37,7 @@ export declare class SceneContainer implements ISceneContainer {
     addGroundBuoys(terrain: PerlinTerrain): void;
     addNavpoints(terrain: PerlinTerrain): void;
     private addBuoysAt;
+    private addGeometer;
     getShipVerticalInclination(): number;
     getGroundDepthAt(xPosAbs: number, zPosAbs: number, terrain: PerlinTerrain): number;
     addVisibleBoundingBox(object: THREE.Object3D, color?: THREE.ColorRepresentation): void;

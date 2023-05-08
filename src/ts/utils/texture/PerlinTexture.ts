@@ -98,6 +98,9 @@ export class PerlinTexture implements TextureData {
     sun.normalize();
     const vector3: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
     let shade: number;
+    // const baseColor = [96, 32, 0];
+    const baseColor = [82, 82, 132];
+
     for (let i = 0, j = 0, l = imageDataArray.length; i < l; i += 4, j++) {
       vector3.x = data[j - 2] - data[j + 2];
       vector3.y = 2;
@@ -106,9 +109,19 @@ export class PerlinTexture implements TextureData {
 
       shade = vector3.dot(sun);
 
-      imageDataArray[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
-      imageDataArray[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
-      imageDataArray[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+      // imageDataArray[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
+      // imageDataArray[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
+      // imageDataArray[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+      // imageDataArray[i + 3] = 255;
+
+      // imageDataArray[i] = (96 + shade * baseColor[0]) * (0.5 + data[j] * 0.007);
+      // imageDataArray[i + 1] = (32 + shade * baseColor[1]) * (0.5 + data[j] * 0.007);
+      // imageDataArray[i + 2] = shade * baseColor[2] * (0.5 + data[j] * 0.007);
+      // imageDataArray[i + 3] = 255;
+
+      imageDataArray[i] = (baseColor[0] + shade * 64) * (0.5 + data[j] * 0.007);
+      imageDataArray[i + 1] = (baseColor[1] + shade * 96) * (0.5 + data[j] * 0.007);
+      imageDataArray[i + 2] = (baseColor[2] + shade * 124) * (0.5 + data[j] * 0.007);
       imageDataArray[i + 3] = 255;
     }
   }

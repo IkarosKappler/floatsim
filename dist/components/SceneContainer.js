@@ -92,7 +92,7 @@ var SceneContainer = /** @class */ (function () {
         this.renderer.autoClear = false;
         this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 10, 10000);
+        this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 1, 10000);
         this.fogHandler = new FogHandler_1.FogHandler(this);
         this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
         this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
@@ -180,7 +180,7 @@ var SceneContainer = /** @class */ (function () {
         console.log("Terrain Bounds", terrain.bounds);
         var updateables = [];
         // Initialize particles
-        var particleDensity = 0.000001;
+        var particleDensity = 0.00001;
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", terrain.bounds, particleDensity));
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-b-256.png", terrain.bounds, particleDensity));
         // // This is the basic render function. It will be called perpetual, again and again,
@@ -221,6 +221,7 @@ var SceneContainer = /** @class */ (function () {
         this.loadConcrete(terrain);
         this.addGroundBuoys(terrain);
         this.addNavpoints(terrain);
+        this.addGeometer(terrain);
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });
@@ -378,6 +379,19 @@ var SceneContainer = /** @class */ (function () {
             }
         };
         new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPositions[0] }, buoyObjectLoaded, buoyMaterialsLoaded);
+    };
+    SceneContainer.prototype.addGeometer = function (terrain) {
+        var geometerCoords = { x: -80.0, z: -40.0 };
+        var heightValue = terrain.getHeightAtRelativePosition(geometerCoords.x, geometerCoords.z);
+        var geometerTexture = new THREE.TextureLoader().load("resources/img/geometer-128x1024.png", function (tex) {
+            // geometerMaterial.map = tex;
+            // geometerMaterial.
+        });
+        var geometerMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, map: geometerTexture });
+        var geometerMesh = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 0.1), geometerMaterial);
+        // geometerMesh.position.y = heightValue; // this.sceneData.initialDepth;
+        geometerMesh.position.set(geometerCoords.x, heightValue, geometerCoords.z);
+        this.scene.add(geometerMesh);
     };
     SceneContainer.prototype.getShipVerticalInclination = function () {
         var worldDir = new THREE.Vector3();

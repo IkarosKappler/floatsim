@@ -106,7 +106,7 @@ export class SceneContainer implements ISceneContainer {
     this.renderer.shadowMap.enabled = !params.getBoolean("disableShadows", false);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 10, 10000);
+    this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 1, 10000);
 
     this.fogHandler = new FogHandler(this);
     this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
@@ -226,7 +226,7 @@ export class SceneContainer implements ISceneContainer {
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
-    const particleDensity = 0.000001;
+    const particleDensity = 0.00001;
     updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, terrain.bounds, particleDensity));
     updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, terrain.bounds, particleDensity));
 
@@ -278,6 +278,7 @@ export class SceneContainer implements ISceneContainer {
     this.loadConcrete(terrain);
     this.addGroundBuoys(terrain);
     this.addNavpoints(terrain);
+    this.addGeometer(terrain);
 
     window.addEventListener("resize", () => {
       _self.onWindowResize();
@@ -480,6 +481,20 @@ export class SceneContainer implements ISceneContainer {
       buoyObjectLoaded,
       buoyMaterialsLoaded
     );
+  }
+
+  private addGeometer(terrain: PerlinTerrain) {
+    const geometerCoords = { x: -80.0, z: -40.0 };
+    const heightValue = terrain.getHeightAtRelativePosition(geometerCoords.x, geometerCoords.z);
+    const geometerTexture = new THREE.TextureLoader().load("resources/img/geometer-128x1024.png", tex => {
+      // geometerMaterial.map = tex;
+      // geometerMaterial.
+    });
+    const geometerMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, map: geometerTexture });
+    const geometerMesh = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 0.1), geometerMaterial);
+    // geometerMesh.position.y = heightValue; // this.sceneData.initialDepth;
+    geometerMesh.position.set(geometerCoords.x, heightValue, geometerCoords.z);
+    this.scene.add(geometerMesh);
   }
 
   getShipVerticalInclination() {
