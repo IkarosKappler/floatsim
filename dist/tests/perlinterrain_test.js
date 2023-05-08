@@ -3,7 +3,7 @@ globalThis.addEventListener("load", function () {
   this.scene = new THREE.Scene();
 
   const tweakParams = {
-    iterations: 5,
+    iterations: 4,
     quality: 2.5,
     y: 0.0,
     useHeightMapTexture: true
@@ -51,7 +51,7 @@ globalThis.addEventListener("load", function () {
 
   //---BEGIN--- Terrain Generation
   var planeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-  var terrainSize = { width: 20, depth: 20, height: 0.1 };
+  var terrainSize = { width: 20, depth: 20, height: 5.0 }; // 0.1 };
   var terrainCenter = new THREE.Vector3(0, 0, 0);
   var terrainBounds = new THREE.Box3(
     new THREE.Vector3(
@@ -87,8 +87,13 @@ globalThis.addEventListener("load", function () {
     var mesh = new THREE.Mesh(geometry, tweakParams.useHeightMapTexture ? material : planeMaterial);
     meshes.push(mesh);
     // mesh.scale.set(0.01, 0.01, 0.01);
-    mesh.position.set(offsetX * terrainSize.width, 0, offsetY * terrainSize.depth);
+    mesh.position.set(offsetX * terrainSize.width, -terrainSize.height / 2.0, offsetY * terrainSize.depth);
     this.scene.add(mesh);
+
+    const visibleBox = new THREE.Mesh(new THREE.BoxGeometry(terrainSize.width, terrainSize.height, terrainSize.depth));
+    visibleBox.position.set(terrainCenter.x, terrainCenter.y, terrainCenter.z);
+    // visibleBox.scale.set(0.1, 0.1, 0.1);
+    this.scene.add(new THREE.BoxHelper(visibleBox));
   };
   var rebuildTerrain = function () {
     for (var i in meshes) {

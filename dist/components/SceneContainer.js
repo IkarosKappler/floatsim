@@ -180,7 +180,7 @@ var SceneContainer = /** @class */ (function () {
         console.log("Terrain Bounds", terrain.bounds);
         var updateables = [];
         // Initialize particles
-        var particleDensity = 0.0001;
+        var particleDensity = 0.000001;
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", terrain.bounds, particleDensity));
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-b-256.png", terrain.bounds, particleDensity));
         // // This is the basic render function. It will be called perpetual, again and again,
@@ -251,15 +251,19 @@ var SceneContainer = /** @class */ (function () {
     }
     SceneContainer.prototype.makeTerrain = function () {
         //--- MAKE TERRAIN ---
-        var zStartOffset = -320.0; // for ImprovedNoise
+        var zStartOffset = -20.0; // for ImprovedNoise
         // const zStartOffset = 300.0; // for Custom noise
         var worldWidthSegments = 256; // 256;
         var worldDepthSegments = 256; // 256;
-        var perlinOptions = { iterations: 5, quality: 2.5 };
+        var perlinOptions = { iterations: 4, quality: 2.5 };
         var terrainData = new PerlinHeightMap_1.PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
-        var terrainSize = { width: 2048.0, depth: 2048.0, height: 10.0 };
+        var terrainSize = { width: 1024.0, depth: 1024.0, height: 92.0 };
         var terrainCenter = new THREE.Vector3(0, 0, 0);
         var terrainBounds = new THREE.Box3(new THREE.Vector3(terrainCenter.x - terrainSize.width / 2.0, terrainCenter.y - terrainSize.height / 2.0, terrainCenter.z - terrainSize.depth / 2.0), new THREE.Vector3(terrainCenter.x + terrainSize.width / 2.0, terrainCenter.y + terrainSize.height / 2.0, terrainCenter.z + terrainSize.depth / 2.0));
+        var visibleBox = new THREE.Mesh(new THREE.BoxGeometry(terrainSize.width, terrainSize.height, terrainSize.depth));
+        visibleBox.position.set(terrainCenter.x, terrainCenter.y, terrainCenter.z);
+        visibleBox.scale.set(0.1, 0.1, 0.1);
+        this.addVisibleBoundingBox(visibleBox, 0xff0000);
         var terrainTexture = new PerlinTexture_1.PerlinTexture(terrainData, terrainSize);
         var terrain = new PerlinTerrain_1.PerlinTerrain(terrainData, terrainBounds, terrainTexture);
         console.log("terrainData", terrainData);
@@ -310,7 +314,7 @@ var SceneContainer = /** @class */ (function () {
                 var buoy = new THREE.Mesh(new THREE.SphereGeometry(1.5), buoyMaterial);
                 buoy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.y + heightValue, terrain.bounds.min.z + z);
                 buoy.position.add(terrain.mesh.position);
-                buoy.position.y += 6.0; // Add 6m so the ground buoys are definitely visible (above ground)
+                buoy.position.y += 46.0; // Add 6m so the ground buoys are definitely visible (above ground)
                 this.scene.add(buoy);
             }
         }
@@ -392,8 +396,8 @@ var SceneContainer = /** @class */ (function () {
             return Number.NEGATIVE_INFINITY;
         }
     };
-    SceneContainer.prototype.addVisibleBoundingBox = function (object) {
-        var box = new THREE.BoxHelper(object, 0x000000);
+    SceneContainer.prototype.addVisibleBoundingBox = function (object, color) {
+        var box = new THREE.BoxHelper(object, color || 0x000000);
         this.scene.add(box);
     };
     SceneContainer.prototype.initializeAudio = function () {

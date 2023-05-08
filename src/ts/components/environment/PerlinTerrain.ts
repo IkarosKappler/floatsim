@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 import { CausticShaderMaterial2 } from "../../utils/texture/CausticShaderMaterial2";
-import { IHeightMap, Size3Immutable, TextureData, Triple } from "../interfaces";
+import { IHeightMap, Size3Immutable, TextureData } from "../interfaces";
 import { bounds2size } from "../../utils/Helpers";
 
 export class PerlinTerrain {
@@ -44,6 +44,14 @@ export class PerlinTerrain {
     );
   }
 
+  // The heightmap has an internal measure [computationalMin ... computationalMax]
+  // This function maps these values the terrain bounds.
+  mapValueToHeight(heightValue): number {
+    const relativeHeightRange: number = this.heightMap.computationalMax - this.heightMap.computationalMin;
+    var normalizedHeightValue = (heightValue - this.heightMap.computationalMin) / relativeHeightRange;
+    return normalizedHeightValue * this.worldSize.height;
+  }
+
   /**
    * Get the relative height value, the y position relative to bounds.min.y at the
    * given relative world (local) coordinates. Local coordinates go from
@@ -61,7 +69,8 @@ export class PerlinTerrain {
     const zRel: number = Math.floor((z / this.worldSize.depth) * this.heightMap.depthSegments);
     // const i: number = Math.max(0, Math.min(zRel * this.heightMap.depthSegments + xRel, this.heightMap.data.length - 1));
     const i: number = this.heightMap.getOffset(xRel, zRel);
-    return this.heightMap.data[i] * this.worldSize.height;
+    // return this.heightMap.data[i] * this.worldSize.height;
+    return this.mapValueToHeight(this.heightMap.data[i]);
   }
 
   /**
@@ -110,8 +119,16 @@ export class PerlinTerrain {
 
     // !!! TODO: check this
     const vertices: Array<number> = (geometry.attributes.position as any).array;
+    const relativeHeightRange: number = heightMap.computationalMax - heightMap.computationalMin;
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-      vertices[j + 1] = heightMap.data[i] * worldSize.height;
+      // vertices[j + 1] = heightMap.data[i] * worldSize.height;
+      // Map to [0 ... 1], then map to desired size.
+      var normalizedHeightValue = (heightMap.data[i] - heightMap.computationalMin) / relativeHeightRange;
+      // if (normalizedHeightValue < 0.5 || normalizedHeightValue > 1) {
+      //   console.log("tmp", normalizedHeightValue);
+      // }
+      vertices[j + 1] = normalizedHeightValue * worldSize.height;
+      // vertices[j+1] = this.co(heightMap.data[i]);
     }
 
     geometry.attributes.position.needsUpdate = true;

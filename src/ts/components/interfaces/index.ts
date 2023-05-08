@@ -104,10 +104,12 @@ export interface Size3Immutable {
 }
 
 export interface IHeightMap {
-  widthSegments: number;
-  depthSegments: number;
-  minHeightValue: number;
-  maxHeightValue: number;
+  readonly widthSegments: number;
+  readonly depthSegments: number;
+  readonly minHeightValue: number;
+  readonly maxHeightValue: number;
+  readonly computationalMin: number;
+  readonly computationalMax: number;
   data: Float32Array;
   /**
    * Convert a position on the heightmap's x-y-grid to an offset inside the

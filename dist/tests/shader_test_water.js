@@ -43,7 +43,7 @@ globalThis.addEventListener("load", function () {
   var zStartOffset = 80.0; // for Custom noise, different for Improved noise
   var worldWidthSegments = 256;
   var worldDepthSegments = 256;
-  var perlinOptions = { iterations: 5, quality: 1.5 };
+  var perlinOptions = { iterations: 4, quality: 1.5 };
   var heightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
   // var terrainSize = { width: 7500, depth: 7500, height: 0 };
   const terrainSize = { width: 2048.0, depth: 2048.0, height: 10.0 };
@@ -167,41 +167,8 @@ globalThis.addEventListener("load", function () {
 
   // Create a geometry conaining the logical 3D information (here: a cube)
   var cubeGeometry = new THREE.BoxGeometry(12, 12, 12);
-  // Pick a material, something like MeshBasicMaterial, PhongMaterial,
-  // var cubeBaseMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-  // Create the cube from the geometry and the material ...
-  // cubeGeometry.clearGroups();
-  // cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 0);
-  // cubeGeometry.addGroup(0, Number.POSITIVE_INFINITY, 1);
-  // this.cube = new THREE.Mesh(cubeGeometry, [cubeBaseMaterial, waterMaterial]);
 
   this.cube = new THREE.Mesh(cubeGeometry, waterMaterial);
-  //  // this.geometry = new THREE.BufferGeometry();
-  // fogColor: 0x021a38,
-  //   vFogDepth: 0.0021,
-  //   fogDensity: 0.0021,
-  // u_zoom: 0.5,
-  //   u_speed: 0.4,
-  //   u_bright: 32.0,
-  //   u_intensity: 0.5,
-  //   u_time: this.clock.getDelta(),
-  //   u_texture: dTex,
-  //   u_effect_color: new THREE.Vector4(0.29, 0.75, 0.89)
-
-  // var fogColor = new Int8Array(3);
-  // fogColor[0] = 2;
-  // fogColor[1] = 26;
-  // fogColor[2] = 56;
-  // this.cube.geometry.setAttribute("fogColor", new THREE.Float32BufferAttribute(fogColor, 3)); // 0x021a38
-  // this.cube.geometry.setAttribute("aSize", new THREE.Float32BufferAttribute(sizes, 1));
-  // this.cube.geometry.setAttribute("aColor", new THREE.Float32BufferAttribute(colors, 4));
-  // this.cube.geometry.setAttribute("aRotation", new THREE.Float32BufferAttribute(angles, 1));
-
-  // this.cube.geometry.attributes.position.needsUpdate = true;
-  // this.cube.geometry.attributes.aSize.needsUpdate = true;
-  // this.cube.geometry.attributes.aColor.needsUpdate = true;
-  // this.cube.geometry.attributes.aRotation.needsUpdate = true;
-
   this.cube.position.set(12, 12, 12);
   // ... and add it to your scene.
   this.scene.add(this.cube);

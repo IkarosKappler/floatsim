@@ -11,6 +11,8 @@ export class PerlinHeightMap implements IHeightMap {
   readonly depthSegments: number;
   readonly minHeightValue: number;
   readonly maxHeightValue: number;
+  readonly computationalMin: number;
+  readonly computationalMax: number;
   readonly data: Float32Array; //  Uint8Array;
 
   /**
@@ -44,14 +46,13 @@ export class PerlinHeightMap implements IHeightMap {
     // Todo: keep track of the height data and find min/max
     let minHeightValue = Number.MAX_VALUE;
     let maxHeightValue = Number.MIN_VALUE;
+    let minPValueAbs = 0.0; // Number.MAX_VALUE;
+    let maxPValueAbs = 1.0; // Number.MIN_VALUE;
+    let minPValue = Number.MAX_VALUE;
+    let maxPValue = Number.MIN_VALUE;
 
     const perlin = new ImprovedNoise();
     const getHeight = (x: number, y: number, z: number): number => {
-      // if (useCustomNoise) {
-      //   return noise.perlin3(x, y, z);
-      // } else {
-      //   return perlin.noise(x, y, z);
-      // }
       if (useCustomNoise) {
         return noise.perlin3(offset.x + x, offset.y + y, z);
       } else {
@@ -67,27 +68,59 @@ export class PerlinHeightMap implements IHeightMap {
     // const depthFactor = 0.15; // 0.15 for custom noise
     const depthFactor = 0.12; // 0.15 for custom noise
     const qualityFactor = 4.0;
+    let computationalMax: number = 0.0;
+    let computationalMin: number = 0.0;
 
     for (let j = 0; j < iterations; j++) {
       for (let i = 0; i < size; i++) {
-        const x = i % widthSegments,
-          y = ~~(i / widthSegments);
+        const x = i % widthSegments;
+        const y = ~~(i / widthSegments);
+        // Map pValue from [-1...1] to [0...1] ?
+        // const pValue = (1.0 + getHeight(x / resolution, y / resolution, z)) / 2.0;
         const pValue = getHeight(x / resolution, y / resolution, z);
-        // minHeightValue = Math.min(minHeightValue, pValue);
-        // maxHeightValue = Math.max(maxHeightValue, pValue);
+        minPValue = Math.min(minPValue, pValue);
+        maxPValue = Math.max(maxPValue, pValue);
         this.data[i] += Math.abs(pValue * resolution * depthFactor);
         if (j + 1 === iterations) {
           minHeightValue = Math.min(minHeightValue, this.data[i]);
           maxHeightValue = Math.max(maxHeightValue, this.data[i]);
         }
       }
+      computationalMax += Math.abs(maxPValueAbs * resolution * depthFactor);
+      computationalMin += Math.abs(minPValueAbs * resolution * depthFactor);
       resolution *= qualityFactor;
       // quality *= quality;
     }
-    // console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
+    // Re-run the outer
+    // resolution = initialQuality;
+    // for (let j = 0; j < iterations; j++) {
+    //   computationalMax += Math.abs(maxPValue * resolution * depthFactor);
+    //   computationalMin += Math.abs(minPValue * resolution * depthFactor);
+    //   resolution *= qualityFactor;
+    // }
+    console.log(
+      "minHeightValue",
+      minHeightValue,
+      "maxHeightvalue",
+      maxHeightValue,
+      "minPValueAbs",
+      minPValueAbs,
+      "maxPValueAbs",
+      maxPValueAbs,
+      "minPValue",
+      minPValue,
+      "maxPValue",
+      maxPValue,
+      "computationalMin",
+      computationalMin,
+      "computationalMax",
+      computationalMax
+    );
 
     this.minHeightValue = minHeightValue;
     this.maxHeightValue = maxHeightValue;
+    this.computationalMax = computationalMax;
+    this.computationalMin = computationalMin;
   } // END constructor
 
   /**

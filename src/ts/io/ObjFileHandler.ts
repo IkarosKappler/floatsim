@@ -37,7 +37,7 @@ export class ObjFileHandler {
   ) {
     // Try loading the object
     this.loadObj(basePath, objFileName).then((loadedObject: THREE.Group) => {
-      console.log("object", loadedObject);
+      // console.log("object", loadedObject);
 
       if (options && options.targetBounds) {
         this.applyScale(loadedObject, options.targetBounds);
@@ -54,7 +54,7 @@ export class ObjFileHandler {
       const materialFileNames: Array<string> = (loadedObject as any).materialLibraries;
       if (materialFileNames) {
         this.loadMaterials(basePath, materialFileNames).then((materials: Record<string, THREE.Material>[]) => {
-          console.log("Materials", materials);
+          // console.log("Materials", materials);
           loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
             if ((child as THREE.Mesh).isMesh) {
               // TODO: check type
@@ -132,11 +132,11 @@ export class ObjFileHandler {
         basePath + materialFileName, // "models/monkey.mtl",
         (materials: MTLLoader.MaterialCreator) => {
           materials.preload();
-          console.log("Materials loaded", materialFileName, materials);
+          // console.log("Materials loaded", materialFileName, materials);
           accept(materials.materials);
         },
         xhr => {
-          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+          // console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
         },
         error => {
           console.log("An error happened", error);
@@ -151,21 +151,21 @@ export class ObjFileHandler {
     const objectSize = new THREE.Vector3();
     objectBounds.getSize(objectSize);
     object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
-    console.log("New scale", object.scale);
+    // console.log("New scale", object.scale);
   }
 
   private locateMaterial(object: THREE.Mesh, materials: Record<string, THREE.Material>[]) {
     const materialName = (object.material as THREE.Material).name;
-    console.log(`Looking for material named ${materialName}`);
+    // console.log(`Looking for material named ${materialName}`);
     if (materialName) {
       const keys = Object.keys(materials);
-      console.log("keys", keys);
+      // console.log("keys", keys);
       for (var i = 0; i < materials.length; i++) {
         const materialSet = materials[i];
         const material = materialSet[materialName];
         //   console.log("key", key);
         if (material) {
-          console.log("Material found", material);
+          // console.log("Material found", material);
           //   material.receiveShadows
           object.material = material;
           return;

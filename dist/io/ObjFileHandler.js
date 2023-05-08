@@ -51,7 +51,7 @@ var ObjFileHandler = /** @class */ (function () {
         var _this = this;
         // Try loading the object
         this.loadObj(basePath, objFileName).then(function (loadedObject) {
-            console.log("object", loadedObject);
+            // console.log("object", loadedObject);
             if (options && options.targetBounds) {
                 _this.applyScale(loadedObject, options.targetBounds);
             }
@@ -66,7 +66,7 @@ var ObjFileHandler = /** @class */ (function () {
             var materialFileNames = loadedObject.materialLibraries;
             if (materialFileNames) {
                 _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
-                    console.log("Materials", materials);
+                    // console.log("Materials", materials);
                     loadedObject.traverse(function (child) {
                         if (child.isMesh) {
                             // TODO: check type
@@ -137,10 +137,10 @@ var ObjFileHandler = /** @class */ (function () {
             mtlLoader.load(basePath + materialFileName, // "models/monkey.mtl",
             function (materials) {
                 materials.preload();
-                console.log("Materials loaded", materialFileName, materials);
+                // console.log("Materials loaded", materialFileName, materials);
                 accept(materials.materials);
             }, function (xhr) {
-                console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+                // console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
             }, function (error) {
                 console.log("An error happened", error);
                 reject();
@@ -152,20 +152,20 @@ var ObjFileHandler = /** @class */ (function () {
         var objectSize = new THREE.Vector3();
         objectBounds.getSize(objectSize);
         object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
-        console.log("New scale", object.scale);
+        // console.log("New scale", object.scale);
     };
     ObjFileHandler.prototype.locateMaterial = function (object, materials) {
         var materialName = object.material.name;
-        console.log("Looking for material named ".concat(materialName));
+        // console.log(`Looking for material named ${materialName}`);
         if (materialName) {
             var keys = Object.keys(materials);
-            console.log("keys", keys);
+            // console.log("keys", keys);
             for (var i = 0; i < materials.length; i++) {
                 var materialSet = materials[i];
                 var material = materialSet[materialName];
                 //   console.log("key", key);
                 if (material) {
-                    console.log("Material found", material);
+                    // console.log("Material found", material);
                     //   material.receiveShadows
                     object.material = material;
                     return;

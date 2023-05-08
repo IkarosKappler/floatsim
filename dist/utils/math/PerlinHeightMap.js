@@ -32,13 +32,12 @@ var PerlinHeightMap = /** @class */ (function () {
         // Todo: keep track of the height data and find min/max
         var minHeightValue = Number.MAX_VALUE;
         var maxHeightValue = Number.MIN_VALUE;
+        var minPValueAbs = 0.0; // Number.MAX_VALUE;
+        var maxPValueAbs = 1.0; // Number.MIN_VALUE;
+        var minPValue = Number.MAX_VALUE;
+        var maxPValue = Number.MIN_VALUE;
         var perlin = new ImprovedNoise_1.ImprovedNoise();
         var getHeight = function (x, y, z) {
-            // if (useCustomNoise) {
-            //   return noise.perlin3(x, y, z);
-            // } else {
-            //   return perlin.noise(x, y, z);
-            // }
             if (useCustomNoise) {
                 return perlin_1.noise.perlin3(offset.x + x, offset.y + y, z);
             }
@@ -53,24 +52,40 @@ var PerlinHeightMap = /** @class */ (function () {
         // const depthFactor = 0.15; // 0.15 for custom noise
         var depthFactor = 0.12; // 0.15 for custom noise
         var qualityFactor = 4.0;
+        var computationalMax = 0.0;
+        var computationalMin = 0.0;
         for (var j = 0; j < iterations; j++) {
             for (var i = 0; i < size; i++) {
-                var x = i % widthSegments, y = ~~(i / widthSegments);
+                var x = i % widthSegments;
+                var y = ~~(i / widthSegments);
+                // Map pValue from [-1...1] to [0...1] ?
+                // const pValue = (1.0 + getHeight(x / resolution, y / resolution, z)) / 2.0;
                 var pValue = getHeight(x / resolution, y / resolution, z);
-                // minHeightValue = Math.min(minHeightValue, pValue);
-                // maxHeightValue = Math.max(maxHeightValue, pValue);
+                minPValue = Math.min(minPValue, pValue);
+                maxPValue = Math.max(maxPValue, pValue);
                 this.data[i] += Math.abs(pValue * resolution * depthFactor);
                 if (j + 1 === iterations) {
                     minHeightValue = Math.min(minHeightValue, this.data[i]);
                     maxHeightValue = Math.max(maxHeightValue, this.data[i]);
                 }
             }
+            computationalMax += Math.abs(maxPValueAbs * resolution * depthFactor);
+            computationalMin += Math.abs(minPValueAbs * resolution * depthFactor);
             resolution *= qualityFactor;
             // quality *= quality;
         }
-        // console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue);
+        // Re-run the outer
+        // resolution = initialQuality;
+        // for (let j = 0; j < iterations; j++) {
+        //   computationalMax += Math.abs(maxPValue * resolution * depthFactor);
+        //   computationalMin += Math.abs(minPValue * resolution * depthFactor);
+        //   resolution *= qualityFactor;
+        // }
+        console.log("minHeightValue", minHeightValue, "maxHeightvalue", maxHeightValue, "minPValueAbs", minPValueAbs, "maxPValueAbs", maxPValueAbs, "minPValue", minPValue, "maxPValue", maxPValue, "computationalMin", computationalMin, "computationalMax", computationalMax);
         this.minHeightValue = minHeightValue;
         this.maxHeightValue = maxHeightValue;
+        this.computationalMax = computationalMax;
+        this.computationalMin = computationalMin;
     } // END constructor
     /**
      * Convert a position on the heightmap's x-y-grid to an offset inside the

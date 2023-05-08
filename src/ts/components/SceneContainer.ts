@@ -226,7 +226,7 @@ export class SceneContainer implements ISceneContainer {
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
-    const particleDensity = 0.0001;
+    const particleDensity = 0.000001;
     updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, terrain.bounds, particleDensity));
     updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, terrain.bounds, particleDensity));
 
@@ -314,14 +314,14 @@ export class SceneContainer implements ISceneContainer {
 
   makeTerrain(): PerlinTerrain {
     //--- MAKE TERRAIN ---
-    const zStartOffset = -320.0; // for ImprovedNoise
+    const zStartOffset = -20.0; // for ImprovedNoise
     // const zStartOffset = 300.0; // for Custom noise
     const worldWidthSegments = 256; // 256;
     const worldDepthSegments = 256; // 256;
-    const perlinOptions = { iterations: 5, quality: 2.5 };
+    const perlinOptions = { iterations: 4, quality: 2.5 };
     const terrainData: IHeightMap = new PerlinHeightMap(worldWidthSegments, worldDepthSegments, perlinOptions);
 
-    const terrainSize: Size3Immutable = { width: 2048.0, depth: 2048.0, height: 10.0 };
+    const terrainSize: Size3Immutable = { width: 1024.0, depth: 1024.0, height: 92.0 };
     const terrainCenter: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
     const terrainBounds: THREE.Box3 = new THREE.Box3(
       new THREE.Vector3(
@@ -335,6 +335,10 @@ export class SceneContainer implements ISceneContainer {
         terrainCenter.z + terrainSize.depth / 2.0
       )
     );
+    const visibleBox = new THREE.Mesh(new THREE.BoxGeometry(terrainSize.width, terrainSize.height, terrainSize.depth));
+    visibleBox.position.set(terrainCenter.x, terrainCenter.y, terrainCenter.z);
+    visibleBox.scale.set(0.1, 0.1, 0.1);
+    this.addVisibleBoundingBox(visibleBox, 0xff0000);
     const terrainTexture = new PerlinTexture(terrainData, terrainSize);
     const terrain = new PerlinTerrain(terrainData, terrainBounds, terrainTexture);
 
@@ -403,7 +407,7 @@ export class SceneContainer implements ISceneContainer {
         const buoy = new THREE.Mesh(new THREE.SphereGeometry(1.5), buoyMaterial);
         buoy.position.set(terrain.bounds.min.x + x, terrain.bounds.min.y + heightValue, terrain.bounds.min.z + z);
         buoy.position.add(terrain.mesh.position);
-        buoy.position.y += 6.0; // Add 6m so the ground buoys are definitely visible (above ground)
+        buoy.position.y += 46.0; // Add 6m so the ground buoys are definitely visible (above ground)
         this.scene.add(buoy);
       }
     }
@@ -496,8 +500,8 @@ export class SceneContainer implements ISceneContainer {
     }
   }
 
-  addVisibleBoundingBox(object: THREE.Object3D) {
-    const box = new THREE.BoxHelper(object, 0x000000);
+  addVisibleBoundingBox(object: THREE.Object3D, color?: THREE.ColorRepresentation) {
+    const box = new THREE.BoxHelper(object, color || 0x000000);
     this.scene.add(box);
   }
 

@@ -20,6 +20,7 @@ export declare class PerlinTerrain {
      * @returns {number} The absolute height value along the `height` (=y) axis.
      */
     getHeightAtWorldPosition(absX: number, absZ: number): number;
+    mapValueToHeight(heightValue: any): number;
     /**
      * Get the relative height value, the y position relative to bounds.min.y at the
      * given relative world (local) coordinates. Local coordinates go from

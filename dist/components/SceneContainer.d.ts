@@ -39,7 +39,7 @@ export declare class SceneContainer implements ISceneContainer {
     private addBuoysAt;
     getShipVerticalInclination(): number;
     getGroundDepthAt(xPosAbs: number, zPosAbs: number, terrain: PerlinTerrain): number;
-    addVisibleBoundingBox(object: THREE.Object3D): void;
+    addVisibleBoundingBox(object: THREE.Object3D, color?: THREE.ColorRepresentation): void;
     initializeAudio(): Promise<void>;
     onWindowResize(): void;
 }
