@@ -86,8 +86,8 @@ var PerlinTexture = /** @class */ (function () {
         sun.normalize();
         var vector3 = new THREE.Vector3(0, 0, 0);
         var shade;
-        // const baseColor = [96, 32, 0];
-        var baseColor = [82, 82, 132];
+        var baseColor = [96, 32, 0];
+        // const baseColor = [82, 82, 132];
         for (var i = 0, j = 0, l = imageDataArray.length; i < l; i += 4, j++) {
             vector3.x = data[j - 2] - data[j + 2];
             vector3.y = 2;

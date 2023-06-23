@@ -29,6 +29,7 @@ import { PerlinTexture } from "../utils/texture/PerlinTexture";
 import { AudioPlayer } from "../utils/AudioPlayer";
 import { FloatingParticles } from "./environment/FloatingParticles";
 import { ObjFileHandler } from "../io/ObjFileHandler";
+import { ColladaFileHandler } from "../io/ColladaFileHandler";
 import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 import { CockpitScene } from "./cockpit/CockpitScene";
 
@@ -366,6 +367,11 @@ export class SceneContainer implements ISceneContainer {
   }
 
   loadConcrete(terrain: PerlinTerrain) {
+    this.loadConcreteRing(terrain);
+    this.loadConcreteWalls(terrain);
+  }
+
+  loadConcreteRing(terrain: PerlinTerrain) {
     // Load some "concrete" asset
     const basePath = "resources/meshes/wavefront/concrete-ring/";
     const objFileName = "newscene.obj";
@@ -380,6 +386,23 @@ export class SceneContainer implements ISceneContainer {
       this.collidableMeshes.push(loadedObject);
     };
     new ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
+  }
+
+  loadConcreteWalls(terrain: PerlinTerrain) {
+    // Load some "concrete" asset
+    const basePath = "resources/meshes/collada/concrete-walls/";
+    const objFileName = "concrete-walls-a-1.dae";
+    const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+    const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
+    // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
+    // targetPosition.y += terrain.bounds.min.y;
+    targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
+    console.log("targetPosition", targetPosition);
+    const callback = (loadedObject: THREE.Object3D) => {
+      this.addVisibleBoundingBox(loadedObject);
+      this.collidableMeshes.push(loadedObject);
+    };
+    new ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
   addGroundBuoys(terrain: PerlinTerrain) {

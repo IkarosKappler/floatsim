@@ -30,7 +30,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PhysicsHandler = void 0;
 var THREE = __importStar(require("three"));
-var generateDemoHeight_1 = require("../utils/generateDemoHeight");
 // Heightfield parameters
 // const terrainWidthExtents = 100;
 // const terrainDepthExtents = 100;
@@ -60,13 +59,19 @@ var PhysicsHandler = /** @class */ (function () {
         this.solver = null;
         this.sceneContainer = sceneContainer;
         this.terrain = terrain;
-        this.heightData = (0, generateDemoHeight_1.generateDemoHeight)(this.terrainWidthSegmentCount, this.terrainDepthSegmentCount, terrainMinHeight, terrainMaxHeight);
-        // this.heightData = terrain.heightMap.data;
-        // this.terrainDepthSegmentCount = terrain.heightMap.depthSegments;
-        // this.terrainWidthSegmentCount = terrain.heightMap.widthSegments;
-        // // This will enable the real world settings of the terrain (large)
-        // // this.terrainWidthExtents = terrain.worldSize.width;
-        // // this.terrainDepthExtents = terrain.worldSize.depth;
+        // Use demo geometry as terrain?
+        // this.heightData = generateDemoHeight(
+        //   this.terrainWidthSegmentCount,
+        //   this.terrainDepthSegmentCount,
+        //   terrainMinHeight,
+        //   terrainMaxHeight
+        // );
+        this.heightData = terrain.heightMap.data;
+        this.terrainDepthSegmentCount = terrain.heightMap.depthSegments;
+        this.terrainWidthSegmentCount = terrain.heightMap.widthSegments;
+        // This will enable the real world settings of the terrain (large)
+        this.terrainWidthExtents = terrain.worldSize.width;
+        this.terrainDepthExtents = terrain.worldSize.depth;
         this.initTestGraphics();
     }
     PhysicsHandler.prototype.start = function () {

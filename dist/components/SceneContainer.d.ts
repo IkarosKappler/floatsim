@@ -34,6 +34,8 @@ export declare class SceneContainer implements ISceneContainer {
     constructor(params: Params);
     makeTerrain(): PerlinTerrain;
     loadConcrete(terrain: PerlinTerrain): void;
+    loadConcreteRing(terrain: PerlinTerrain): void;
+    loadConcreteWalls(terrain: PerlinTerrain): void;
     addGroundBuoys(terrain: PerlinTerrain): void;
     addNavpoints(terrain: PerlinTerrain): void;
     private addBuoysAt;

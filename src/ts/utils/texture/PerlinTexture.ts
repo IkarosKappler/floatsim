@@ -98,8 +98,8 @@ export class PerlinTexture implements TextureData {
     sun.normalize();
     const vector3: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
     let shade: number;
-    // const baseColor = [96, 32, 0];
-    const baseColor = [82, 82, 132];
+    const baseColor = [96, 32, 0];
+    // const baseColor = [82, 82, 132];
 
     for (let i = 0, j = 0, l = imageDataArray.length; i < l; i += 4, j++) {
       vector3.x = data[j - 2] - data[j + 2];

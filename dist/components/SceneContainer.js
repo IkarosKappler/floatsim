@@ -40,6 +40,7 @@ var PerlinTexture_1 = require("../utils/texture/PerlinTexture");
 var AudioPlayer_1 = require("../utils/AudioPlayer");
 var FloatingParticles_1 = require("./environment/FloatingParticles");
 var ObjFileHandler_1 = require("../io/ObjFileHandler");
+var ColladaFileHandler_1 = require("../io/ColladaFileHandler");
 var PerlinHeightMap_1 = require("../utils/math/PerlinHeightMap");
 var CockpitScene_1 = require("./cockpit/CockpitScene");
 var SceneContainer = /** @class */ (function () {
@@ -286,6 +287,10 @@ var SceneContainer = /** @class */ (function () {
         return terrain;
     };
     SceneContainer.prototype.loadConcrete = function (terrain) {
+        this.loadConcreteRing(terrain);
+        this.loadConcreteWalls(terrain);
+    };
+    SceneContainer.prototype.loadConcreteRing = function (terrain) {
         var _this = this;
         // Load some "concrete" asset
         var basePath = "resources/meshes/wavefront/concrete-ring/";
@@ -301,6 +306,23 @@ var SceneContainer = /** @class */ (function () {
             _this.collidableMeshes.push(loadedObject);
         };
         new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
+    };
+    SceneContainer.prototype.loadConcreteWalls = function (terrain) {
+        var _this = this;
+        // Load some "concrete" asset
+        var basePath = "resources/meshes/collada/concrete-walls/";
+        var objFileName = "concrete-walls-a-1.dae";
+        var targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+        var targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
+        // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
+        // targetPosition.y += terrain.bounds.min.y;
+        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
+        console.log("targetPosition", targetPosition);
+        var callback = function (loadedObject) {
+            _this.addVisibleBoundingBox(loadedObject);
+            _this.collidableMeshes.push(loadedObject);
+        };
+        new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
     SceneContainer.prototype.addGroundBuoys = function (terrain) {
         // Test x-y- height positioning in the terrain class

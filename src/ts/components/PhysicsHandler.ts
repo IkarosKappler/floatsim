@@ -54,18 +54,19 @@ export class PhysicsHandler {
     this.sceneContainer = sceneContainer;
     this.terrain = terrain;
 
-    this.heightData = generateDemoHeight(
-      this.terrainWidthSegmentCount,
-      this.terrainDepthSegmentCount,
-      terrainMinHeight,
-      terrainMaxHeight
-    );
-    // this.heightData = terrain.heightMap.data;
-    // this.terrainDepthSegmentCount = terrain.heightMap.depthSegments;
-    // this.terrainWidthSegmentCount = terrain.heightMap.widthSegments;
-    // // This will enable the real world settings of the terrain (large)
-    // // this.terrainWidthExtents = terrain.worldSize.width;
-    // // this.terrainDepthExtents = terrain.worldSize.depth;
+    // Use demo geometry as terrain?
+    // this.heightData = generateDemoHeight(
+    //   this.terrainWidthSegmentCount,
+    //   this.terrainDepthSegmentCount,
+    //   terrainMinHeight,
+    //   terrainMaxHeight
+    // );
+    this.heightData = terrain.heightMap.data;
+    this.terrainDepthSegmentCount = terrain.heightMap.depthSegments;
+    this.terrainWidthSegmentCount = terrain.heightMap.widthSegments;
+    // This will enable the real world settings of the terrain (large)
+    this.terrainWidthExtents = terrain.worldSize.width;
+    this.terrainDepthExtents = terrain.worldSize.depth;
 
     this.initTestGraphics();
   }
