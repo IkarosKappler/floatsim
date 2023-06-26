@@ -32,6 +32,7 @@ import { ObjFileHandler } from "../io/ObjFileHandler";
 import { ColladaFileHandler } from "../io/ColladaFileHandler";
 import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 import { CockpitScene } from "./cockpit/CockpitScene";
+import { FbxFileHandler } from "../io/FbxFileHandler";
 
 export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
@@ -369,6 +370,7 @@ export class SceneContainer implements ISceneContainer {
   loadConcrete(terrain: PerlinTerrain) {
     this.loadConcreteRing(terrain);
     this.loadConcreteWalls(terrain);
+    this.loadFBXStruff(terrain);
   }
 
   loadConcreteRing(terrain: PerlinTerrain) {
@@ -391,18 +393,42 @@ export class SceneContainer implements ISceneContainer {
   loadConcreteWalls(terrain: PerlinTerrain) {
     // Load some "concrete" asset
     const basePath = "resources/meshes/collada/concrete-walls/";
-    const objFileName = "concrete-walls-a-1.dae";
-    const targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+    const objFileName = "concrete-walls-a-1-png2.dae";
+    const targetBounds = { width: 20.0, depth: 20.0, height: 40.0 };
     const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
     // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
     // targetPosition.y += terrain.bounds.min.y;
     targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
     console.log("targetPosition", targetPosition);
     const callback = (loadedObject: THREE.Object3D) => {
+      // const texture = new THREE.TextureLoader().load(basePath + "20100630_007_Tacheles_0_-_4_1.png");
+      // const material = new THREE.MeshPhongMaterial({ map: texture });
+      // material.needsUpdate = true;
+      // loadedObject.traverse(child => {
+      //   if (child instanceof THREE.Mesh) {
+      //     child.material = material;
+      //   }
+      // });
+      this.addVisibleBoundingBox(loadedObject);
+      this.collidableMeshes.push(loadedObject);
+      // this.scene.add(loadedObject);
+    };
+    new ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
+  }
+
+  loadFBXStruff(terrain: PerlinTerrain) {
+    // Load some "concrete" asset
+    const basePath = "resources/meshes/fbx/concrete-walls/";
+    const objFileName = "concrete-walls-a.fbx";
+    const targetBounds = { width: 20.0, depth: 20.0, height: 40.0 };
+    const targetPosition = { x: -110.0, y: 0.0, z: -115.0 };
+    targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
+    console.log("targetPosition", targetPosition);
+    const callback = (loadedObject: THREE.Object3D) => {
       this.addVisibleBoundingBox(loadedObject);
       this.collidableMeshes.push(loadedObject);
     };
-    new ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
+    new FbxFileHandler(this).loadFbxFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
   addGroundBuoys(terrain: PerlinTerrain) {

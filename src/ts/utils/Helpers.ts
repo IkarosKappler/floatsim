@@ -139,6 +139,14 @@ export const rotateVertY = (vertex: THREE.Vector3, angle: number, center?: Tripl
   return vertex;
 };
 
+export const applyObjectScale = (object: THREE.Group, targetSize: Size3Immutable) => {
+  const objectBounds = new THREE.Box3().setFromObject(object);
+  const objectSize = new THREE.Vector3();
+  objectBounds.getSize(objectSize);
+  object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
+  // console.log("New scale", object.scale);
+};
+
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */

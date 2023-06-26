@@ -7,11 +7,10 @@
  */
 
 import * as THREE from "three";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { SceneContainer } from "../components/SceneContainer";
-import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { Size3Immutable, TripleImmutable } from "../components/interfaces";
 import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader.js";
+import { applyObjectScale } from "../utils/Helpers";
 
 export class ColladaFileHandler {
   private readonly sceneContainer: SceneContainer;
@@ -33,8 +32,7 @@ export class ColladaFileHandler {
     basePath: string,
     colladaFileName: string,
     options?: { targetBounds?: Size3Immutable; targetPosition?: TripleImmutable<number> },
-    onObjectLoaded?: (loadedObject: THREE.Object3D) => void,
-    onMaterialsLoaded?: (loadedObject: THREE.Object3D) => void
+    onObjectLoaded?: (loadedObject: THREE.Object3D) => void
   ) {
     // Try loading the object
     console.log("Load collada file ", colladaFileName);
@@ -42,12 +40,22 @@ export class ColladaFileHandler {
     let model = null;
     const _self = this;
     const loadingManager = new THREE.LoadingManager(function () {
+      if (options && options.targetBounds) {
+        // this.applyScale(loadedObject, options.targetBounds);
+        applyObjectScale(model, options.targetBounds);
+      }
+      if (options && options.targetPosition) {
+        model.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
+      }
+
       _self.sceneContainer.scene.add(model);
+      onObjectLoaded(model);
     });
 
     const loader = new ColladaLoader(loadingManager);
     // loader.load("./models/collada/elf/elf.dae", function (collada) {
     loader.load(basePath + colladaFileName, function (collada) {
+      console.log("Collada model loaded", collada);
       model = collada.scene;
     });
   }

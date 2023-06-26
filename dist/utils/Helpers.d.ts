@@ -63,6 +63,7 @@ export declare const rotateVertZ: (vertex: THREE.Vector3, angle: number, center?
  * @memberof Vertex
  **/
 export declare const rotateVertY: (vertex: THREE.Vector3, angle: number, center?: Triple<number> | undefined) => THREE.Vector3;
+export declare const applyObjectScale: (object: THREE.Group, targetSize: Size3Immutable) => void;
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */

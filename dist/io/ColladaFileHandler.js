@@ -33,6 +33,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ColladaFileHandler = void 0;
 var THREE = __importStar(require("three"));
 var ColladaLoader_js_1 = require("three/examples/jsm/loaders/ColladaLoader.js");
+var Helpers_1 = require("../utils/Helpers");
 var ColladaFileHandler = /** @class */ (function () {
     function ColladaFileHandler(sceneContainer) {
         this.sceneContainer = sceneContainer;
@@ -46,17 +47,26 @@ var ColladaFileHandler = /** @class */ (function () {
      * @param {Size3Immutable} options.targetBounds
      * @param {TripleImmutable<number>} options.targetPosition
      */
-    ColladaFileHandler.prototype.loadColladaFile = function (basePath, colladaFileName, options, onObjectLoaded, onMaterialsLoaded) {
+    ColladaFileHandler.prototype.loadColladaFile = function (basePath, colladaFileName, options, onObjectLoaded) {
         // Try loading the object
         console.log("Load collada file ", colladaFileName);
         var model = null;
         var _self = this;
         var loadingManager = new THREE.LoadingManager(function () {
+            if (options && options.targetBounds) {
+                // this.applyScale(loadedObject, options.targetBounds);
+                (0, Helpers_1.applyObjectScale)(model, options.targetBounds);
+            }
+            if (options && options.targetPosition) {
+                model.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
+            }
             _self.sceneContainer.scene.add(model);
+            onObjectLoaded(model);
         });
         var loader = new ColladaLoader_js_1.ColladaLoader(loadingManager);
         // loader.load("./models/collada/elf/elf.dae", function (collada) {
         loader.load(basePath + colladaFileName, function (collada) {
+            console.log("Collada model loaded", collada);
             model = collada.scene;
         });
     };

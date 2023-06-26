@@ -48,6 +48,5 @@ export declare class ObjFileHandler {
      * @returns
      */
     private loadMaterial;
-    private applyScale;
     private locateMaterial;
 }

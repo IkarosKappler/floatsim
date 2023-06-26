@@ -1,14 +1,14 @@
 /**
- * A simple class to properly load Collada models.
+ * A simple class to properly load FBX models.
  *
  * @author  Ikaros Kappler
  * @version 1.0.0
- * @date    2023-06-23 (Two days after midsommer)
+ * @date    2023-06-26
  */
 import * as THREE from "three";
 import { SceneContainer } from "../components/SceneContainer";
 import { Size3Immutable, TripleImmutable } from "../components/interfaces";
-export declare class ColladaFileHandler {
+export declare class FbxFileHandler {
     private readonly sceneContainer;
     constructor(sceneContainer: SceneContainer);
     /**
@@ -20,7 +20,7 @@ export declare class ColladaFileHandler {
      * @param {Size3Immutable} options.targetBounds
      * @param {TripleImmutable<number>} options.targetPosition
      */
-    loadColladaFile(basePath: string, colladaFileName: string, options?: {
+    loadFbxFile(basePath: string, fbxFileName: string, options?: {
         targetBounds?: Size3Immutable;
         targetPosition?: TripleImmutable<number>;
     }, onObjectLoaded?: (loadedObject: THREE.Object3D) => void): void;

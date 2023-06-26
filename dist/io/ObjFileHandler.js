@@ -6,34 +6,11 @@
  * @version 1.0.0
  * @date    2023-04-10 (Happy Easter)
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ObjFileHandler = void 0;
-var THREE = __importStar(require("three"));
 var OBJLoader_1 = require("three/examples/jsm/loaders/OBJLoader");
 var MTLLoader_1 = require("three/examples/jsm/loaders/MTLLoader");
+var Helpers_1 = require("../utils/Helpers");
 var ObjFileHandler = /** @class */ (function () {
     function ObjFileHandler(sceneContainer) {
         this.sceneContainer = sceneContainer;
@@ -53,7 +30,8 @@ var ObjFileHandler = /** @class */ (function () {
         this.loadObj(basePath, objFileName).then(function (loadedObject) {
             // console.log("object", loadedObject);
             if (options && options.targetBounds) {
-                _this.applyScale(loadedObject, options.targetBounds);
+                // this.applyScale(loadedObject, options.targetBounds);
+                (0, Helpers_1.applyObjectScale)(loadedObject, options.targetBounds);
             }
             if (options && options.targetPosition) {
                 loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
@@ -147,13 +125,13 @@ var ObjFileHandler = /** @class */ (function () {
             });
         });
     };
-    ObjFileHandler.prototype.applyScale = function (object, targetSize) {
-        var objectBounds = new THREE.Box3().setFromObject(object);
-        var objectSize = new THREE.Vector3();
-        objectBounds.getSize(objectSize);
-        object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
-        // console.log("New scale", object.scale);
-    };
+    // private applyScale(object: THREE.Group, targetSize: Size3Immutable) {
+    //   const objectBounds = new THREE.Box3().setFromObject(object);
+    //   const objectSize = new THREE.Vector3();
+    //   objectBounds.getSize(objectSize);
+    //   object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
+    //   // console.log("New scale", object.scale);
+    // }
     ObjFileHandler.prototype.locateMaterial = function (object, materials) {
         var materialName = object.material.name;
         // console.log(`Looking for material named ${materialName}`);

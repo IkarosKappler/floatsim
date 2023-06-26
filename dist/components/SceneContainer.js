@@ -43,6 +43,7 @@ var ObjFileHandler_1 = require("../io/ObjFileHandler");
 var ColladaFileHandler_1 = require("../io/ColladaFileHandler");
 var PerlinHeightMap_1 = require("../utils/math/PerlinHeightMap");
 var CockpitScene_1 = require("./cockpit/CockpitScene");
+var FbxFileHandler_1 = require("../io/FbxFileHandler");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -289,6 +290,7 @@ var SceneContainer = /** @class */ (function () {
     SceneContainer.prototype.loadConcrete = function (terrain) {
         this.loadConcreteRing(terrain);
         this.loadConcreteWalls(terrain);
+        this.loadFBXStruff(terrain);
     };
     SceneContainer.prototype.loadConcreteRing = function (terrain) {
         var _this = this;
@@ -311,18 +313,42 @@ var SceneContainer = /** @class */ (function () {
         var _this = this;
         // Load some "concrete" asset
         var basePath = "resources/meshes/collada/concrete-walls/";
-        var objFileName = "concrete-walls-a-1.dae";
-        var targetBounds = { width: 40.0, depth: 40.0, height: 12.0 };
+        var objFileName = "concrete-walls-a-1-png2.dae";
+        var targetBounds = { width: 20.0, depth: 20.0, height: 40.0 };
         var targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
         // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
         // targetPosition.y += terrain.bounds.min.y;
         targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
         console.log("targetPosition", targetPosition);
         var callback = function (loadedObject) {
+            // const texture = new THREE.TextureLoader().load(basePath + "20100630_007_Tacheles_0_-_4_1.png");
+            // const material = new THREE.MeshPhongMaterial({ map: texture });
+            // material.needsUpdate = true;
+            // loadedObject.traverse(child => {
+            //   if (child instanceof THREE.Mesh) {
+            //     child.material = material;
+            //   }
+            // });
+            _this.addVisibleBoundingBox(loadedObject);
+            _this.collidableMeshes.push(loadedObject);
+            // this.scene.add(loadedObject);
+        };
+        new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
+    };
+    SceneContainer.prototype.loadFBXStruff = function (terrain) {
+        var _this = this;
+        // Load some "concrete" asset
+        var basePath = "resources/meshes/fbx/concrete-walls/";
+        var objFileName = "concrete-walls-a.fbx";
+        var targetBounds = { width: 20.0, depth: 20.0, height: 40.0 };
+        var targetPosition = { x: -110.0, y: 0.0, z: -115.0 };
+        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
+        console.log("targetPosition", targetPosition);
+        var callback = function (loadedObject) {
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
         };
-        new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
+        new FbxFileHandler_1.FbxFileHandler(this).loadFbxFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
     SceneContainer.prototype.addGroundBuoys = function (terrain) {
         // Test x-y- height positioning in the terrain class

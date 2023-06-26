@@ -11,6 +11,7 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { SceneContainer } from "../components/SceneContainer";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { Size3Immutable, TripleImmutable } from "../components/interfaces";
+import { applyObjectScale } from "../utils/Helpers";
 
 export class ObjFileHandler {
   private readonly sceneContainer: SceneContainer;
@@ -40,7 +41,8 @@ export class ObjFileHandler {
       // console.log("object", loadedObject);
 
       if (options && options.targetBounds) {
-        this.applyScale(loadedObject, options.targetBounds);
+        // this.applyScale(loadedObject, options.targetBounds);
+        applyObjectScale(loadedObject, options.targetBounds);
       }
       if (options && options.targetPosition) {
         loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
@@ -146,13 +148,13 @@ export class ObjFileHandler {
     });
   }
 
-  private applyScale(object: THREE.Group, targetSize: Size3Immutable) {
-    const objectBounds = new THREE.Box3().setFromObject(object);
-    const objectSize = new THREE.Vector3();
-    objectBounds.getSize(objectSize);
-    object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
-    // console.log("New scale", object.scale);
-  }
+  // private applyScale(object: THREE.Group, targetSize: Size3Immutable) {
+  //   const objectBounds = new THREE.Box3().setFromObject(object);
+  //   const objectSize = new THREE.Vector3();
+  //   objectBounds.getSize(objectSize);
+  //   object.scale.set(targetSize.width / objectSize.x, targetSize.height / objectSize.y, targetSize.depth / objectSize.x);
+  //   // console.log("New scale", object.scale);
+  // }
 
   private locateMaterial(object: THREE.Mesh, materials: Record<string, THREE.Material>[]) {
     const materialName = (object.material as THREE.Material).name;
