@@ -29,7 +29,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bounds2Immutable = exports.applyObjectScale = exports.rotateVertY = exports.rotateVertZ = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
+exports.Bounds2Immutable = exports.applyObjectScale = exports.distance3 = exports.rotateVertY = exports.rotateVertZ = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
 var THREE = __importStar(require("three"));
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -159,6 +159,10 @@ var rotateVertY = function (vertex, angle, center) {
     return vertex;
 };
 exports.rotateVertY = rotateVertY;
+var distance3 = function (vertA, vertB) {
+    return Math.sqrt(Math.pow(vertA.x - vertB.x, 2) + Math.pow(vertA.y - vertB.y, 2) + Math.pow(vertA.z - vertB.z, 2));
+};
+exports.distance3 = distance3;
 var applyObjectScale = function (object, targetSize) {
     var objectBounds = new THREE.Box3().setFromObject(object);
     var objectSize = new THREE.Vector3();

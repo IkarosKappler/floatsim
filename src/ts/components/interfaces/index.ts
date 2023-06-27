@@ -128,9 +128,14 @@ export interface TextureData {
   readonly imageCanvas: HTMLCanvasElement;
 }
 
+export type NavPointType = "default" | "nav";
+
 export interface Navpoint {
   position: Triple<number>;
   label: string;
+  detectionDistance: number;
+  isDisabled: boolean;
+  type: NavPointType;
 }
 
 export interface ISceneContainer {

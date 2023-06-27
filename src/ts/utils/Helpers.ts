@@ -139,6 +139,10 @@ export const rotateVertY = (vertex: THREE.Vector3, angle: number, center?: Tripl
   return vertex;
 };
 
+export const distance3 = (vertA: THREE.Vector3 | Triple<number>, vertB: THREE.Vector3 | Triple<number>) => {
+  return Math.sqrt(Math.pow(vertA.x - vertB.x, 2) + Math.pow(vertA.y - vertB.y, 2) + Math.pow(vertA.z - vertB.z, 2));
+};
+
 export const applyObjectScale = (object: THREE.Group, targetSize: Size3Immutable) => {
   const objectBounds = new THREE.Box3().setFromObject(object);
   const objectSize = new THREE.Vector3();

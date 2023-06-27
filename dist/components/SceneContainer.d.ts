@@ -13,6 +13,7 @@ import { ISceneContainer, Navpoint, SceneData, Size2Immutable, TweakParams } fro
 import { FogHandler } from "./environment/FogHandler";
 import { Params } from "../utils/Params";
 import { CockpitScene } from "./cockpit/CockpitScene";
+import { GameLogicManager } from "../gamelogic/GameLogicManager";
 export declare class SceneContainer implements ISceneContainer {
     readonly scene: THREE.Scene;
     readonly renderer: THREE.WebGLRenderer;
@@ -29,6 +30,7 @@ export declare class SceneContainer implements ISceneContainer {
     readonly collidableMeshes: Array<THREE.Object3D>;
     readonly terrainSegments: Array<PerlinTerrain>;
     readonly navpoints: Array<Navpoint>;
+    readonly gameLogicManager: GameLogicManager;
     private isGameRunning;
     cube: THREE.Mesh;
     constructor(params: Params);
@@ -39,6 +41,7 @@ export declare class SceneContainer implements ISceneContainer {
     loadFBXStruff(terrain: PerlinTerrain): void;
     addGroundBuoys(terrain: PerlinTerrain): void;
     addNavpoints(terrain: PerlinTerrain): void;
+    private addNavpoint;
     private addBuoysAt;
     private addGeometer;
     getShipVerticalInclination(): number;

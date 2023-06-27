@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { HudComponent } from "./HudComponent";
-import { HUDData, ISceneContainer, Navpoint, RenderableComponent, Tuple, TweakParams } from "../interfaces";
+import { HUDData, ISceneContainer, NavPointType, Navpoint, RenderableComponent, Tuple, TweakParams } from "../interfaces";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
 
 export class NavpointsFragment implements RenderableComponent {
@@ -15,6 +15,10 @@ export class NavpointsFragment implements RenderableComponent {
 
   private drawNavpoint(sceneContainer: ISceneContainer, navpoint: Navpoint) {
     // Compute position on screen
+
+    if (navpoint.isDisabled) {
+      return;
+    }
 
     // TODO: reuse the vector somehow!
     const vector = new THREE.Vector3(navpoint.position.x, navpoint.position.y, navpoint.position.z);
@@ -34,7 +38,7 @@ export class NavpointsFragment implements RenderableComponent {
     const colorMarker = getColorStyle(this.hudComponent.primaryColor, 1.0);
     if (this.currentFragmentBounds.contains(vector)) {
       // Navpoint is in visible area
-      this.drawMarkerAt(vector, colorMarker);
+      this.drawMarkerAt(vector, colorMarker, navpoint.type);
       this.drawLabelAt(vector.x, vector.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
     } else {
       // const directionPoint = { x : vector.x, y : vector.y };
@@ -46,20 +50,28 @@ export class NavpointsFragment implements RenderableComponent {
         x: Math.min(Math.max(vector.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
         y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
       };
-      this.drawMarkerAt(directionPoint, "red");
+      this.drawMarkerAt(directionPoint, "red", navpoint.type);
       this.drawLabelAt(directionPoint.x, directionPoint.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
     }
     this.drawLabelAt(vector.x, vector.y + 12, ` (${difference < 0 ? "﹀" : "︿"} ${difference.toFixed(1)}m)`);
   }
 
-  private drawMarkerAt(center: Tuple<number>, color: string) {
+  private drawMarkerAt(center: Tuple<number>, color: string, navPointType: NavPointType) {
     this.hudComponent.hudBitmap.strokeStyle = color;
     this.hudComponent.hudBitmap.beginPath();
-    this.hudComponent.hudBitmap.moveTo(center.x - 5, center.y - 5);
-    this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
-    this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y - 5);
-    this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y + 5);
-    this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y - 5);
+    if (navPointType === "nav") {
+      this.hudComponent.hudBitmap.moveTo(center.x + 5, center.y - 5);
+      this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y - 5);
+      this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
+      this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y + 5);
+      this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y - 5);
+    } else {
+      this.hudComponent.hudBitmap.moveTo(center.x - 5, center.y - 5);
+      this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
+      this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y - 5);
+      this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y + 5);
+      this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y - 5);
+    }
     this.hudComponent.hudBitmap.stroke();
     this.hudComponent.hudBitmap.closePath();
   }
@@ -97,7 +109,7 @@ export class NavpointsFragment implements RenderableComponent {
     this.hudComponent.hudBitmap.fillStyle = colorFillStyle;
 
     const center = this.currentFragmentBounds.getCenter();
-    this.drawMarkerAt(center, colorStrokeStyle);
+    this.drawMarkerAt(center, colorStrokeStyle, "default");
 
     for (var i = 0; i < sceneContainer.navpoints.length; i++) {
       this.drawNavpoint(sceneContainer, sceneContainer.navpoints[i]);

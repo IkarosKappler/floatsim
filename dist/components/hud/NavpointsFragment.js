@@ -33,6 +33,9 @@ var NavpointsFragment = /** @class */ (function () {
     }
     NavpointsFragment.prototype.drawNavpoint = function (sceneContainer, navpoint) {
         // Compute position on screen
+        if (navpoint.isDisabled) {
+            return;
+        }
         // TODO: reuse the vector somehow!
         var vector = new THREE.Vector3(navpoint.position.x, navpoint.position.y, navpoint.position.z);
         var distance = sceneContainer.camera.position.distanceTo(vector);
@@ -49,7 +52,7 @@ var NavpointsFragment = /** @class */ (function () {
         var colorMarker = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
         if (this.currentFragmentBounds.contains(vector)) {
             // Navpoint is in visible area
-            this.drawMarkerAt(vector, colorMarker);
+            this.drawMarkerAt(vector, colorMarker, navpoint.type);
             this.drawLabelAt(vector.x, vector.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
         else {
@@ -62,19 +65,28 @@ var NavpointsFragment = /** @class */ (function () {
                 x: Math.min(Math.max(vector.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
                 y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
             };
-            this.drawMarkerAt(directionPoint, "red");
+            this.drawMarkerAt(directionPoint, "red", navpoint.type);
             this.drawLabelAt(directionPoint.x, directionPoint.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
         this.drawLabelAt(vector.x, vector.y + 12, " (".concat(difference < 0 ? "﹀" : "︿", " ").concat(difference.toFixed(1), "m)"));
     };
-    NavpointsFragment.prototype.drawMarkerAt = function (center, color) {
+    NavpointsFragment.prototype.drawMarkerAt = function (center, color, navPointType) {
         this.hudComponent.hudBitmap.strokeStyle = color;
         this.hudComponent.hudBitmap.beginPath();
-        this.hudComponent.hudBitmap.moveTo(center.x - 5, center.y - 5);
-        this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
-        this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y - 5);
-        this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y + 5);
-        this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y - 5);
+        if (navPointType === "nav") {
+            this.hudComponent.hudBitmap.moveTo(center.x + 5, center.y - 5);
+            this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y - 5);
+            this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
+            this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y + 5);
+            this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y - 5);
+        }
+        else {
+            this.hudComponent.hudBitmap.moveTo(center.x - 5, center.y - 5);
+            this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y + 5);
+            this.hudComponent.hudBitmap.lineTo(center.x + 5, center.y - 5);
+            this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y + 5);
+            this.hudComponent.hudBitmap.lineTo(center.x - 5, center.y - 5);
+        }
         this.hudComponent.hudBitmap.stroke();
         this.hudComponent.hudBitmap.closePath();
     };
@@ -101,7 +113,7 @@ var NavpointsFragment = /** @class */ (function () {
         var colorFillStyle = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 0.5);
         this.hudComponent.hudBitmap.fillStyle = colorFillStyle;
         var center = this.currentFragmentBounds.getCenter();
-        this.drawMarkerAt(center, colorStrokeStyle);
+        this.drawMarkerAt(center, colorStrokeStyle, "default");
         for (var i = 0; i < sceneContainer.navpoints.length; i++) {
             this.drawNavpoint(sceneContainer, sceneContainer.navpoints[i]);
         }

@@ -44,6 +44,7 @@ var ColladaFileHandler_1 = require("../io/ColladaFileHandler");
 var PerlinHeightMap_1 = require("../utils/math/PerlinHeightMap");
 var CockpitScene_1 = require("./cockpit/CockpitScene");
 var FbxFileHandler_1 = require("../io/FbxFileHandler");
+var GameLogicManager_1 = require("../gamelogic/GameLogicManager");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -185,6 +186,7 @@ var SceneContainer = /** @class */ (function () {
         var particleDensity = 0.00001;
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", terrain.bounds, particleDensity));
         updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-b-256.png", terrain.bounds, particleDensity));
+        var discreteDetectionTime = _self.clock.getElapsedTime();
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.
         var _render = function () {
@@ -214,12 +216,18 @@ var SceneContainer = /** @class */ (function () {
                     // Let's animate the cube: a rotation.
                     _this.cube.rotation.x += 0.05;
                     _this.cube.rotation.y += 0.04;
+                    // Check each second.
+                    if (elapsedTime - discreteDetectionTime > 1) {
+                        _self.gameLogicManager.update(elapsedTime, discreteDetectionTime);
+                        discreteDetectionTime = elapsedTime;
+                    }
                     // Update physica
                     physicsHandler.render();
                 }
             }
             requestAnimationFrame(_render);
         }; // END render
+        this.gameLogicManager = new GameLogicManager_1.GameLogicManager(this);
         this.loadConcrete(terrain);
         this.addGroundBuoys(terrain);
         this.addNavpoints(terrain);
@@ -306,6 +314,13 @@ var SceneContainer = /** @class */ (function () {
         var callback = function (loadedObject) {
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
+            _this.addNavpoint({
+                position: loadedObject.position,
+                label: "OBJ Object",
+                detectionDistance: 0.0,
+                isDisabled: false,
+                type: "default"
+            });
         };
         new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
@@ -316,22 +331,17 @@ var SceneContainer = /** @class */ (function () {
         var objFileName = "concrete-walls-a-1-png2.dae";
         var targetBounds = { width: 20.0, depth: 20.0, height: 40.0 };
         var targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
-        // targetPosition.y = terrain.getHeightAtRelativePosition(targetPosition.x, targetPosition.z);
-        // targetPosition.y += terrain.bounds.min.y;
-        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
-        console.log("targetPosition", targetPosition);
+        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain) + 5.0;
         var callback = function (loadedObject) {
-            // const texture = new THREE.TextureLoader().load(basePath + "20100630_007_Tacheles_0_-_4_1.png");
-            // const material = new THREE.MeshPhongMaterial({ map: texture });
-            // material.needsUpdate = true;
-            // loadedObject.traverse(child => {
-            //   if (child instanceof THREE.Mesh) {
-            //     child.material = material;
-            //   }
-            // });
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
-            // this.scene.add(loadedObject);
+            _this.addNavpoint({
+                position: loadedObject.position,
+                label: "Collada Object",
+                detectionDistance: 0.0,
+                isDisabled: false,
+                type: "default"
+            });
         };
         new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
@@ -347,6 +357,13 @@ var SceneContainer = /** @class */ (function () {
         var callback = function (loadedObject) {
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
+            _this.addNavpoint({
+                position: loadedObject.position,
+                label: "FBX Object",
+                detectionDistance: 0.0,
+                isDisabled: false,
+                type: "default"
+            });
         };
         new FbxFileHandler_1.FbxFileHandler(this).loadFbxFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
@@ -369,20 +386,19 @@ var SceneContainer = /** @class */ (function () {
         }
     };
     SceneContainer.prototype.addNavpoints = function (terrain) {
-        // URGH, FIX THIS POSITIONING PROBLEM
-        var buoyXYCoords = { x: terrain.worldSize.width / 2.0 - 160.0, y: terrain.worldSize.depth / 2.0 - 20.0 };
-        var heightValue = terrain.getHeightAtRelativePosition(buoyXYCoords.x, buoyXYCoords.y);
-        var targetPositionA = new THREE.Vector3();
-        targetPositionA.set(terrain.bounds.min.x + buoyXYCoords.x, terrain.bounds.min.y + heightValue, //  + terrain.mesh.position.y, //50.0, // 10 meters above the ground
-        terrain.bounds.min.z + buoyXYCoords.y);
-        // Place buoy 6m above ground
-        targetPositionA.add(terrain.mesh.position);
-        targetPositionA.y += 6.0;
-        var targetPositionB = targetPositionA.clone();
-        targetPositionB.x -= 9.0;
-        this.navpoints.push({ position: targetPositionA, label: "Nav A" });
-        this.navpoints.push({ position: targetPositionB, label: "Nav B" });
+        var targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
+        targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
+        var targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
+        targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
+        this.addNavpoint({ position: targetPositionA, label: "Nav A", detectionDistance: 25.0, isDisabled: true, type: "nav" });
+        this.addNavpoint({ position: targetPositionB, label: "Nav B", detectionDistance: 25.0, isDisabled: true, type: "nav" });
         this.addBuoysAt([targetPositionA, targetPositionB]);
+    };
+    SceneContainer.prototype.addNavpoint = function (navpoint) {
+        // Add to visible nav points
+        this.navpoints.push(navpoint);
+        // And add to navpoint router
+        this.gameLogicManager.navpointRouter.addToRoute(navpoint);
     };
     SceneContainer.prototype.addBuoysAt = function (targetPositions) {
         var _this = this;
