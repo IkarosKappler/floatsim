@@ -31,5 +31,31 @@ html, body {
     width: 200px;
     height: 64px;
     border: 1px solid green;
-    border-radius: 12px;;
+    border-radius: 12px;
+}
+
+#messagebox {
+    position: absolute;
+    width: 80%;
+    min-height: 60px;
+    background-color: rgba(32,32,32,0.85);
+    border-radius: 5px;
+    bottom: 0;
+    box-sizing: border-box;
+    margin-left: 10%;
+    margin-right: 10%;
+    transition: transform 2s;
+    transform: translateY(100%);
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    font-family: unifontregular, monospace;
+    font-weight: 600;
+    color: rgb(163, 252, 163);
+    pointer-events: none;
+}
+
+#messagebox.popup {
+    transform: translateY(0%);
 }

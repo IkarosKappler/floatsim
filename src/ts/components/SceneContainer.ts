@@ -34,6 +34,7 @@ import { PerlinHeightMap } from "../utils/math/PerlinHeightMap";
 import { CockpitScene } from "./cockpit/CockpitScene";
 import { FbxFileHandler } from "../io/FbxFileHandler";
 import { GameLogicManager } from "../gamelogic/GameLogicManager";
+import { MessageBox } from "../dom/MessageBox";
 
 export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
@@ -55,6 +56,7 @@ export class SceneContainer implements ISceneContainer {
   // General nav points (not game relevant)
   readonly navpoints: Array<Navpoint>;
   readonly gameLogicManager: GameLogicManager;
+  readonly messageBox: MessageBox;
 
   private isGameRunning: boolean = false;
 
@@ -289,6 +291,7 @@ export class SceneContainer implements ISceneContainer {
     }; // END render
 
     this.gameLogicManager = new GameLogicManager(this);
+    this.messageBox = new MessageBox();
 
     this.loadConcrete(terrain);
     this.addGroundBuoys(terrain);
@@ -325,6 +328,7 @@ export class SceneContainer implements ISceneContainer {
     ];
     Promise.all(waitingFor).then(() => {
       this.isGameRunning = true;
+      this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
     });
   }
 
@@ -492,16 +496,18 @@ export class SceneContainer implements ISceneContainer {
     const targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
     targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
 
-    this.addNavpoint({ position: targetPositionA, label: "Nav A", detectionDistance: 25.0, isDisabled: true, type: "nav" });
-    this.addNavpoint({ position: targetPositionB, label: "Nav B", detectionDistance: 25.0, isDisabled: true, type: "nav" });
+    this.addNavpoint({ position: targetPositionA, label: "Nav A", detectionDistance: 25.0, isDisabled: true, type: "nav" }, true);
+    this.addNavpoint({ position: targetPositionB, label: "Nav B", detectionDistance: 25.0, isDisabled: true, type: "nav" }, true);
     this.addBuoysAt([targetPositionA, targetPositionB]);
   }
 
-  private addNavpoint(navpoint: Navpoint) {
+  private addNavpoint(navpoint: Navpoint, addToRoute?: boolean) {
     // Add to visible nav points
     this.navpoints.push(navpoint);
-    // And add to navpoint router
-    this.gameLogicManager.navpointRouter.addToRoute(navpoint);
+    // And add to navpoint router?
+    if (addToRoute) {
+      this.gameLogicManager.navpointRouter.addToRoute(navpoint);
+    }
   }
 
   private addBuoysAt(targetPositions: THREE.Vector3[]) {

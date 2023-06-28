@@ -7,4 +7,5 @@ export declare class NavpointRouter {
     constructor(sceneContainer: SceneContainer);
     addToRoute(navpoint: Navpoint): void;
     update(elapsedTime: number, discreteDetectionTime: number): void;
+    getCurrentNavpoint(): Navpoint | null;
 }

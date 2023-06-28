@@ -45,6 +45,7 @@ var PerlinHeightMap_1 = require("../utils/math/PerlinHeightMap");
 var CockpitScene_1 = require("./cockpit/CockpitScene");
 var FbxFileHandler_1 = require("../io/FbxFileHandler");
 var GameLogicManager_1 = require("../gamelogic/GameLogicManager");
+var MessageBox_1 = require("../dom/MessageBox");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -228,6 +229,7 @@ var SceneContainer = /** @class */ (function () {
             requestAnimationFrame(_render);
         }; // END render
         this.gameLogicManager = new GameLogicManager_1.GameLogicManager(this);
+        this.messageBox = new MessageBox_1.MessageBox();
         this.loadConcrete(terrain);
         this.addGroundBuoys(terrain);
         this.addNavpoints(terrain);
@@ -258,6 +260,7 @@ var SceneContainer = /** @class */ (function () {
         ];
         Promise.all(waitingFor).then(function () {
             _this.isGameRunning = true;
+            _this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
         });
     }
     SceneContainer.prototype.makeTerrain = function () {
@@ -390,15 +393,17 @@ var SceneContainer = /** @class */ (function () {
         targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
         var targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
         targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
-        this.addNavpoint({ position: targetPositionA, label: "Nav A", detectionDistance: 25.0, isDisabled: true, type: "nav" });
-        this.addNavpoint({ position: targetPositionB, label: "Nav B", detectionDistance: 25.0, isDisabled: true, type: "nav" });
+        this.addNavpoint({ position: targetPositionA, label: "Nav A", detectionDistance: 25.0, isDisabled: true, type: "nav" }, true);
+        this.addNavpoint({ position: targetPositionB, label: "Nav B", detectionDistance: 25.0, isDisabled: true, type: "nav" }, true);
         this.addBuoysAt([targetPositionA, targetPositionB]);
     };
-    SceneContainer.prototype.addNavpoint = function (navpoint) {
+    SceneContainer.prototype.addNavpoint = function (navpoint, addToRoute) {
         // Add to visible nav points
         this.navpoints.push(navpoint);
-        // And add to navpoint router
-        this.gameLogicManager.navpointRouter.addToRoute(navpoint);
+        // And add to navpoint router?
+        if (addToRoute) {
+            this.gameLogicManager.navpointRouter.addToRoute(navpoint);
+        }
     };
     SceneContainer.prototype.addBuoysAt = function (targetPositions) {
         var _this = this;

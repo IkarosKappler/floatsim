@@ -29,6 +29,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var SceneContainer_1 = require("./components/SceneContainer");
+var KeyHandler_1 = require("./io/KeyHandler");
 var gup_1 = require("./utils/gup");
 var Params_1 = require("./utils/Params");
 var TweakPane = __importStar(require("tweakpane"));
@@ -83,5 +84,15 @@ globalThis.addEventListener("load", function () {
         sceneContainer.camera.updateProjectionMatrix();
     });
     pane.expanded = false;
+    var keyHandler = new KeyHandler_1.KeyHandler({ element: document.body, trackAll: false });
+    keyHandler.down("h", function (e) {
+        var curNavPoint = sceneContainer.gameLogicManager.navpointRouter.getCurrentNavpoint();
+        if (curNavPoint) {
+            sceneContainer.messageBox.showMessage("Your next nav point is ".concat(curNavPoint.label, "."));
+        }
+        else {
+            sceneContainer.messageBox.showMessage("There is no next nav point.");
+        }
+    });
 });
 //# sourceMappingURL=main.js.map

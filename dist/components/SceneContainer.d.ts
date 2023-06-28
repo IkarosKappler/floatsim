@@ -14,6 +14,7 @@ import { FogHandler } from "./environment/FogHandler";
 import { Params } from "../utils/Params";
 import { CockpitScene } from "./cockpit/CockpitScene";
 import { GameLogicManager } from "../gamelogic/GameLogicManager";
+import { MessageBox } from "../dom/MessageBox";
 export declare class SceneContainer implements ISceneContainer {
     readonly scene: THREE.Scene;
     readonly renderer: THREE.WebGLRenderer;
@@ -31,6 +32,7 @@ export declare class SceneContainer implements ISceneContainer {
     readonly terrainSegments: Array<PerlinTerrain>;
     readonly navpoints: Array<Navpoint>;
     readonly gameLogicManager: GameLogicManager;
+    readonly messageBox: MessageBox;
     private isGameRunning;
     cube: THREE.Mesh;
     constructor(params: Params);

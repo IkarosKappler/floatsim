@@ -5,6 +5,7 @@
  */
 
 import { SceneContainer } from "./components/SceneContainer";
+import { KeyHandler } from "./io/KeyHandler";
 import { gup } from "./utils/gup";
 import { Params } from "./utils/Params";
 
@@ -64,4 +65,14 @@ globalThis.addEventListener("load", () => {
       sceneContainer.camera.updateProjectionMatrix();
     });
   pane.expanded = false;
+
+  const keyHandler = new KeyHandler({ element: document.body, trackAll: false });
+  keyHandler.down("h", (e: KeyboardEvent) => {
+    const curNavPoint = sceneContainer.gameLogicManager.navpointRouter.getCurrentNavpoint();
+    if (curNavPoint) {
+      sceneContainer.messageBox.showMessage(`Your next nav point is ${curNavPoint.label}.`);
+    } else {
+      sceneContainer.messageBox.showMessage(`There is no next nav point.`);
+    }
+  });
 });
