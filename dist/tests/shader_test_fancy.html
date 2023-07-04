@@ -1,22 +1,35 @@
-/**
- * This is the second version of my caustic shader.
- * It is split into parts with the code for main function(s) and parts
- * with the uniforms/varying definitions.
- *
- * This makes it easy to combine it with existing shaders from THREEJS
- * by using the onCompile method with text replacement.
- *
- * @author  Ikaros Kappler
- * @date    2023-05-03
- * @version 1.0.0
- */
-
-const vertex_pars = /* glsl */ `
+<!DOCTYPE html>
+<html> 
+<head> 
+    <meta charset="UTF-8">
+    <title>THREE.js Water Shader Test</title> 
+    <link rel="stylesheet" href="../styles.css" />
+    <script src="../lib/three/build/three.150.min.js"></script>
+    <script>globalThis.three = THREE;
+    </script>
+    <script src="../lib/three/examples/umd/lib/stats.module.js"></script> 
+    <script>
+        globalThis.module = globalThis;
+    </script>
+    <script src="../module.js"></script>
+    <script src="../lib/three/examples/umd/controls/OrbitControls.js"></script>
+    <script>globalThis.three = THREE;</script>
+    <script src="../lib/three/examples/umd/math/ImprovedNoise.js"></script>
+    <script src="../utils/Helpers.js"></script> 
+    <script src="../utils/texture/shaders/caustic_shader_material.glsl.js"></script>
+    <script src="../utils/texture/shaders/caustic_shader_material2.glsl.js"></script>
+    <script src="../utils/texture/CausticShaderMaterial.js"></script> 
+    <script src="../utils/texture/CausticShaderMaterial2.js"></script> 
+    <script src="../utils/texture/PerlinTexture.js"></script> 
+    <script src="../utils/math/perlin.js"></script> 
+    <script src="../utils/math/PerlinHeightMap.js"></script> 
+    <script src="../components/environment/PerlinTerrain.js"></script> 
+    <script src="shader_test_fancy.js"></script> 
+    <script id="vertexShader-pars" type="x-shader/x-vertex">
         // varying vec2 vUv; 
         varying vec3 vposition;
-`;
-
-const vertex = /* glsl */ `
+    </script>
+    <script id="vertexShader" type="x-shader/x-vertex">
         // varying vec2 vUv; 
         // varying vec3 vposition;
 
@@ -29,9 +42,9 @@ const vertex = /* glsl */ `
             vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
             gl_Position = projectionMatrix * modelViewPosition; 
         // }
-`;
+    </script>
 
-const fragment_pars = /* glsl */ `
+    <script id="fragmentShader-pars" type="x-shader/x-fragment">
 
         // #define FOG_EXP2 1
 
@@ -63,6 +76,7 @@ const fragment_pars = /* glsl */ `
         // varying vec2 vUv;
         varying vec3 vposition;
 
+
         // Source for Hue/Brightness/Saturation in GLSL
         //    https://gamedev.stackexchange.com/questions/59797/glsl-shader-change-hue-saturation-brightness
         //    http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
@@ -83,9 +97,8 @@ const fragment_pars = /* glsl */ `
             vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
             return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
         }
-`;
-
-const fragment = /* glsl */ `
+    </script>
+    <script id="fragmentShader" type="x-shader/x-fragment">
 
         // #define FOG_EXP2 1
 
@@ -120,7 +133,7 @@ const fragment = /* glsl */ `
 
         // void main() {
 
-             // uncoment when using real texture
+            // uncoment when using real texture
             // vec4 texture_color = texture2D(u_texture, vUv.xy);
             // Re-use fragment color from shader pipeline
             vec4 texture_color = gl_FragColor;
@@ -147,8 +160,8 @@ const fragment = /* glsl */ `
             // vec3 vHSV = vec3(1.0,1.0,1.0);
             // TODO: convert this to a VARYING
             vec3 vHSV = rgb2hsv(u_effect_color.rgb).rgb;
-            vec3 fragRGB = texture_color.rgb;
-            // vec3 fragRGB = mix( texture_color.rgb, u_effect_color.rgb, u_bright*0.25 );
+            // vec3 fragRGB = texture_color.rgb;
+            vec3 fragRGB = mix( texture_color.rgb, u_effect_color.rgb, u_bright*0.25 );
             // vec3 fragRGB = (texture_color + (u_effect_color-texture_color) * min(u_intensity,brightValue)).rgb;
             vec3 fragHSV = rgb2hsv(fragRGB).xyz;
             // fragHSV.x += mod(min(u_intensity,brightValue), 360.0);
@@ -160,19 +173,18 @@ const fragment = /* glsl */ `
             gl_FragColor = vec4(fragRGB, texture_color.w);
             
             // gl_FragColor.rgb = mix( gl_FragColor.rgb, u_effect_color.rgb, brightValue*u_intensity*0.25 );
-            // Try to mix in the effect color.
-            gl_FragColor.rgb += (u_effect_color.rgb * (1.0- brightValue*u_intensity)) * 0.15;
 
             // -- <fog_fragment>
             // Note: fogFactor is here taken from the underlying shader. No need to re-define it here
             // float fogFactor = 1.0 - exp( - fogDensity * fogDensity * vFogDepth * vFogDepth );
             gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
         // }
-`;
+    </script>
 
-export const Caustic_Shader2 = {
-  fragment,
-  fragment_pars,
-  vertex,
-  vertex_pars
-};
+</head>
+
+<body> 
+    <div id="Stats-output">
+    </div>
+</body> 
+</html>
