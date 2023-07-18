@@ -103,3 +103,4 @@ CURRENTLY NOT WORKING, NEEDS TO BE FIXED
 - Cocopon for Tweakpane https://cocopon.github.io/tweakpane
 - Vector Ruler Generator by robbbb https://robbbb.github.io/VectorRuler/
 - pailhead011 for the tutorial of how to extend existing THREEJS shaders and pass custom uniforms to them https://medium.com/@pailhead011/extending-three-js-materials-with-glsl-78ea7bbb9270
+- Sam Hocevar for the rgb2hsl and reverse GLSL functions https://gamedev.stackexchange.com/questions/59797/glsl-shader-change-hue-saturation-brightness

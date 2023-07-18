@@ -322,7 +322,8 @@ var SceneContainer = /** @class */ (function () {
                 label: "OBJ Object",
                 detectionDistance: 0.0,
                 isDisabled: false,
-                type: "default"
+                type: "default",
+                userData: { isCurrentlyInRange: false }
             });
         };
         new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
@@ -343,7 +344,8 @@ var SceneContainer = /** @class */ (function () {
                 label: "Collada Object",
                 detectionDistance: 0.0,
                 isDisabled: false,
-                type: "default"
+                type: "default",
+                userData: { isCurrentlyInRange: false }
             });
         };
         new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
@@ -365,7 +367,8 @@ var SceneContainer = /** @class */ (function () {
                 label: "FBX Object",
                 detectionDistance: 0.0,
                 isDisabled: false,
-                type: "default"
+                type: "default",
+                userData: { isCurrentlyInRange: false }
             });
         };
         new FbxFileHandler_1.FbxFileHandler(this).loadFbxFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
@@ -393,13 +396,28 @@ var SceneContainer = /** @class */ (function () {
         targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
         var targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
         targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
-        this.addNavpoint({ position: targetPositionA, label: "Nav A", detectionDistance: 25.0, isDisabled: true, type: "nav" }, true);
-        this.addNavpoint({ position: targetPositionB, label: "Nav B", detectionDistance: 25.0, isDisabled: true, type: "nav" }, true);
+        this.addNavpoint({
+            position: targetPositionA,
+            label: "Nav A",
+            detectionDistance: 25.0,
+            isDisabled: true,
+            type: "nav",
+            userData: { isCurrentlyInRange: false }
+        }, true);
+        this.addNavpoint({
+            position: targetPositionB,
+            label: "Nav B",
+            detectionDistance: 25.0,
+            isDisabled: true,
+            type: "nav",
+            userData: { isCurrentlyInRange: false }
+        }, true);
         this.addBuoysAt([targetPositionA, targetPositionB]);
     };
     SceneContainer.prototype.addNavpoint = function (navpoint, addToRoute) {
         // Add to visible nav points
         this.navpoints.push(navpoint);
+        this.gameLogicManager.navigationManager.addNavpoint(navpoint);
         // And add to navpoint router?
         if (addToRoute) {
             this.gameLogicManager.navpointRouter.addToRoute(navpoint);

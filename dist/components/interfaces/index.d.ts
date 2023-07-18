@@ -115,6 +115,9 @@ export interface Navpoint {
     detectionDistance: number;
     isDisabled: boolean;
     type: NavPointType;
+    userData: {
+        isCurrentlyInRange: boolean;
+    };
 }
 export interface ISceneContainer {
     readonly rendererSize: Size2Immutable;
@@ -131,4 +134,8 @@ export interface RenderableComponent {
     beforeRender(sceneContainer: ISceneContainer, hudData: HUDData, tweakParams: TweakParams): void;
     renderFragment(renderer: THREE.WebGLRenderer): void;
     updateSize(width: number, height: number): void;
+}
+export interface NavigationEventListener {
+    onNavpointEntered: (navpoint: Navpoint) => void;
+    onNavpointExited: (navpoint: Navpoint) => void;
 }
