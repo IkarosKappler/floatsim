@@ -13,6 +13,7 @@
  **/
 // globalThis.module = globalThis;
 globalThis.exports = globalThis.export = globalThis;
+// globalThis.exports = globalThis.exports || {};
 var require = (globalThis.require = function (...args) {
   // console.log(args[0], args);
   var itemName = args[0];

@@ -22,6 +22,8 @@ type AmmoShapeType = Ammo.btSphereShape | Ammo.btBoxShape | Ammo.btCylinderShape
 const terrainMaxHeight = 8;
 const terrainMinHeight = -2;
 
+const HEIGHT_SCALE = 5;
+
 let time: number = 0;
 const objectTimePeriod: number = 3;
 let timeNextSpawn: number = time + 0.5; // objectTimePeriod; // Span first object after one half second
@@ -134,6 +136,9 @@ export class PhysicsHandler {
     terrainMesh.receiveShadow = true;
     terrainMesh.castShadow = true;
 
+    terrainMesh.scale.y = HEIGHT_SCALE;
+    terrainMesh.position.y = -HEIGHT_SCALE - (terrainMaxHeight - terrainMinHeight) + HEIGHT_SCALE * 0.6;
+
     this.sceneContainer.scene.add(terrainMesh);
   }
 
@@ -178,7 +183,7 @@ export class PhysicsHandler {
 
   private initPhysics() {
     // Physics configuration
-    const groundShape = createTerrainShape(this); // }, this.ammo);
+    const groundShape = createTerrainShape(this);
     const groundTransform = new this.ammo.btTransform();
     groundTransform.setIdentity();
     // Shifts the terrain, since bullet re-centers it on its bounding box.
@@ -282,7 +287,7 @@ const createObjectMaterial = () => {
 
 const createTerrainShape = (physicsHandler: PhysicsHandler) => {
   // This parameter is not really used, since we are using PHY_FLOAT height data type and hence it is ignored
-  const heightScale = 1;
+  // const heightScale = 10;
 
   // Up axis = 0 for X, 1 for Y, 2 for Z. Normally 1 = Y is used.
   const upAxis = 1;
@@ -319,7 +324,7 @@ const createTerrainShape = (physicsHandler: PhysicsHandler) => {
     physicsHandler.terrainWidthSegmentCount,
     physicsHandler.terrainDepthSegmentCount,
     physicsHandler.ammoHeightData,
-    heightScale,
+    HEIGHT_SCALE,
     terrainMinHeight,
     terrainMaxHeight,
     upAxis,
@@ -330,7 +335,7 @@ const createTerrainShape = (physicsHandler: PhysicsHandler) => {
   // Set horizontal scale
   const scaleX = physicsHandler.terrainWidthExtents / (physicsHandler.terrainWidthSegmentCount - 1);
   const scaleZ = physicsHandler.terrainDepthExtents / (physicsHandler.terrainDepthSegmentCount - 1);
-  heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, 1, scaleZ));
+  heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, HEIGHT_SCALE, scaleZ));
 
   heightFieldShape.setMargin(0.05);
 

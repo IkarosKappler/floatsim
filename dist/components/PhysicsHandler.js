@@ -37,6 +37,7 @@ var THREE = __importStar(require("three"));
 // const terrainDepthSegmentCount = 128;
 var terrainMaxHeight = 8;
 var terrainMinHeight = -2;
+var HEIGHT_SCALE = 5;
 var time = 0;
 var objectTimePeriod = 3;
 var timeNextSpawn = time + 0.5; // objectTimePeriod; // Span first object after one half second
@@ -113,6 +114,8 @@ var PhysicsHandler = /** @class */ (function () {
         var terrainMesh = new THREE.Mesh(geometry, groundMaterial);
         terrainMesh.receiveShadow = true;
         terrainMesh.castShadow = true;
+        terrainMesh.scale.y = HEIGHT_SCALE;
+        terrainMesh.position.y = -HEIGHT_SCALE - (terrainMaxHeight - terrainMinHeight) + HEIGHT_SCALE * 0.6;
         this.sceneContainer.scene.add(terrainMesh);
     };
     /**
@@ -151,7 +154,7 @@ var PhysicsHandler = /** @class */ (function () {
     }; // END updatePhsics
     PhysicsHandler.prototype.initPhysics = function () {
         // Physics configuration
-        var groundShape = createTerrainShape(this); // }, this.ammo);
+        var groundShape = createTerrainShape(this);
         var groundTransform = new this.ammo.btTransform();
         groundTransform.setIdentity();
         // Shifts the terrain, since bullet re-centers it on its bounding box.
@@ -232,7 +235,7 @@ var createObjectMaterial = function () {
 };
 var createTerrainShape = function (physicsHandler) {
     // This parameter is not really used, since we are using PHY_FLOAT height data type and hence it is ignored
-    var heightScale = 1;
+    // const heightScale = 10;
     // Up axis = 0 for X, 1 for Y, 2 for Z. Normally 1 = Y is used.
     var upAxis = 1;
     // hdt, height data type. "PHY_FLOAT" is used. Possible values are "PHY_FLOAT", "PHY_UCHAR", "PHY_SHORT"
@@ -254,11 +257,11 @@ var createTerrainShape = function (physicsHandler) {
         }
     }
     // Creates the heightfield physics shape
-    var heightFieldShape = new physicsHandler.ammo.btHeightfieldTerrainShape(physicsHandler.terrainWidthSegmentCount, physicsHandler.terrainDepthSegmentCount, physicsHandler.ammoHeightData, heightScale, terrainMinHeight, terrainMaxHeight, upAxis, hdt, flipQuadEdges);
+    var heightFieldShape = new physicsHandler.ammo.btHeightfieldTerrainShape(physicsHandler.terrainWidthSegmentCount, physicsHandler.terrainDepthSegmentCount, physicsHandler.ammoHeightData, HEIGHT_SCALE, terrainMinHeight, terrainMaxHeight, upAxis, hdt, flipQuadEdges);
     // Set horizontal scale
     var scaleX = physicsHandler.terrainWidthExtents / (physicsHandler.terrainWidthSegmentCount - 1);
     var scaleZ = physicsHandler.terrainDepthExtents / (physicsHandler.terrainDepthSegmentCount - 1);
-    heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, 1, scaleZ));
+    heightFieldShape.setLocalScaling(new physicsHandler.ammo.btVector3(scaleX, HEIGHT_SCALE, scaleZ));
     heightFieldShape.setMargin(0.05);
     return heightFieldShape;
 };
