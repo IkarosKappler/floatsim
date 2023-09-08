@@ -181,12 +181,17 @@ var SceneContainer = /** @class */ (function () {
         };
         var terrain = this.makeTerrain();
         this.terrainSegments.push(terrain);
+        // TODO: terrain.bounds is always at (0,0,0), the initialDepth is ignored!
         console.log("Terrain Bounds", terrain.bounds);
         var updateables = [];
         // Initialize particles
         var particleDensity = 0.00001;
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", terrain.bounds, particleDensity));
-        updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-b-256.png", terrain.bounds, particleDensity));
+        var particleBounds = terrain.bounds.clone();
+        particleBounds.min.y += this.sceneData.initialDepth;
+        particleBounds.max.y += this.sceneData.initialDepth;
+        console.log("particleBounds", particleBounds);
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-a-256.png", particleBounds, particleDensity));
+        updateables.push(new FloatingParticles_1.FloatingParticles(this, "resources/img/particle-b-256.png", particleBounds, particleDensity));
         var discreteDetectionTime = _self.clock.getElapsedTime();
         // // This is the basic render function. It will be called perpetual, again and again,
         // // depending on your machines possible frame rate.

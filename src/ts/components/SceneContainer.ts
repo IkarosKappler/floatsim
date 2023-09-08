@@ -229,13 +229,19 @@ export class SceneContainer implements ISceneContainer {
     const terrain = this.makeTerrain();
     this.terrainSegments.push(terrain);
 
+    // TODO: terrain.bounds is always at (0,0,0), the initialDepth is ignored!
     console.log("Terrain Bounds", terrain.bounds);
 
     const updateables: Array<UpdateableComponent> = [];
     // Initialize particles
     const particleDensity = 0.00001;
-    updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, terrain.bounds, particleDensity));
-    updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, terrain.bounds, particleDensity));
+    const particleBounds = terrain.bounds.clone();
+    particleBounds.min.y += this.sceneData.initialDepth;
+    particleBounds.max.y += this.sceneData.initialDepth;
+    console.log("particleBounds", particleBounds);
+
+    updateables.push(new FloatingParticles(this, `resources/img/particle-a-256.png`, particleBounds, particleDensity));
+    updateables.push(new FloatingParticles(this, `resources/img/particle-b-256.png`, particleBounds, particleDensity));
 
     let discreteDetectionTime = _self.clock.getElapsedTime();
 

@@ -137,7 +137,7 @@ export class PhysicsHandler {
     terrainMesh.castShadow = true;
 
     terrainMesh.scale.y = HEIGHT_SCALE;
-    terrainMesh.position.y = -HEIGHT_SCALE - (terrainMaxHeight - terrainMinHeight) + HEIGHT_SCALE * 0.6;
+    terrainMesh.position.y = -HEIGHT_SCALE - (terrainMaxHeight - terrainMinHeight) + HEIGHT_SCALE * 0.6 - 20;
 
     this.sceneContainer.scene.add(terrainMesh);
   }
