@@ -63,6 +63,7 @@
     "npm": "^9.6.1",
     "perlin": "^1.0.0",
     "play-sound": "^1.1.5",
+    "preact": "^10.17.1",
     "rpg-dialogue-js": "^1.0.0",
     "three": "^0.150.1",
     "three-geometry-hellfix": "^1.1.0",

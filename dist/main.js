@@ -29,13 +29,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var SceneContainer_1 = require("./components/SceneContainer");
+var FrontendUI_1 = require("./dom/frontend/FrontendUI");
 var KeyHandler_1 = require("./io/KeyHandler");
 var gup_1 = require("./utils/gup");
 var Params_1 = require("./utils/Params");
 var TweakPane = __importStar(require("tweakpane"));
 console.log("Main script starting ...");
 globalThis.addEventListener("load", function () {
-    console.log("Initializing");
+    console.log("[main] Initializing");
+    var preactLib = globalThis["preact"];
+    console.log("[main] preact", preactLib);
+    var globalLibs = {
+        preact: preactLib
+    };
+    var frontendUI = new FrontendUI_1.FrontendUI(globalLibs);
+    console.log("frontendUI", frontendUI);
     var GUP = (0, gup_1.gup)();
     var params = new Params_1.Params(GUP);
     console.log("SceneContainer", SceneContainer_1.SceneContainer);

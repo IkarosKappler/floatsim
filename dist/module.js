@@ -27,13 +27,20 @@ var require = (globalThis.require = function (...args) {
       itemName = itemName.substring(itemNameStart + 1, itemNameEnd);
     }
   }
-  // console.log("itemName", itemName);
-  if (["three", "OrbitControls"].indexOf(itemName) !== -1) {
+  console.log("itemName", itemName);
+  if (itemName === "jsx-runtime") {
+    console.log("[module] Requiring pract jsx-runtime", jsxRuntime);
+    return jsxRuntime;
+  } else if (itemName === "hooks") {
+    console.log("[module] Requiring preact hooks", preactHooks);
+    return preactHooks;
+  } else if (["three", "OrbitControls"].indexOf(itemName) !== -1) {
+    // console.log("[module] requiring special library", itemName, globalThis[itemName]);
     return globalThis[itemName]; // [args[0]];
   } else {
     return globalThis;
   }
 });
 
-console.log("module.js typeof module", typeof module);
-console.log("module.js typeof exports", typeof exports);
+console.log("[module] module.js typeof module", typeof module);
+console.log("[module] module.js typeof exports", typeof exports);

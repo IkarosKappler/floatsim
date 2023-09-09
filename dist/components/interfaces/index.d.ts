@@ -1,6 +1,7 @@
 /**
  * Global interfaces.
  */
+import type preact from "preact";
 import { PerlinTerrain } from "../environment/PerlinTerrain";
 export interface DirectionalRotation {
     upAngle: number;
@@ -138,4 +139,7 @@ export interface RenderableComponent {
 export interface NavigationEventListener {
     onNavpointEntered: (navpoint: Navpoint) => void;
     onNavpointExited: (navpoint: Navpoint) => void;
+}
+export interface IGlobalLibs {
+    preact: typeof preact;
 }

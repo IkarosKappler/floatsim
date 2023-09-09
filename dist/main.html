@@ -9,20 +9,27 @@
     <script>globalThis.three = THREE;</script>
     <script src="lib/three/examples/umd/lib/stats.module.js"></script> 
 
-        <!-- RPG-Dialogue-JS -->
-        <script src="lib/axios/dist/axios.js"></script> <!-- URGS, axios does some sh*t with my exports!? -->
-        <!-- <script src="lib/axios/dist/axios.min.js"></script>  -->
-        <script>
-            // console.log("axios", axios);
-            // exports["Axios"] = axios;
-            // console.log("exports", exports)
-        </script>
+    <!-- Load Axios for RPG-Dialogue-JS -->
+    <!-- URGS, axios does some sh*t with my exports!? So this is the place to load it: before my custom classes -->
+    <script src="lib/axios/dist/axios.js"></script> 
 
     <script src="module.js"></script>
+    <!-- Load Tweakpane -->
     <script src="lib/tweakpane/tweakpane.min.js"></script>
     <script>
         globalThis.exports["tweakpane"] = Tweakpane;
     </script>
+
+    <!-- Load Preact and jsx-runtime -->
+    <script src="lib/preact/dist/preact.umd.js"></script>
+    <script src="lib/preact/jsx-runtime/dist/jsxRuntime.umd.js"></script>
+    <script src="lib/preact/hooks/dist/hooks.umd.js"></script>
+
+    <script>
+        console.log("preact", preact);
+    </script>
+
+    <!-- Load Ammo --->
     <script src="lib/ammojs/ammo.js"></script>
     <!-- <script src="lib/ammo.wasm-downloaded.js"></script> -->
     <script>
@@ -30,6 +37,8 @@
         console.log("exports after Ammo", exports);  */
         globalThis.module = globalThis;
     </script>
+
+
     <script src="lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script src="lib/three/examples/umd/controls/FirstPersonControls.js"></script>
     <script src="lib/three/examples/umd/loaders/MTLLoader.js"></script>
@@ -88,7 +97,9 @@
     <script src="components/SceneContainer.js"></script> 
     <script src="components/constants.js"></script> 
     <script src="dom/MessageBox.js"></script> 
+    <script src="dom/frontend/FrontendUI.js"></script> 
 
+    <!-- Load Axios for RPG-Dialogue-JS -->
     <script src="lib/rpg-dialogue-js/dist/lib-cjs/DefaultDialogueRenderer.js"></script>
     <script src="lib/rpg-dialogue-js/dist/lib-cjs/RPGDialogueLogic.js"></script>
     <script src="lib/rpg-dialogue-js/dist/lib-cjs/RPGDialogueSequence.js"></script>
@@ -102,5 +113,6 @@
     <div id="Stats-output"></div>
     <div id="overlay"><button id="button-start">Start</button></div>
     <div id="messagebox"></div>
+
 </body> 
 </html>

@@ -4,16 +4,28 @@
  * @version 1.0.0
  */
 
+import type preact from "preact";
 import { SceneContainer } from "./components/SceneContainer";
+import { FrontendUI } from "./dom/frontend/FrontendUI";
 import { KeyHandler } from "./io/KeyHandler";
 import { gup } from "./utils/gup";
 import { Params } from "./utils/Params";
 
 import * as TweakPane from "tweakpane";
+import { IGlobalLibs } from "./components/interfaces";
 
 console.log("Main script starting ...");
 globalThis.addEventListener("load", () => {
-  console.log("Initializing");
+  console.log("[main] Initializing");
+
+  const preactLib = globalThis["preact"] as typeof preact;
+  console.log("[main] preact", preactLib);
+  const globalLibs: IGlobalLibs = {
+    preact: preactLib
+  };
+
+  const frontendUI = new FrontendUI(globalLibs);
+  console.log("frontendUI", frontendUI);
 
   const GUP: Record<string, string> = gup();
   const params: Params = new Params(GUP);
