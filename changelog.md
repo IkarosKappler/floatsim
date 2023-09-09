@@ -1,6 +1,8 @@
 - 2023-09-09
   - Adding preact to render proper JSX. This is intended to render some frontend ui stuff.
   - Getting preact running in as isloated container.
+  - Refactoring the overlay to work completely with preact now.
+  - Adding a listener logic to the SceneContainer, to listen for gameReady and gameRunning/gamePaused events.
 - 2023-09-08
   - Adding a dialigue library (rpg-dialigue-js).
 - 2023-05-03

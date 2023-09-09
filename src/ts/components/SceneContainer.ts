@@ -11,6 +11,7 @@ import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { HudComponent } from "./hud/HudComponent";
 import {
+  GameRunningListener,
   HUDData,
   IDimension2,
   IHeightMap,
@@ -35,6 +36,7 @@ import { CockpitScene } from "./cockpit/CockpitScene";
 import { FbxFileHandler } from "../io/FbxFileHandler";
 import { GameLogicManager } from "../gamelogic/GameLogicManager";
 import { MessageBox } from "../dom/MessageBox";
+import { GameListeners } from "../utils/GameListeners";
 
 export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
@@ -58,7 +60,12 @@ export class SceneContainer implements ISceneContainer {
   readonly gameLogicManager: GameLogicManager;
   readonly messageBox: MessageBox;
 
+  readonly gameListeners: GameListeners;
+
   private isGameRunning: boolean = false;
+  private isGamePaused: boolean = false;
+
+  private initializationPromise: Promise<void[]>;
 
   // Example cube
   cube: THREE.Mesh;
@@ -70,6 +77,8 @@ export class SceneContainer implements ISceneContainer {
     this.terrainSegments = [];
     this.navpoints = [];
     this.rendererSize = { width: window.innerWidth, height: window.innerHeight };
+
+    this.gameListeners = new GameListeners();
 
     this.sceneData = {
       initialDepth: params.getNumber("initialDepth", -898.0), // -898.0,
@@ -332,10 +341,35 @@ export class SceneContainer implements ISceneContainer {
       // Only after the "Start" button was hit (user interaction) audio can play.
       this.initializeAudio()
     ];
-    Promise.all(waitingFor).then(() => {
-      this.isGameRunning = true;
-      this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+    this.initializationPromise = Promise.all(waitingFor); /* .then(() => {
+      // this.isGameRunning = true;
+      // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+      this.gameListeners.fireGameReadyChanged();
+    }); */
+  } // END constructor
+
+  initializGame() {
+    this.initializationPromise.then(() => {
+      // this.isGameRunning = true;
+      // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+      this.gameListeners.fireGameReadyChanged();
     });
+  }
+
+  startGame() {
+    if (this.isGameRunning) {
+      console.debug("[SceneContainer] Cannot start game a second time. Game is already running.");
+      return;
+    }
+    this.isGameRunning = true;
+    this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+  }
+
+  togglePause() {
+    this.isGameRunning = !this.isGameRunning;
+    this.isGamePaused = !this.isGameRunning;
+    this.controls.enabled = !this.isGamePaused;
+    this.gameListeners.fireGameRunningChanged(this.isGameRunning, this.isGamePaused);
   }
 
   makeTerrain(): PerlinTerrain {
@@ -628,14 +662,18 @@ export class SceneContainer implements ISceneContainer {
 
   initializeAudio(): Promise<void> {
     const audioPlayer = new AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+    // return new Promise<void>((accept, _reject) => {
+    //   const startButton = document.querySelector("#button-start");
+    //   startButton.addEventListener("click", () => {
+    //     const overlay = document.querySelector("#overlay");
+    //     overlay.classList.add("d-none");
+    //     audioPlayer.play();
+    //     accept();
+    //   });
+    // });
     return new Promise<void>((accept, _reject) => {
-      const startButton = document.querySelector("#button-start");
-      startButton.addEventListener("click", () => {
-        const overlay = document.querySelector("#overlay");
-        overlay.classList.add("d-none");
-        audioPlayer.play();
-        accept();
-      });
+      // Well, this new implementation accepts immediately.
+      accept();
     });
   }
 

@@ -140,6 +140,8 @@ export interface NavigationEventListener {
     onNavpointEntered: (navpoint: Navpoint) => void;
     onNavpointExited: (navpoint: Navpoint) => void;
 }
+export type GameRunningListener = (isRunning: boolean, isPaused: boolean) => void;
+export type GameReadyListener = () => void;
 export interface IGlobalLibs {
     preact: typeof preact;
 }

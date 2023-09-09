@@ -46,16 +46,19 @@ var CockpitScene_1 = require("./cockpit/CockpitScene");
 var FbxFileHandler_1 = require("../io/FbxFileHandler");
 var GameLogicManager_1 = require("../gamelogic/GameLogicManager");
 var MessageBox_1 = require("../dom/MessageBox");
+var GameListeners_1 = require("../utils/GameListeners");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
         this.isGameRunning = false;
+        this.isGamePaused = false;
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         this.collidableMeshes = [];
         this.terrainSegments = [];
         this.navpoints = [];
         this.rendererSize = { width: window.innerWidth, height: window.innerHeight };
+        this.gameListeners = new GameListeners_1.GameListeners();
         this.sceneData = {
             initialDepth: params.getNumber("initialDepth", -898.0),
             deepFogDepth: {
@@ -263,11 +266,34 @@ var SceneContainer = /** @class */ (function () {
             // Only after the "Start" button was hit (user interaction) audio can play.
             this.initializeAudio()
         ];
-        Promise.all(waitingFor).then(function () {
-            _this.isGameRunning = true;
-            _this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+        this.initializationPromise = Promise.all(waitingFor); /* .then(() => {
+          // this.isGameRunning = true;
+          // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+          this.gameListeners.fireGameReadyChanged();
+        }); */
+    } // END constructor
+    SceneContainer.prototype.initializGame = function () {
+        var _this = this;
+        this.initializationPromise.then(function () {
+            // this.isGameRunning = true;
+            // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+            _this.gameListeners.fireGameReadyChanged();
         });
-    }
+    };
+    SceneContainer.prototype.startGame = function () {
+        if (this.isGameRunning) {
+            console.debug("[SceneContainer] Cannot start game a second time. Game is already running.");
+            return;
+        }
+        this.isGameRunning = true;
+        this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+    };
+    SceneContainer.prototype.togglePause = function () {
+        this.isGameRunning = !this.isGameRunning;
+        this.isGamePaused = !this.isGameRunning;
+        this.controls.enabled = !this.isGamePaused;
+        this.gameListeners.fireGameRunningChanged(this.isGameRunning, this.isGamePaused);
+    };
     SceneContainer.prototype.makeTerrain = function () {
         //--- MAKE TERRAIN ---
         var zStartOffset = -20.0; // for ImprovedNoise
@@ -508,14 +534,18 @@ var SceneContainer = /** @class */ (function () {
     };
     SceneContainer.prototype.initializeAudio = function () {
         var audioPlayer = new AudioPlayer_1.AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+        // return new Promise<void>((accept, _reject) => {
+        //   const startButton = document.querySelector("#button-start");
+        //   startButton.addEventListener("click", () => {
+        //     const overlay = document.querySelector("#overlay");
+        //     overlay.classList.add("d-none");
+        //     audioPlayer.play();
+        //     accept();
+        //   });
+        // });
         return new Promise(function (accept, _reject) {
-            var startButton = document.querySelector("#button-start");
-            startButton.addEventListener("click", function () {
-                var overlay = document.querySelector("#overlay");
-                overlay.classList.add("d-none");
-                audioPlayer.play();
-                accept();
-            });
+            // Well, this new implementation accepts immediately.
+            accept();
         });
     };
     SceneContainer.prototype.onWindowResize = function () {

@@ -8,6 +8,7 @@
  * @version 1.0.0
  */
 import { IGlobalLibs } from "../../components/interfaces";
+import { SceneContainer } from "../../components/SceneContainer";
 export declare class FrontendUI {
-    constructor(globalLibs: IGlobalLibs);
+    constructor(sceneContainer: SceneContainer, globalLibs: IGlobalLibs);
 }

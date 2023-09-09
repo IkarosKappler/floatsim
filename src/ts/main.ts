@@ -24,14 +24,14 @@ globalThis.addEventListener("load", () => {
     preact: preactLib
   };
 
-  const frontendUI = new FrontendUI(globalLibs);
-  console.log("frontendUI", frontendUI);
-
   const GUP: Record<string, string> = gup();
   const params: Params = new Params(GUP);
 
   console.log("SceneContainer", SceneContainer);
   const sceneContainer = new SceneContainer(params);
+
+  const frontendUI = new FrontendUI(sceneContainer, globalLibs);
+  console.log("frontendUI", frontendUI);
 
   console.log(TweakPane);
   const pane = new window["Tweakpane"].Pane({ title: "Params" }) as TweakPane.Pane;
@@ -79,12 +79,23 @@ globalThis.addEventListener("load", () => {
   pane.expanded = false;
 
   const keyHandler = new KeyHandler({ element: document.body, trackAll: false });
-  keyHandler.down("h", (e: KeyboardEvent) => {
-    const curNavPoint = sceneContainer.gameLogicManager.navpointRouter.getCurrentNavpoint();
-    if (curNavPoint) {
-      sceneContainer.messageBox.showMessage(`Your next nav point is ${curNavPoint.label}.`);
-    } else {
-      sceneContainer.messageBox.showMessage(`There is no next nav point.`);
-    }
+  keyHandler
+    .down("h", (e: KeyboardEvent) => {
+      const curNavPoint = sceneContainer.gameLogicManager.navpointRouter.getCurrentNavpoint();
+      if (curNavPoint) {
+        sceneContainer.messageBox.showMessage(`Your next nav point is ${curNavPoint.label}.`);
+      } else {
+        sceneContainer.messageBox.showMessage(`There is no next nav point.`);
+      }
+    })
+    .down("p", (e: KeyboardEvent) => {
+      console.log("[main] Pausing/unpausing game");
+      sceneContainer.togglePause();
+    });
+
+  sceneContainer.gameListeners.gameRunningListeners.add((isGameRunning: boolean, isGamePaused: boolean) => {
+    console.log("[main] Game paused?", isGamePaused);
   });
+
+  sceneContainer.initializGame();
 });

@@ -4,6 +4,7 @@
 
 import type preact from "preact";
 import { PerlinTerrain } from "../environment/PerlinTerrain";
+import { SceneContainer } from "../SceneContainer";
 
 export interface DirectionalRotation {
   upAngle: number;
@@ -163,6 +164,10 @@ export interface NavigationEventListener {
   onNavpointEntered: (navpoint: Navpoint) => void;
   onNavpointExited: (navpoint: Navpoint) => void;
 }
+
+export type GameRunningListener = (isRunning: boolean, isPaused: boolean) => void;
+
+export type GameReadyListener = () => void;
 
 export interface IGlobalLibs {
   preact: typeof preact;

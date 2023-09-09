@@ -42,12 +42,12 @@ globalThis.addEventListener("load", function () {
     var globalLibs = {
         preact: preactLib
     };
-    var frontendUI = new FrontendUI_1.FrontendUI(globalLibs);
-    console.log("frontendUI", frontendUI);
     var GUP = (0, gup_1.gup)();
     var params = new Params_1.Params(GUP);
     console.log("SceneContainer", SceneContainer_1.SceneContainer);
     var sceneContainer = new SceneContainer_1.SceneContainer(params);
+    var frontendUI = new FrontendUI_1.FrontendUI(sceneContainer, globalLibs);
+    console.log("frontendUI", frontendUI);
     console.log(TweakPane);
     var pane = new window["Tweakpane"].Pane({ title: "Params" });
     pane.addInput(sceneContainer.tweakParams, "compassZ", {
@@ -93,7 +93,8 @@ globalThis.addEventListener("load", function () {
     });
     pane.expanded = false;
     var keyHandler = new KeyHandler_1.KeyHandler({ element: document.body, trackAll: false });
-    keyHandler.down("h", function (e) {
+    keyHandler
+        .down("h", function (e) {
         var curNavPoint = sceneContainer.gameLogicManager.navpointRouter.getCurrentNavpoint();
         if (curNavPoint) {
             sceneContainer.messageBox.showMessage("Your next nav point is ".concat(curNavPoint.label, "."));
@@ -101,6 +102,14 @@ globalThis.addEventListener("load", function () {
         else {
             sceneContainer.messageBox.showMessage("There is no next nav point.");
         }
+    })
+        .down("p", function (e) {
+        console.log("[main] Pausing/unpausing game");
+        sceneContainer.togglePause();
     });
+    sceneContainer.gameListeners.gameRunningListeners.add(function (isGameRunning, isGamePaused) {
+        console.log("[main] Game paused?", isGamePaused);
+    });
+    sceneContainer.initializGame();
 });
 //# sourceMappingURL=main.js.map

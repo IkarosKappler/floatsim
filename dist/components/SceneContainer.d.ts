@@ -15,6 +15,7 @@ import { Params } from "../utils/Params";
 import { CockpitScene } from "./cockpit/CockpitScene";
 import { GameLogicManager } from "../gamelogic/GameLogicManager";
 import { MessageBox } from "../dom/MessageBox";
+import { GameListeners } from "../utils/GameListeners";
 export declare class SceneContainer implements ISceneContainer {
     readonly scene: THREE.Scene;
     readonly renderer: THREE.WebGLRenderer;
@@ -33,9 +34,15 @@ export declare class SceneContainer implements ISceneContainer {
     readonly navpoints: Array<Navpoint>;
     readonly gameLogicManager: GameLogicManager;
     readonly messageBox: MessageBox;
+    readonly gameListeners: GameListeners;
     private isGameRunning;
+    private isGamePaused;
+    private initializationPromise;
     cube: THREE.Mesh;
     constructor(params: Params);
+    initializGame(): void;
+    startGame(): void;
+    togglePause(): void;
     makeTerrain(): PerlinTerrain;
     loadConcrete(terrain: PerlinTerrain): void;
     loadConcreteRing(terrain: PerlinTerrain): void;
