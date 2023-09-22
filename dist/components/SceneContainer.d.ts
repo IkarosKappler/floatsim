@@ -34,6 +34,7 @@ export declare class SceneContainer implements ISceneContainer {
     readonly navpoints: Array<Navpoint>;
     readonly gameLogicManager: GameLogicManager;
     readonly messageBox: MessageBox;
+    private audioPlayer;
     readonly gameListeners: GameListeners;
     private isGameRunning;
     private isGamePaused;

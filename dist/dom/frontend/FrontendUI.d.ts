@@ -9,6 +9,10 @@
  */
 import { IGlobalLibs } from "../../components/interfaces";
 import { SceneContainer } from "../../components/SceneContainer";
+export interface IFrontendUIBaseProps {
+    sceneContainer: SceneContainer;
+    globalLibs: IGlobalLibs;
+}
 export declare class FrontendUI {
     constructor(sceneContainer: SceneContainer, globalLibs: IGlobalLibs);
 }

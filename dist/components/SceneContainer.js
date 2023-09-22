@@ -275,8 +275,6 @@ var SceneContainer = /** @class */ (function () {
     SceneContainer.prototype.initializGame = function () {
         var _this = this;
         this.initializationPromise.then(function () {
-            // this.isGameRunning = true;
-            // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
             _this.gameListeners.fireGameReadyChanged();
         });
     };
@@ -285,8 +283,25 @@ var SceneContainer = /** @class */ (function () {
             console.debug("[SceneContainer] Cannot start game a second time. Game is already running.");
             return;
         }
+        var _self = this;
+        var gameInitiallyStarting = !this.isGamePaused;
         this.isGameRunning = true;
+        this.audioPlayer.play();
         this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+        if (gameInitiallyStarting) {
+            _self.tweakParams.cutsceneShutterValue = 0.0;
+            var shutterValue = 0; // 0..100
+            var timer_1 = globalThis.setInterval(function () {
+                shutterValue += 2;
+                // TODO: clamp
+                _self.tweakParams.cutsceneShutterValue = Math.min(1.0, shutterValue / 100.0);
+                // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
+                if (shutterValue >= 100) {
+                    _self.tweakParams.cutsceneShutterValue = 1.0;
+                    globalThis.clearInterval(timer_1);
+                }
+            }, 50);
+        }
     };
     SceneContainer.prototype.togglePause = function () {
         this.isGameRunning = !this.isGameRunning;
@@ -533,7 +548,7 @@ var SceneContainer = /** @class */ (function () {
         this.scene.add(box);
     };
     SceneContainer.prototype.initializeAudio = function () {
-        var audioPlayer = new AudioPlayer_1.AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+        this.audioPlayer = new AudioPlayer_1.AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
         // return new Promise<void>((accept, _reject) => {
         //   const startButton = document.querySelector("#button-start");
         //   startButton.addEventListener("click", () => {

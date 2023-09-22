@@ -59,6 +59,7 @@ export class SceneContainer implements ISceneContainer {
   readonly navpoints: Array<Navpoint>;
   readonly gameLogicManager: GameLogicManager;
   readonly messageBox: MessageBox;
+  private audioPlayer: AudioPlayer;
 
   readonly gameListeners: GameListeners;
 
@@ -350,8 +351,6 @@ export class SceneContainer implements ISceneContainer {
 
   initializGame() {
     this.initializationPromise.then(() => {
-      // this.isGameRunning = true;
-      // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
       this.gameListeners.fireGameReadyChanged();
     });
   }
@@ -361,8 +360,26 @@ export class SceneContainer implements ISceneContainer {
       console.debug("[SceneContainer] Cannot start game a second time. Game is already running.");
       return;
     }
+    const _self = this;
+    const gameInitiallyStarting = !this.isGamePaused;
     this.isGameRunning = true;
+    this.audioPlayer.play();
     this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
+
+    if (gameInitiallyStarting) {
+      _self.tweakParams.cutsceneShutterValue = 0.0;
+      var shutterValue = 0; // 0..100
+      const timer = globalThis.setInterval(() => {
+        shutterValue += 2;
+        // TODO: clamp
+        _self.tweakParams.cutsceneShutterValue = Math.min(1.0, shutterValue / 100.0);
+        // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
+        if (shutterValue >= 100) {
+          _self.tweakParams.cutsceneShutterValue = 1.0;
+          globalThis.clearInterval(timer);
+        }
+      }, 50);
+    }
   }
 
   togglePause() {
@@ -661,7 +678,7 @@ export class SceneContainer implements ISceneContainer {
   }
 
   initializeAudio(): Promise<void> {
-    const audioPlayer = new AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
+    this.audioPlayer = new AudioPlayer("resources/audio/underwater-ambiencewav-14428.mp3", "audio/mp3");
     // return new Promise<void>((accept, _reject) => {
     //   const startButton = document.querySelector("#button-start");
     //   startButton.addEventListener("click", () => {
@@ -671,6 +688,7 @@ export class SceneContainer implements ISceneContainer {
     //     accept();
     //   });
     // });
+
     return new Promise<void>((accept, _reject) => {
       // Well, this new implementation accepts immediately.
       accept();

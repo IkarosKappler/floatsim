@@ -1,3 +1,8 @@
+- 2023-09-22
+  - Adding hooks to build a typewriter effect.
+  - Adding intro overlay with typewriter effect.
+  - Adding intro with map preview.
+  - Adding initial shutter effect.
 - 2023-09-09
   - Adding preact to render proper JSX. This is intended to render some frontend ui stuff.
   - Getting preact running in as isloated container.
