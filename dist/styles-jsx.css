@@ -22,3 +22,9 @@
     /* height: 50%; */
     white-space: pre-line;
 }
+
+.jsx-textcuscene-ui button {
+    background: rgb(163, 252, 163);
+    color: black;
+    border: 1px solid rgb(163, 252, 163);
+}

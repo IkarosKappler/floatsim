@@ -14,5 +14,5 @@ export interface IFrontendUIBaseProps {
     globalLibs: IGlobalLibs;
 }
 export declare class FrontendUI {
-    constructor(sceneContainer: SceneContainer, globalLibs: IGlobalLibs);
+    constructor(sceneContainer: SceneContainer, globalLibs: IGlobalLibs, GUP: Record<string, string>);
 }

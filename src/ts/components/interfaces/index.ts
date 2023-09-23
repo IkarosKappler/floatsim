@@ -3,6 +3,7 @@
  */
 
 import type preact from "preact";
+import type axios from "axios";
 import { PerlinTerrain } from "../environment/PerlinTerrain";
 import { SceneContainer } from "../SceneContainer";
 
@@ -170,5 +171,6 @@ export type GameRunningListener = (isRunning: boolean, isPaused: boolean) => voi
 export type GameReadyListener = () => void;
 
 export interface IGlobalLibs {
+  axios: typeof axios;
   preact: typeof preact;
 }

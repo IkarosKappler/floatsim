@@ -2,6 +2,7 @@
  * Global interfaces.
  */
 import type preact from "preact";
+import type axios from "axios";
 import { PerlinTerrain } from "../environment/PerlinTerrain";
 export interface DirectionalRotation {
     upAngle: number;
@@ -143,5 +144,6 @@ export interface NavigationEventListener {
 export type GameRunningListener = (isRunning: boolean, isPaused: boolean) => void;
 export type GameReadyListener = () => void;
 export interface IGlobalLibs {
+    axios: typeof axios;
     preact: typeof preact;
 }

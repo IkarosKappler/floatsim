@@ -38,15 +38,18 @@ console.log("Main script starting ...");
 globalThis.addEventListener("load", function () {
     console.log("[main] Initializing");
     var preactLib = globalThis["preact"];
+    var axiosLib = globalThis["axios"];
     console.log("[main] preact", preactLib);
     var globalLibs = {
-        preact: preactLib
+        preact: preactLib,
+        axios: axiosLib
     };
+    console.log("[main] globalLibs", globalLibs);
     var GUP = (0, gup_1.gup)();
     var params = new Params_1.Params(GUP);
     console.log("SceneContainer", SceneContainer_1.SceneContainer);
     var sceneContainer = new SceneContainer_1.SceneContainer(params);
-    var frontendUI = new FrontendUI_1.FrontendUI(sceneContainer, globalLibs);
+    var frontendUI = new FrontendUI_1.FrontendUI(sceneContainer, globalLibs, GUP);
     console.log("frontendUI", frontendUI);
     console.log(TweakPane);
     var pane = new window["Tweakpane"].Pane({ title: "Params" });

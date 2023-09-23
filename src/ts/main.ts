@@ -5,6 +5,7 @@
  */
 
 import type preact from "preact";
+import type axios from "axios";
 import { SceneContainer } from "./components/SceneContainer";
 import { FrontendUI } from "./dom/frontend/FrontendUI";
 import { KeyHandler } from "./io/KeyHandler";
@@ -19,10 +20,14 @@ globalThis.addEventListener("load", () => {
   console.log("[main] Initializing");
 
   const preactLib = globalThis["preact"] as typeof preact;
+  const axiosLib = globalThis["axios"] as typeof axios;
+
   console.log("[main] preact", preactLib);
   const globalLibs: IGlobalLibs = {
-    preact: preactLib
+    preact: preactLib,
+    axios: axiosLib
   };
+  console.log("[main] globalLibs", globalLibs);
 
   const GUP: Record<string, string> = gup();
   const params: Params = new Params(GUP);
@@ -30,7 +35,7 @@ globalThis.addEventListener("load", () => {
   console.log("SceneContainer", SceneContainer);
   const sceneContainer = new SceneContainer(params);
 
-  const frontendUI = new FrontendUI(sceneContainer, globalLibs);
+  const frontendUI = new FrontendUI(sceneContainer, globalLibs, GUP);
   console.log("frontendUI", frontendUI);
 
   console.log(TweakPane);

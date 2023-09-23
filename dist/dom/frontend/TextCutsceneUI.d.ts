@@ -7,7 +7,6 @@
  */
 import { JSXInternal } from "preact/src/jsx";
 import { IFrontendUIBaseProps } from "./FrontendUI";
-/** @jsx h */
 interface TextCutsceneUIProps extends IFrontendUIBaseProps {
     text: string;
     onTerminated: () => void;
