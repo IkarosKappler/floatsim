@@ -1,4 +1,7 @@
 "use strict";
+/**
+ * @date 2023-09-23
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useInterval = void 0;
 var hooks_1 = require("preact/hooks");

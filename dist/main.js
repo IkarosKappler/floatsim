@@ -34,6 +34,7 @@ var KeyHandler_1 = require("./io/KeyHandler");
 var gup_1 = require("./utils/gup");
 var Params_1 = require("./utils/Params");
 var TweakPane = __importStar(require("tweakpane"));
+var MediaStorage_1 = require("./io/MediaStorage");
 console.log("Main script starting ...");
 globalThis.addEventListener("load", function () {
     console.log("[main] Initializing");
@@ -44,12 +45,14 @@ globalThis.addEventListener("load", function () {
         preact: preactLib,
         axios: axiosLib
     };
+    // The globalLibs will be used by the MediaStorage singleton
+    MediaStorage_1.MediaStorage.globalLibs = globalLibs;
     console.log("[main] globalLibs", globalLibs);
     var GUP = (0, gup_1.gup)();
     var params = new Params_1.Params(GUP);
     console.log("SceneContainer", SceneContainer_1.SceneContainer);
     var sceneContainer = new SceneContainer_1.SceneContainer(params);
-    var frontendUI = new FrontendUI_1.FrontendUI(sceneContainer, globalLibs, GUP);
+    var frontendUI = new FrontendUI_1.FrontendUI(sceneContainer, globalLibs, params);
     console.log("frontendUI", frontendUI);
     console.log(TweakPane);
     var pane = new window["Tweakpane"].Pane({ title: "Params" });

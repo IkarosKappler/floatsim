@@ -25,7 +25,7 @@ var jsx_runtime_1 = require("preact/jsx-runtime");
 var hooks_1 = require("preact/hooks");
 var ChapterIntro_1 = require("./ChapterIntro");
 var App = function (props) {
-    var skipChapterIntro = Boolean(props.GUP["skipChapterIntro"]);
+    var skipChapterIntro = props.params.getBoolean("skipChapterIntro", false);
     var _a = (0, hooks_1.useState)(false), isGameReady = _a[0], setGameReady = _a[1];
     var _b = (0, hooks_1.useState)(false), isGameStartedState = _b[0], setGameStartedState = _b[1];
     var _c = (0, hooks_1.useState)(false), isGameRunningState = _c[0], setGameRunningState = _c[1];
@@ -69,7 +69,7 @@ var App = function (props) {
     }
 };
 var FrontendUI = /** @class */ (function () {
-    function FrontendUI(sceneContainer, globalLibs, GUP) {
+    function FrontendUI(sceneContainer, globalLibs, params) {
         var overlay = document.querySelector("#overlay");
         var showOverlay = function () {
             overlay.classList.remove("d-none");
@@ -79,7 +79,7 @@ var FrontendUI = /** @class */ (function () {
         };
         // globalLibs.preact.render(<App globalLibs={globalLibs} />, document.getElementById("overlay"));
         console.log("[FrontendUI] Rendering frontend App ...", globalLibs.preact.render);
-        globalLibs.preact.render((0, jsx_runtime_1.jsx)(App, { GUP: GUP, sceneContainer: sceneContainer, globalLibs: globalLibs, hideOverlay: hideOverlay, showOverlay: showOverlay }), document.getElementById("overlay"));
+        globalLibs.preact.render((0, jsx_runtime_1.jsx)(App, { params: params, sceneContainer: sceneContainer, globalLibs: globalLibs, hideOverlay: hideOverlay, showOverlay: showOverlay }), document.getElementById("overlay"));
     }
     return FrontendUI;
 }());

@@ -6,11 +6,11 @@
  * @version 1.0.0
  */
 
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 import { JSXInternal } from "preact/src/jsx";
 import { IFrontendUIBaseProps } from "./FrontendUI";
-import { useInterval } from "../customHooks";
 import { TextCutsceneUI } from "./TextCutsceneUI";
+import { MediaStorage } from "../../io/MediaStorage";
 
 interface ChapterIntroProps extends IFrontendUIBaseProps {
   resourcePath: string;
@@ -18,42 +18,49 @@ interface ChapterIntroProps extends IFrontendUIBaseProps {
   isGameReady: boolean;
 }
 
-// export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
-//   return <span>A</span>;
-// };
-
 export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
   const [isShowMap, setShowMap] = useState<boolean>(false);
   const [introText, setIntroText] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [introRequested, setIntroRequested] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<any | null>(null);
   const [isShowNextButton, setShowNextButton] = useState<boolean>(false);
 
-  props.globalLibs.axios
-    .get(props.resourcePath + "intro-text.txt")
-    .then(response => {
-      // handle success
-      console.log(response);
-      // Validate response data?
-      // accept(response.data);
-      setIntroText(response.data);
-    })
-    .catch(error => {
-      // handle error
-      console.log(error);
-      // reject();
-      setError(error);
-    })
-    .finally(() => {
-      // always executed
-      globalThis.setTimeout(() => {
-        setIsLoading(false);
-      }, 2000);
-    });
+  const requestTextResource = () => {
+    setIntroRequested(true);
+    setIsLoading(true);
+    MediaStorage.getText(props.resourcePath + "intro-text.txt")
+      .then(responseText => {
+        // console.log(response);
+        setIntroText(responseText);
+      })
+      .catch(error => {
+        // console.log(error);
+        setError(error);
+      })
+      .finally(() => {
+        // always executed
+        globalThis.setTimeout(() => {
+          setIsLoading(false);
+        }, 2000);
+      });
+  };
 
-  //   return <span>Y</span>;
-
-  if (isLoading) {
+  if (!introRequested) {
+    return (
+      <div className="jsx-textcuscene-ui">
+        <img className="jsx-game-logo spinning" src="resources/img/logo-256x256.png" />
+        <button
+          onClick={() => {
+            requestTextResource();
+          }}
+        >
+          Request location
+        </button>
+        <span>Please click to request location</span>
+      </div>
+    );
+  } else if (isLoading) {
     return (
       <div className="jsx-textcuscene-ui">
         <span>Loading ...</span>
@@ -69,16 +76,13 @@ export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
     if (isShowMap) {
       return (
         <div className="jsx-textcuscene-ui">
-          <img src="resources/chapters/00-north-sea/map-base.png" />
-          <button
-            id="button-start"
-            disabled={!props.isGameReady}
-            onClick={() => {
-              // TODO: pass function directly
-              //   props.sceneContainer.startGame();
-              props.onTerminated();
-            }}
-          >
+          {/* <img src="resources/chapters/00-north-sea/map-base.png" /> */}
+          <div
+            className="jsx-chapterintro-map"
+            style={{ backgroundImage: "url('resources/chapters/00-north-sea/map-base.png')" }}
+          />
+
+          <button id="button-start" disabled={!props.isGameReady} onClick={props.onTerminated}>
             Start
           </button>
         </div>
@@ -90,9 +94,7 @@ export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
             globalLibs={props.globalLibs}
             onTerminated={() => {
               console.log("Intro terminated");
-              // setShowNextButton(true);
               setShowNextButton(true);
-              //   setShowMap(true);
             }}
             sceneContainer={props.sceneContainer}
             text={introText}
@@ -100,11 +102,7 @@ export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
           {isShowNextButton ? (
             <button
               onClick={() => {
-                // globalThis.setTimeout(() => {
-                //   setShowMap(true);
-                // }, 2000);
                 setShowMap(true);
-                // props.onTerminated();
               }}
             >
               Next

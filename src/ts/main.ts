@@ -14,6 +14,7 @@ import { Params } from "./utils/Params";
 
 import * as TweakPane from "tweakpane";
 import { IGlobalLibs } from "./components/interfaces";
+import { MediaStorage } from "./io/MediaStorage";
 
 console.log("Main script starting ...");
 globalThis.addEventListener("load", () => {
@@ -27,6 +28,8 @@ globalThis.addEventListener("load", () => {
     preact: preactLib,
     axios: axiosLib
   };
+  // The globalLibs will be used by the MediaStorage singleton
+  MediaStorage.globalLibs = globalLibs;
   console.log("[main] globalLibs", globalLibs);
 
   const GUP: Record<string, string> = gup();
@@ -35,7 +38,7 @@ globalThis.addEventListener("load", () => {
   console.log("SceneContainer", SceneContainer);
   const sceneContainer = new SceneContainer(params);
 
-  const frontendUI = new FrontendUI(sceneContainer, globalLibs, GUP);
+  const frontendUI = new FrontendUI(sceneContainer, globalLibs, params);
   console.log("frontendUI", frontendUI);
 
   console.log(TweakPane);

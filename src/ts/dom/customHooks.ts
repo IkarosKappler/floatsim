@@ -1,3 +1,7 @@
+/**
+ * @date 2023-09-23
+ */
+
 import { useEffect, useRef, useState } from "preact/hooks";
 
 export const useInterval = (callback: () => void, delay: number) => {

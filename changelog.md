@@ -1,3 +1,7 @@
+- 2023-09-24
+  - Adding proper modulalization for the typewriter effect.
+  - Adding a MediaStorage to avoid multiple media request.
+  - Added a quick logo.
 - 2023-09-22
   - Adding hooks to build a typewriter effect.
   - Adding intro overlay with typewriter effect.
