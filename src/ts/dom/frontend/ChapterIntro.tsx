@@ -57,7 +57,7 @@ export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
         >
           Request location
         </button>
-        <span>Please click to request location</span>
+        <span>Please click</span>
       </div>
     );
   } else if (isLoading) {
@@ -76,12 +76,16 @@ export const ChapterIntro = (props: ChapterIntroProps): JSXInternal.Element => {
     if (isShowMap) {
       return (
         <div className="jsx-textcuscene-ui">
-          {/* <img src="resources/chapters/00-north-sea/map-base.png" /> */}
-          <div
-            className="jsx-chapterintro-map"
-            style={{ backgroundImage: "url('resources/chapters/00-north-sea/map-base.png')" }}
-          />
-
+          <div className="jsx-textcutscene-mapwrapper">
+            <div
+              className="jsx-chapterintro-map-base"
+              style={{ backgroundImage: "url('resources/chapters/00-north-sea/map-base.png')" }}
+            />
+            <div
+              className="jsx-chapterintro-map-objectives blinking"
+              style={{ backgroundImage: "url('resources/chapters/00-north-sea/map-objectives.png')" }}
+            />
+          </div>
           <button id="button-start" disabled={!props.isGameReady} onClick={props.onTerminated}>
             Start
           </button>

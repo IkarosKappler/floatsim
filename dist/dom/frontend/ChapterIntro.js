@@ -52,7 +52,7 @@ var ChapterIntro = function (props) {
     if (!introRequested) {
         return ((0, jsx_runtime_1.jsxs)("div", __assign({ className: "jsx-textcuscene-ui" }, { children: [(0, jsx_runtime_1.jsx)("img", { className: "jsx-game-logo spinning", src: "resources/img/logo-256x256.png" }), (0, jsx_runtime_1.jsx)("button", __assign({ onClick: function () {
                         requestTextResource();
-                    } }, { children: "Request location" })), (0, jsx_runtime_1.jsx)("span", { children: "Please click to request location" })] })));
+                    } }, { children: "Request location" })), (0, jsx_runtime_1.jsx)("span", { children: "Please click" })] })));
     }
     else if (isLoading) {
         return ((0, jsx_runtime_1.jsx)("div", __assign({ className: "jsx-textcuscene-ui" }, { children: (0, jsx_runtime_1.jsx)("span", { children: "Loading ..." }) })));
@@ -62,7 +62,7 @@ var ChapterIntro = function (props) {
     }
     else if (introText) {
         if (isShowMap) {
-            return ((0, jsx_runtime_1.jsxs)("div", __assign({ className: "jsx-textcuscene-ui" }, { children: [(0, jsx_runtime_1.jsx)("div", { className: "jsx-chapterintro-map", style: { backgroundImage: "url('resources/chapters/00-north-sea/map-base.png')" } }), (0, jsx_runtime_1.jsx)("button", __assign({ id: "button-start", disabled: !props.isGameReady, onClick: props.onTerminated }, { children: "Start" }))] })));
+            return ((0, jsx_runtime_1.jsxs)("div", __assign({ className: "jsx-textcuscene-ui" }, { children: [(0, jsx_runtime_1.jsxs)("div", __assign({ className: "jsx-textcutscene-mapwrapper" }, { children: [(0, jsx_runtime_1.jsx)("div", { className: "jsx-chapterintro-map-base", style: { backgroundImage: "url('resources/chapters/00-north-sea/map-base.png')" } }), (0, jsx_runtime_1.jsx)("div", { className: "jsx-chapterintro-map-objectives blinking", style: { backgroundImage: "url('resources/chapters/00-north-sea/map-objectives.png')" } })] })), (0, jsx_runtime_1.jsx)("button", __assign({ id: "button-start", disabled: !props.isGameReady, onClick: props.onTerminated }, { children: "Start" }))] })));
         }
         else {
             return ((0, jsx_runtime_1.jsxs)("div", __assign({ className: "jsx-textcuscene-ui" }, { children: [(0, jsx_runtime_1.jsx)(TextCutsceneUI_1.TextCutsceneUI, { globalLibs: props.globalLibs, onTerminated: function () {
