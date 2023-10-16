@@ -80,9 +80,18 @@ globalThis.addEventListener("load", () => {
       max: 90.0
     })
     .on("change", (ev: TweakPane.TpChangeEvent<number>) => {
-      console.log(" cameraFovchanged: " + JSON.stringify(ev.value));
+      console.log(" cameraFov changed: " + JSON.stringify(ev.value));
       sceneContainer.camera.fov = ev.value;
       sceneContainer.camera.updateProjectionMatrix();
+    });
+  pane
+    .addInput(sceneContainer.tweakParams, "fogDensity", {
+      min: 0.0,
+      max: 0.015
+    })
+    .on("change", (ev: TweakPane.TpChangeEvent<number>) => {
+      console.log(" fogDensity changed: " + JSON.stringify(ev.value));
+      (sceneContainer.scene.fog as THREE.FogExp2).density = ev.value;
     });
   pane.expanded = false;
 

@@ -83,4 +83,5 @@ export declare class Bounds2Immutable implements IBounds2Immutable {
     scale(factor: number): Bounds2Immutable;
     move(amount: Tuple<number>): Bounds2Immutable;
     static fromMinMax(min: Tuple<number>, max: Tuple<number>): Bounds2Immutable;
+    static numToChar(num: number): void;
 }

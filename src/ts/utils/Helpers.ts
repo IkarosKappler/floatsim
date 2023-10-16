@@ -216,4 +216,9 @@ export class Bounds2Immutable implements IBounds2Immutable {
   static fromMinMax(min: Tuple<number>, max: Tuple<number>) {
     return new Bounds2Immutable(min.x, min.y, max.x - min.x, max.y - min.y);
   }
+
+  static numToChar(num: number) {
+    // TODO this only works for number from 0 ... 25
+    console.log(String.fromCharCode(96 + num + 1));
+  }
 }

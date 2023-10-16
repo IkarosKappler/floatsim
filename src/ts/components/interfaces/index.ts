@@ -57,6 +57,7 @@ export interface TweakParams {
   maxShipUpAngle: number;
   minShipUpAngle: number;
   cameraFov: number;
+  fogDensity: number;
 }
 
 export interface IDimension2 {
@@ -140,6 +141,7 @@ export interface Navpoint {
   isDisabled: boolean;
   type: NavPointType;
   userData: { isCurrentlyInRange: boolean };
+  object3D: THREE.Object3D; // Required to properly render the 2D position
 }
 
 export interface ISceneContainer {

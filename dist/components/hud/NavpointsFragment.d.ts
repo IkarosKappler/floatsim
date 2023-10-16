@@ -5,6 +5,7 @@ export declare class NavpointsFragment implements RenderableComponent {
     private hudComponent;
     private currentFragmentBounds;
     constructor(hudComponent: HudComponent);
+    private toScreenPosition;
     private drawNavpoint;
     private drawMarkerAt;
     private drawLabelAt;

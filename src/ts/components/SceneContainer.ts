@@ -106,7 +106,8 @@ export class SceneContainer implements ISceneContainer {
       fontSize: 14,
       maxShipUpAngle: Math.PI * 0.25, // 45 degree
       minShipUpAngle: -Math.PI * 0.25, // -45 degree
-      cameraFov: 30
+      cameraFov: 30,
+      fogDensity: 0.0021
     };
 
     // Initialize a new THREE renderer (you are also allowed
@@ -466,9 +467,11 @@ export class SceneContainer implements ISceneContainer {
         detectionDistance: 0.0,
         isDisabled: false,
         type: "default",
-        userData: { isCurrentlyInRange: false }
+        userData: { isCurrentlyInRange: false },
+        object3D: loadedObject
       });
     };
+    // TODO: use MediaStorage here
     new ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
@@ -488,9 +491,11 @@ export class SceneContainer implements ISceneContainer {
         detectionDistance: 0.0,
         isDisabled: false,
         type: "default",
-        userData: { isCurrentlyInRange: false }
+        userData: { isCurrentlyInRange: false },
+        object3D: loadedObject
       });
     };
+    // TODO: use MediaStorage here
     new ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
@@ -511,9 +516,11 @@ export class SceneContainer implements ISceneContainer {
         detectionDistance: 0.0,
         isDisabled: false,
         type: "default",
-        userData: { isCurrentlyInRange: false }
+        userData: { isCurrentlyInRange: false },
+        object3D: loadedObject
       });
     };
+    // TODO: use MediaStorage here
     new FbxFileHandler(this).loadFbxFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
@@ -556,29 +563,50 @@ export class SceneContainer implements ISceneContainer {
     const targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
     targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
 
-    this.addNavpoint(
-      {
-        position: targetPositionA,
-        label: "Nav A",
-        detectionDistance: 25.0,
-        isDisabled: true,
-        type: "nav",
-        userData: { isCurrentlyInRange: false }
-      },
-      true
-    );
-    this.addNavpoint(
-      {
-        position: targetPositionB,
-        label: "Nav B",
-        detectionDistance: 25.0,
-        isDisabled: true,
-        type: "nav",
-        userData: { isCurrentlyInRange: false }
-      },
-      true
-    );
-    this.addBuoysAt([targetPositionA, targetPositionB]);
+    this.addBuoysAt([targetPositionA, targetPositionB])
+      .then((buoys: Array<THREE.Object3D>) => {
+        // console.log( String.fromCharCode(96 + index + 1) );
+        for (var i = 0; i < buoys.length; i++) {
+          this.addNavpoint(
+            {
+              position: targetPositionA,
+              label: "Nav A",
+              detectionDistance: 25.0,
+              isDisabled: true,
+              type: "nav",
+              userData: { isCurrentlyInRange: false },
+              object3D: buoys[i]
+            },
+            true
+          );
+        }
+      })
+      .catch((error: any) => {
+        console.error("[SceneContainer] Failed to add buoys.", error);
+      });
+
+    // this.addNavpoint(
+    //   {
+    //     position: targetPositionA,
+    //     label: "Nav A",
+    //     detectionDistance: 25.0,
+    //     isDisabled: true,
+    //     type: "nav",
+    //     userData: { isCurrentlyInRange: false }
+    //   },
+    //   true
+    // );
+    // this.addNavpoint(
+    //   {
+    //     position: targetPositionB,
+    //     label: "Nav B",
+    //     detectionDistance: 25.0,
+    //     isDisabled: true,
+    //     type: "nav",
+    //     userData: { isCurrentlyInRange: false }
+    //   },
+    //   true
+    // );
   }
 
   private addNavpoint(navpoint: Navpoint, addToRoute?: boolean) {
@@ -591,10 +619,10 @@ export class SceneContainer implements ISceneContainer {
     }
   }
 
-  private addBuoysAt(targetPositions: THREE.Vector3[]) {
-    if (targetPositions.length === 0) {
-      return;
-    }
+  private addBuoysAt(targetPositions: THREE.Vector3[]): Promise<THREE.Object3D[]> {
+    // if (targetPositions.length === 0) {
+    //   return;
+    // }
     // Also load visual nav buoys
     const basePath = "resources/meshes/wavefront/buoy-blender/";
     const objFileName = "buoy-blender-v1.obj";
@@ -602,42 +630,50 @@ export class SceneContainer implements ISceneContainer {
     const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
       console.log("Buoy mesh loaded");
       // NOOP
+      // Wait until the 'materialsLoaded' callback is triggered; then the
+      // object is fully loaded.
     };
-    const buoyMaterialsLoaded = (loadedObject: THREE.Object3D) => {
-      console.log("Buoy material loaded");
-      // loadedObject.rotateX(-Math.PI / 2.0);
-      console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
-      loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
-        if ((child as THREE.Mesh).isMesh) {
-          // TODO: check type
-          const childMesh = child as THREE.Mesh;
-          console.log("addBuoyAt", child);
-          if (Array.isArray(childMesh.material)) {
-            childMesh.material.forEach(mat => {
-              mat.side = THREE.BackSide;
-              mat.needsUpdate = true;
-            });
-          } else {
-            childMesh.material.side = THREE.BackSide;
-            childMesh.material.needsUpdate = true;
+    return new Promise<THREE.Object3D[]>((accept, reject) => {
+      const buoyMaterialsLoaded = (loadedObject: THREE.Object3D | null) => {
+        console.log("Buoy material loaded");
+        // loadedObject.rotateX(-Math.PI / 2.0);
+        console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
+        loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
+          if ((child as THREE.Mesh).isMesh) {
+            // TODO: check type
+            const childMesh = child as THREE.Mesh;
+            console.log("addBuoyAt", child);
+            if (Array.isArray(childMesh.material)) {
+              childMesh.material.forEach(mat => {
+                mat.side = THREE.BackSide;
+                mat.needsUpdate = true;
+              });
+            } else {
+              childMesh.material.side = THREE.BackSide;
+              childMesh.material.needsUpdate = true;
+            }
           }
+          // Clone.
+        });
+        console.log("Creating buoy clones ...", targetPositions.length);
+        const buoys: Array<THREE.Object3D> = [];
+        for (var i = 1; i < targetPositions.length; i++) {
+          const buoyCopy = loadedObject.clone();
+          buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
+          this.scene.add(buoyCopy);
+          buoys.push(buoyCopy);
         }
-        // Clone.
-      });
-      console.log("Creating buoy clones ...", targetPositions.length);
-      for (var i = 1; i < targetPositions.length; i++) {
-        const buoyCopy = loadedObject.clone();
-        buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
-        this.scene.add(buoyCopy);
-      }
-    };
-    new ObjFileHandler(this).loadObjFile(
-      basePath,
-      objFileName,
-      { targetBounds, targetPosition: targetPositions[0] },
-      buoyObjectLoaded,
-      buoyMaterialsLoaded
-    );
+        accept(buoys);
+      };
+      new ObjFileHandler(this).loadObjFile(
+        basePath,
+        objFileName,
+        { targetBounds, targetPosition: targetPositions[0] },
+        buoyObjectLoaded,
+        buoyMaterialsLoaded,
+        reject
+      );
+    });
   }
 
   private addGeometer(terrain: PerlinTerrain) {

@@ -220,6 +220,10 @@ var Bounds2Immutable = /** @class */ (function () {
     Bounds2Immutable.fromMinMax = function (min, max) {
         return new Bounds2Immutable(min.x, min.y, max.x - min.x, max.y - min.y);
     };
+    Bounds2Immutable.numToChar = function (num) {
+        // TODO this only works for number from 0 ... 25
+        console.log(String.fromCharCode(96 + num + 1));
+    };
     return Bounds2Immutable;
 }());
 exports.Bounds2Immutable = Bounds2Immutable;

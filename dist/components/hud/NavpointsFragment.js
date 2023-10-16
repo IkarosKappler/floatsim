@@ -31,6 +31,48 @@ var NavpointsFragment = /** @class */ (function () {
         this.hudComponent = hudComponent;
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
+    NavpointsFragment.prototype.toScreenPosition = function (sceneContainer, obj, camera) {
+        var vector = new THREE.Vector3();
+        var widthHalf = 0.5 * sceneContainer.rendererSize.width;
+        var heightHalf = 0.5 * sceneContainer.rendererSize.height;
+        obj.updateMatrixWorld();
+        vector.setFromMatrixPosition(obj.matrixWorld);
+        // vector.applyMatrix4(obj.matrixWorld);
+        vector.project(camera);
+        vector.x = vector.x * widthHalf + widthHalf;
+        vector.y = -(vector.y * heightHalf) + heightHalf;
+        var seemsInsideView = vector.x >= 0 &&
+            vector.x < sceneContainer.rendererSize.width &&
+            vector.y >= 0 &&
+            vector.y < sceneContainer.rendererSize.height;
+        // var style =
+        //   "translate(-50%,-50%) translate(" +
+        //   (vector.x * widthHalf + widthHalf) +
+        //   "px," +
+        //   (-vector.y * heightHalf + heightHalf) +
+        //   "px)";
+        // Check if in view
+        camera.updateMatrix();
+        camera.updateMatrixWorld();
+        var frustum = new THREE.Frustum();
+        frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+        // Your 3d point to check
+        var pos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+        if (seemsInsideView && !frustum.containsPoint(pos)) {
+            // Do something with the position...
+            // vector.x = -1;
+            // vector.y = widthHalf;
+            // Reverse position and project to the border+1
+            vector.x = sceneContainer.rendererSize.width - vector.x;
+            vector.y = sceneContainer.rendererSize.height - vector.y;
+            // Now project to edge of the screen
+            // ... todo in plotboilerplate
+        }
+        return {
+            x: vector.x,
+            y: vector.y
+        };
+    };
     NavpointsFragment.prototype.drawNavpoint = function (sceneContainer, navpoint) {
         // Compute position on screen
         if (navpoint.isDisabled) {
@@ -43,17 +85,18 @@ var NavpointsFragment = /** @class */ (function () {
         // How to converting world coordinates to 2D mouse coordinates in ThreeJS
         // Found at
         //    https://discourse.threejs.org/t/how-to-converting-world-coordinates-to-2d-mouse-coordinates-in-threejs/2251
-        vector.project(sceneContainer.camera);
-        //  This only converts a vector to normalized device space. You still have to map the vector to 2D screen space. Something like:
-        // TODO: fetch real renderer size here!
-        vector.x = ((vector.x + 1) * sceneContainer.rendererSize.width) / 2;
-        vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
-        vector.z = 0;
+        // vector.project(sceneContainer.camera);
+        // //  This only converts a vector to normalized device space. You still have to map the vector to 2D screen space. Something like:
+        // // TODO: fetch real renderer size here!
+        // vector.x = ((vector.x + 1) * sceneContainer.rendererSize.width) / 2;
+        // vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
+        // vector.z = 0;
+        var vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, sceneContainer.camera);
         var colorMarker = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
-        if (this.currentFragmentBounds.contains(vector)) {
+        if (this.currentFragmentBounds.contains(vector2d)) {
             // Navpoint is in visible area
-            this.drawMarkerAt(vector, colorMarker, navpoint.type);
-            this.drawLabelAt(vector.x, vector.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
+            this.drawMarkerAt(vector2d, colorMarker, navpoint.type);
+            this.drawLabelAt(vector2d.x, vector2d.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
         else {
             // const directionPoint = { x : vector.x, y : vector.y };
@@ -62,13 +105,13 @@ var NavpointsFragment = /** @class */ (function () {
             //   directionPoint.x =
             // }
             var directionPoint = {
-                x: Math.min(Math.max(vector.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
-                y: Math.min(Math.max(vector.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
+                x: Math.min(Math.max(vector2d.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
+                y: Math.min(Math.max(vector2d.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
             };
             this.drawMarkerAt(directionPoint, "red", navpoint.type);
             this.drawLabelAt(directionPoint.x, directionPoint.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
         }
-        this.drawLabelAt(vector.x, vector.y + 12, " (".concat(difference < 0 ? "﹀" : "︿", " ").concat(difference.toFixed(1), "m)"));
+        this.drawLabelAt(vector2d.x, vector2d.y + 12, " (".concat(difference < 0 ? "﹀" : "︿", " ").concat(difference.toFixed(1), "m)"));
     };
     NavpointsFragment.prototype.drawMarkerAt = function (center, color, navPointType) {
         this.hudComponent.hudBitmap.strokeStyle = color;

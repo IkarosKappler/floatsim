@@ -34,7 +34,8 @@ export class ObjFileHandler {
     objFileName: string,
     options?: { targetBounds?: Size3Immutable; targetPosition?: TripleImmutable<number> },
     onObjectLoaded?: (loadedObject: THREE.Object3D) => void,
-    onMaterialsLoaded?: (loadedObject: THREE.Object3D) => void
+    onMaterialsLoaded?: (loadedObject: THREE.Object3D) => void,
+    onError?: (error: any) => void
   ) {
     // Try loading the object
     this.loadObj(basePath, objFileName).then((loadedObject: THREE.Group) => {
@@ -55,27 +56,34 @@ export class ObjFileHandler {
 
       const materialFileNames: Array<string> = (loadedObject as any).materialLibraries;
       if (materialFileNames) {
-        this.loadMaterials(basePath, materialFileNames).then((materials: Record<string, THREE.Material>[]) => {
-          // console.log("Materials", materials);
-          loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
-            if ((child as THREE.Mesh).isMesh) {
-              // TODO: check type
-              const childMesh = child as THREE.Mesh;
-              this.locateMaterial(childMesh, materials);
-              if (Array.isArray(childMesh.material)) {
-                childMesh.material.forEach(mat => {
-                  mat.needsUpdate = true;
-                });
-              } else {
-                childMesh.material.needsUpdate = true;
+        this.loadMaterials(basePath, materialFileNames)
+          .then((materials: Record<string, THREE.Material>[]) => {
+            // console.log("Materials", materials);
+            loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
+              if ((child as THREE.Mesh).isMesh) {
+                // TODO: check type
+                const childMesh = child as THREE.Mesh;
+                this.locateMaterial(childMesh, materials);
+                if (Array.isArray(childMesh.material)) {
+                  childMesh.material.forEach(mat => {
+                    mat.needsUpdate = true;
+                  });
+                } else {
+                  childMesh.material.needsUpdate = true;
+                }
               }
+            });
+            if (onMaterialsLoaded) {
+              onMaterialsLoaded(loadedObject);
             }
+          })
+          .catch((error: any) => {
+            onError && onError(error);
           });
-          if (onMaterialsLoaded) {
-            onMaterialsLoaded(loadedObject);
-          }
-        });
       } // END if
+      else {
+        onMaterialsLoaded && onMaterialsLoaded(loadedObject);
+      }
     });
   }
 
@@ -99,7 +107,7 @@ export class ObjFileHandler {
         },
         (error: ErrorEvent) => {
           console.log(error);
-          reject();
+          reject(error);
         }
       );
     });
@@ -142,7 +150,7 @@ export class ObjFileHandler {
         },
         error => {
           console.log("An error happened", error);
-          reject();
+          reject(error);
         }
       );
     });

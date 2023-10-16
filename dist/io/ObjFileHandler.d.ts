@@ -23,7 +23,7 @@ export declare class ObjFileHandler {
     loadObjFile(basePath: string, objFileName: string, options?: {
         targetBounds?: Size3Immutable;
         targetPosition?: TripleImmutable<number>;
-    }, onObjectLoaded?: (loadedObject: THREE.Object3D) => void, onMaterialsLoaded?: (loadedObject: THREE.Object3D) => void): void;
+    }, onObjectLoaded?: (loadedObject: THREE.Object3D) => void, onMaterialsLoaded?: (loadedObject: THREE.Object3D) => void, onError?: (error: any) => void): void;
     /**
      * This private helper function loads the OBJ file using THREE's OBJLoader.
      *

@@ -93,9 +93,18 @@ globalThis.addEventListener("load", function () {
         max: 90.0
     })
         .on("change", function (ev) {
-        console.log(" cameraFovchanged: " + JSON.stringify(ev.value));
+        console.log(" cameraFov changed: " + JSON.stringify(ev.value));
         sceneContainer.camera.fov = ev.value;
         sceneContainer.camera.updateProjectionMatrix();
+    });
+    pane
+        .addInput(sceneContainer.tweakParams, "fogDensity", {
+        min: 0.0,
+        max: 0.015
+    })
+        .on("change", function (ev) {
+        console.log(" fogDensity changed: " + JSON.stringify(ev.value));
+        sceneContainer.scene.fog.density = ev.value;
     });
     pane.expanded = false;
     var keyHandler = new KeyHandler_1.KeyHandler({ element: document.body, trackAll: false });

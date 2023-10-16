@@ -24,7 +24,7 @@ var ObjFileHandler = /** @class */ (function () {
      * @param {Size3Immutable} options.targetBounds
      * @param {TripleImmutable<number>} options.targetPosition
      */
-    ObjFileHandler.prototype.loadObjFile = function (basePath, objFileName, options, onObjectLoaded, onMaterialsLoaded) {
+    ObjFileHandler.prototype.loadObjFile = function (basePath, objFileName, options, onObjectLoaded, onMaterialsLoaded, onError) {
         var _this = this;
         // Try loading the object
         this.loadObj(basePath, objFileName).then(function (loadedObject) {
@@ -43,7 +43,8 @@ var ObjFileHandler = /** @class */ (function () {
             }
             var materialFileNames = loadedObject.materialLibraries;
             if (materialFileNames) {
-                _this.loadMaterials(basePath, materialFileNames).then(function (materials) {
+                _this.loadMaterials(basePath, materialFileNames)
+                    .then(function (materials) {
                     // console.log("Materials", materials);
                     loadedObject.traverse(function (child) {
                         if (child.isMesh) {
@@ -63,8 +64,14 @@ var ObjFileHandler = /** @class */ (function () {
                     if (onMaterialsLoaded) {
                         onMaterialsLoaded(loadedObject);
                     }
+                })
+                    .catch(function (error) {
+                    onError && onError(error);
                 });
             } // END if
+            else {
+                onMaterialsLoaded && onMaterialsLoaded(loadedObject);
+            }
         });
     };
     /**
@@ -84,7 +91,7 @@ var ObjFileHandler = /** @class */ (function () {
                 console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
             }, function (error) {
                 console.log(error);
-                reject();
+                reject(error);
             });
         });
     };
@@ -121,7 +128,7 @@ var ObjFileHandler = /** @class */ (function () {
                 // console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
             }, function (error) {
                 console.log("An error happened", error);
-                reject();
+                reject(error);
             });
         });
     };

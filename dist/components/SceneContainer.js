@@ -84,7 +84,8 @@ var SceneContainer = /** @class */ (function () {
             fontSize: 14,
             maxShipUpAngle: Math.PI * 0.25,
             minShipUpAngle: -Math.PI * 0.25,
-            cameraFov: 30
+            cameraFov: 30,
+            fogDensity: 0.0021
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
@@ -369,9 +370,11 @@ var SceneContainer = /** @class */ (function () {
                 detectionDistance: 0.0,
                 isDisabled: false,
                 type: "default",
-                userData: { isCurrentlyInRange: false }
+                userData: { isCurrentlyInRange: false },
+                object3D: loadedObject
             });
         };
+        // TODO: use MediaStorage here
         new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
     SceneContainer.prototype.loadConcreteWalls = function (terrain) {
@@ -391,9 +394,11 @@ var SceneContainer = /** @class */ (function () {
                 detectionDistance: 0.0,
                 isDisabled: false,
                 type: "default",
-                userData: { isCurrentlyInRange: false }
+                userData: { isCurrentlyInRange: false },
+                object3D: loadedObject
             });
         };
+        // TODO: use MediaStorage here
         new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
     SceneContainer.prototype.loadFBXStruff = function (terrain) {
@@ -414,9 +419,11 @@ var SceneContainer = /** @class */ (function () {
                 detectionDistance: 0.0,
                 isDisabled: false,
                 type: "default",
-                userData: { isCurrentlyInRange: false }
+                userData: { isCurrentlyInRange: false },
+                object3D: loadedObject
             });
         };
+        // TODO: use MediaStorage here
         new FbxFileHandler_1.FbxFileHandler(this).loadFbxFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
     SceneContainer.prototype.addGroundBuoys = function (terrain) {
@@ -438,27 +445,51 @@ var SceneContainer = /** @class */ (function () {
         }
     };
     SceneContainer.prototype.addNavpoints = function (terrain) {
+        var _this = this;
         var targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
         targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
         var targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
         targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
-        this.addNavpoint({
-            position: targetPositionA,
-            label: "Nav A",
-            detectionDistance: 25.0,
-            isDisabled: true,
-            type: "nav",
-            userData: { isCurrentlyInRange: false }
-        }, true);
-        this.addNavpoint({
-            position: targetPositionB,
-            label: "Nav B",
-            detectionDistance: 25.0,
-            isDisabled: true,
-            type: "nav",
-            userData: { isCurrentlyInRange: false }
-        }, true);
-        this.addBuoysAt([targetPositionA, targetPositionB]);
+        this.addBuoysAt([targetPositionA, targetPositionB])
+            .then(function (buoys) {
+            // console.log( String.fromCharCode(96 + index + 1) );
+            for (var i = 0; i < buoys.length; i++) {
+                _this.addNavpoint({
+                    position: targetPositionA,
+                    label: "Nav A",
+                    detectionDistance: 25.0,
+                    isDisabled: true,
+                    type: "nav",
+                    userData: { isCurrentlyInRange: false },
+                    object3D: buoys[i]
+                }, true);
+            }
+        })
+            .catch(function (error) {
+            console.error("[SceneContainer] Failed to add buoys.", error);
+        });
+        // this.addNavpoint(
+        //   {
+        //     position: targetPositionA,
+        //     label: "Nav A",
+        //     detectionDistance: 25.0,
+        //     isDisabled: true,
+        //     type: "nav",
+        //     userData: { isCurrentlyInRange: false }
+        //   },
+        //   true
+        // );
+        // this.addNavpoint(
+        //   {
+        //     position: targetPositionB,
+        //     label: "Nav B",
+        //     detectionDistance: 25.0,
+        //     isDisabled: true,
+        //     type: "nav",
+        //     userData: { isCurrentlyInRange: false }
+        //   },
+        //   true
+        // );
     };
     SceneContainer.prototype.addNavpoint = function (navpoint, addToRoute) {
         // Add to visible nav points
@@ -471,9 +502,9 @@ var SceneContainer = /** @class */ (function () {
     };
     SceneContainer.prototype.addBuoysAt = function (targetPositions) {
         var _this = this;
-        if (targetPositions.length === 0) {
-            return;
-        }
+        // if (targetPositions.length === 0) {
+        //   return;
+        // }
         // Also load visual nav buoys
         var basePath = "resources/meshes/wavefront/buoy-blender/";
         var objFileName = "buoy-blender-v1.obj";
@@ -481,37 +512,44 @@ var SceneContainer = /** @class */ (function () {
         var buoyObjectLoaded = function (_loadedObject) {
             console.log("Buoy mesh loaded");
             // NOOP
+            // Wait until the 'materialsLoaded' callback is triggered; then the
+            // object is fully loaded.
         };
-        var buoyMaterialsLoaded = function (loadedObject) {
-            console.log("Buoy material loaded");
-            // loadedObject.rotateX(-Math.PI / 2.0);
-            console.log("[Buoy material loaded] ", loadedObject);
-            loadedObject.traverse(function (child) {
-                if (child.isMesh) {
-                    // TODO: check type
-                    var childMesh = child;
-                    console.log("addBuoyAt", child);
-                    if (Array.isArray(childMesh.material)) {
-                        childMesh.material.forEach(function (mat) {
-                            mat.side = THREE.BackSide;
-                            mat.needsUpdate = true;
-                        });
+        return new Promise(function (accept, reject) {
+            var buoyMaterialsLoaded = function (loadedObject) {
+                console.log("Buoy material loaded");
+                // loadedObject.rotateX(-Math.PI / 2.0);
+                console.log("[Buoy material loaded] ", loadedObject);
+                loadedObject.traverse(function (child) {
+                    if (child.isMesh) {
+                        // TODO: check type
+                        var childMesh = child;
+                        console.log("addBuoyAt", child);
+                        if (Array.isArray(childMesh.material)) {
+                            childMesh.material.forEach(function (mat) {
+                                mat.side = THREE.BackSide;
+                                mat.needsUpdate = true;
+                            });
+                        }
+                        else {
+                            childMesh.material.side = THREE.BackSide;
+                            childMesh.material.needsUpdate = true;
+                        }
                     }
-                    else {
-                        childMesh.material.side = THREE.BackSide;
-                        childMesh.material.needsUpdate = true;
-                    }
+                    // Clone.
+                });
+                console.log("Creating buoy clones ...", targetPositions.length);
+                var buoys = [];
+                for (var i = 1; i < targetPositions.length; i++) {
+                    var buoyCopy = loadedObject.clone();
+                    buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
+                    _this.scene.add(buoyCopy);
+                    buoys.push(buoyCopy);
                 }
-                // Clone.
-            });
-            console.log("Creating buoy clones ...", targetPositions.length);
-            for (var i = 1; i < targetPositions.length; i++) {
-                var buoyCopy = loadedObject.clone();
-                buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
-                _this.scene.add(buoyCopy);
-            }
-        };
-        new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPositions[0] }, buoyObjectLoaded, buoyMaterialsLoaded);
+                accept(buoys);
+            };
+            new ObjFileHandler_1.ObjFileHandler(_this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPositions[0] }, buoyObjectLoaded, buoyMaterialsLoaded, reject);
+        });
     };
     SceneContainer.prototype.addGeometer = function (terrain) {
         var geometerCoords = { x: -80.0, z: -40.0 };
