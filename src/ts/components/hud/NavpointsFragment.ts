@@ -2,14 +2,17 @@ import * as THREE from "three";
 import { HudComponent } from "./HudComponent";
 import { HUDData, ISceneContainer, NavPointType, Navpoint, RenderableComponent, Tuple, TweakParams } from "../interfaces";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
+import { Bounds, Line, Vertex } from "plotboilerplate";
 
 export class NavpointsFragment implements RenderableComponent {
   private hudComponent: HudComponent;
   private currentFragmentBounds: Bounds2Immutable;
+  private screenBounds: Bounds;
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
 
+    this.screenBounds = new Bounds(new Vertex(), new Vertex());
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
   }
 
@@ -48,21 +51,45 @@ export class NavpointsFragment implements RenderableComponent {
 
     // Your 3d point to check
     var pos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
-    if (seemsInsideView && !frustum.containsPoint(pos)) {
-      // Do something with the position...
-      // vector.x = -1;
-      // vector.y = widthHalf;
-      // Reverse position and project to the border+1
-      vector.x = sceneContainer.rendererSize.width - vector.x;
-      vector.y = sceneContainer.rendererSize.height - vector.y;
-      // Now project to edge of the screen
-      // ... todo in plotboilerplate
+    const isInCameraFrustum = frustum.containsPoint(pos);
+    if (seemsInsideView && !isInCameraFrustum) {
+      // // if (!frustum.containsPoint(pos)) {
+      // // Do something with the position...
+      // // vector.x = -1;
+      // // vector.y = widthHalf;
+      // // Reverse position and project to the border+1
+      // vector.x = sceneContainer.rendererSize.width - vector.x;
+      // vector.y = sceneContainer.rendererSize.height - vector.y;
+      // // Now project to edge of the screen
+      // // ... todo in plotboilerplate
+      // const lineFromCenter = new Line(
+      //   this.screenBounds.getCenter(),
+      //   new Vertex(vector.x, vector.y) // TODO: check if Vertex(THREE.Vector) is working
+      // );
+      // const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
+      // return {
+      //   x: screenIntersection ? screenIntersection.x : 0,
+      //   y: screenIntersection ? screenIntersection.y : 0
+      // };
     }
 
     return {
       x: vector.x,
-      y: vector.y
+      y: vector.y,
+      isInCameraFrustum: isInCameraFrustum,
+      seemsInsideView: seemsInsideView
     };
+  }
+
+  private toScreenPosition2(sceneContainer: ISceneContainer, obj: THREE.Object3D, camera: THREE.Camera) {
+    let vector1 = camera.position.clone().sub(obj.position);
+    let vector2 = camera.getWorldDirection(new THREE.Vector3());
+
+    // let angle = Math.atan2(vector2.y, vector2.x) - Math.atan2(vector1.y, vector1.x)
+    // if(angle < 0) left.push
+    // else right.push
+
+    return vector2;
   }
 
   private drawNavpoint(sceneContainer: ISceneContainer, navpoint: Navpoint) {
@@ -90,7 +117,8 @@ export class NavpointsFragment implements RenderableComponent {
     const vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, sceneContainer.camera);
 
     const colorMarker = getColorStyle(this.hudComponent.primaryColor, 1.0);
-    if (this.currentFragmentBounds.contains(vector2d)) {
+    // if (this.currentFragmentBounds.contains(vector2d)) {
+    if (vector2d.seemsInsideView && vector2d.isInCameraFrustum) {
       // Navpoint is in visible area
       this.drawMarkerAt(vector2d, colorMarker, navpoint.type);
       this.drawLabelAt(vector2d.x, vector2d.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
@@ -195,5 +223,9 @@ export class NavpointsFragment implements RenderableComponent {
       width * (1.0 - 2 * safeAreaPct),
       height * (1.0 - 2 * safeAreaPct)
     );
+    this.screenBounds.min.x = 0;
+    this.screenBounds.min.y = 0;
+    this.screenBounds.max.x = this.hudComponent.hudCanvas.width;
+    this.screenBounds.max.y = this.hudComponent.hudCanvas.height;
   }
 }

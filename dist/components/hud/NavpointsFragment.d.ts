@@ -4,8 +4,10 @@ import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../i
 export declare class NavpointsFragment implements RenderableComponent {
     private hudComponent;
     private currentFragmentBounds;
+    private screenBounds;
     constructor(hudComponent: HudComponent);
     private toScreenPosition;
+    private toScreenPosition2;
     private drawNavpoint;
     private drawMarkerAt;
     private drawLabelAt;

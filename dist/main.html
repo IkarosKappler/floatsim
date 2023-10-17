@@ -40,6 +40,28 @@
         globalThis.module = globalThis;
     </script>
 
+    <script src="lib/plotboilerplate/dist/plotboilerplate.browser.min.js"></script>
+    <script>
+        console.log("plotboilerplate Vertex", Vertex );
+        globalThis.plotboilerplate = {
+            Vertex: Vertex,
+            Line: Line,
+            Vector: Vector,
+            Triangle: Triangle,
+            CubicBezierCurve: CubicBezierCurve,
+            BezierPath: BezierPath,
+            Cirlce: Circle,
+            CircleSector: CircleSector,
+            Polygon: Polygon,
+            VEllipse: VEllipse,
+            VEllipseSector: VEllipseSector,
+            PBImage: PBImage,
+            PBText: PBText,
+            Bounds: Bounds
+        };
+        console.log("plotboilerplate", plotboilerplate);
+
+    </script>
 
     <script src="lib/three/examples/umd/controls/OrbitControls.js"></script>
     <script src="lib/three/examples/umd/controls/FirstPersonControls.js"></script>

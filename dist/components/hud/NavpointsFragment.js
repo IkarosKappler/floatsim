@@ -26,9 +26,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NavpointsFragment = void 0;
 var THREE = __importStar(require("three"));
 var Helpers_1 = require("../../utils/Helpers");
+var plotboilerplate_1 = require("plotboilerplate");
 var NavpointsFragment = /** @class */ (function () {
     function NavpointsFragment(hudComponent) {
         this.hudComponent = hudComponent;
+        this.screenBounds = new plotboilerplate_1.Bounds(new plotboilerplate_1.Vertex(), new plotboilerplate_1.Vertex());
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
     NavpointsFragment.prototype.toScreenPosition = function (sceneContainer, obj, camera) {
@@ -58,20 +60,41 @@ var NavpointsFragment = /** @class */ (function () {
         frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
         // Your 3d point to check
         var pos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
-        if (seemsInsideView && !frustum.containsPoint(pos)) {
-            // Do something with the position...
-            // vector.x = -1;
-            // vector.y = widthHalf;
-            // Reverse position and project to the border+1
-            vector.x = sceneContainer.rendererSize.width - vector.x;
-            vector.y = sceneContainer.rendererSize.height - vector.y;
-            // Now project to edge of the screen
-            // ... todo in plotboilerplate
+        var isInCameraFrustum = frustum.containsPoint(pos);
+        if (seemsInsideView && !isInCameraFrustum) {
+            // // if (!frustum.containsPoint(pos)) {
+            // // Do something with the position...
+            // // vector.x = -1;
+            // // vector.y = widthHalf;
+            // // Reverse position and project to the border+1
+            // vector.x = sceneContainer.rendererSize.width - vector.x;
+            // vector.y = sceneContainer.rendererSize.height - vector.y;
+            // // Now project to edge of the screen
+            // // ... todo in plotboilerplate
+            // const lineFromCenter = new Line(
+            //   this.screenBounds.getCenter(),
+            //   new Vertex(vector.x, vector.y) // TODO: check if Vertex(THREE.Vector) is working
+            // );
+            // const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
+            // return {
+            //   x: screenIntersection ? screenIntersection.x : 0,
+            //   y: screenIntersection ? screenIntersection.y : 0
+            // };
         }
         return {
             x: vector.x,
-            y: vector.y
+            y: vector.y,
+            isInCameraFrustum: isInCameraFrustum,
+            seemsInsideView: seemsInsideView
         };
+    };
+    NavpointsFragment.prototype.toScreenPosition2 = function (sceneContainer, obj, camera) {
+        var vector1 = camera.position.clone().sub(obj.position);
+        var vector2 = camera.getWorldDirection(new THREE.Vector3());
+        // let angle = Math.atan2(vector2.y, vector2.x) - Math.atan2(vector1.y, vector1.x)
+        // if(angle < 0) left.push
+        // else right.push
+        return vector2;
     };
     NavpointsFragment.prototype.drawNavpoint = function (sceneContainer, navpoint) {
         // Compute position on screen
@@ -93,7 +116,8 @@ var NavpointsFragment = /** @class */ (function () {
         // vector.z = 0;
         var vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, sceneContainer.camera);
         var colorMarker = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
-        if (this.currentFragmentBounds.contains(vector2d)) {
+        // if (this.currentFragmentBounds.contains(vector2d)) {
+        if (vector2d.seemsInsideView && vector2d.isInCameraFrustum) {
             // Navpoint is in visible area
             this.drawMarkerAt(vector2d, colorMarker, navpoint.type);
             this.drawLabelAt(vector2d.x, vector2d.y, "".concat(navpoint.label, " (").concat(distance.toFixed(1), "m)"));
@@ -179,6 +203,10 @@ var NavpointsFragment = /** @class */ (function () {
         // Use 10% safe area from the frame borders
         var safeAreaPct = 0.1;
         this.currentFragmentBounds = new Helpers_1.Bounds2Immutable(width * safeAreaPct, height * safeAreaPct, width * (1.0 - 2 * safeAreaPct), height * (1.0 - 2 * safeAreaPct));
+        this.screenBounds.min.x = 0;
+        this.screenBounds.min.y = 0;
+        this.screenBounds.max.x = this.hudComponent.hudCanvas.width;
+        this.screenBounds.max.y = this.hudComponent.hudCanvas.height;
     };
     return NavpointsFragment;
 }());
