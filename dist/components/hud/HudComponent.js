@@ -33,6 +33,7 @@ var VariometerFragment_1 = require("./VariometerFragment");
 var cutscene_shader_material_glsl_1 = require("../../utils/texture/shaders/cutscene_shader_material.glsl");
 var NavpointsFragment_1 = require("./NavpointsFragment");
 var HorizonFragment_1 = require("./HorizonFragment");
+var SystemStatusFragment_1 = require("./SystemStatusFragment");
 var HudComponent = /** @class */ (function () {
     function HudComponent(width, height, primaryColor, warningColor) {
         // console.log("HudComponent vertex shader", Cutscene_Shader.vertex);
@@ -96,6 +97,7 @@ var HudComponent = /** @class */ (function () {
         // Create Navpoints fragment
         this.navpoints = new NavpointsFragment_1.NavpointsFragment(this);
         this.horizon = new HorizonFragment_1.HorizonFragment(this);
+        this.systemStatus = new SystemStatusFragment_1.SystemStatusFragment(this);
     }
     /**
      * @implement RenderableComponent.beforeRender
@@ -109,6 +111,7 @@ var HudComponent = /** @class */ (function () {
         this.variometer.beforeRender(sceneContainer, hudData, tweakParams);
         this.navpoints.beforeRender(sceneContainer, hudData, tweakParams);
         this.horizon.beforeRender(sceneContainer, hudData, tweakParams);
+        this.systemStatus.beforeRender(sceneContainer, hudData, tweakParams);
         this.hudDynamicTexture.needsUpdate = true;
         this.hudMaterial.uniforms.u_shutter_amount.value = tweakParams.cutsceneShutterValue;
         this.hudMaterial.uniformsNeedUpdate = true;
@@ -139,6 +142,7 @@ var HudComponent = /** @class */ (function () {
         this.variometer.updateSize(width, height);
         this.navpoints.updateSize(width, height);
         this.horizon.updateSize(width, height);
+        this.systemStatus.updateSize(width, height);
     };
     return HudComponent;
 }());

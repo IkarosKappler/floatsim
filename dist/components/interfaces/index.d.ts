@@ -48,6 +48,7 @@ export interface TweakParams {
     minShipUpAngle: number;
     cameraFov: number;
     fogDensity: number;
+    isBatteryDamaged: boolean;
 }
 export interface IDimension2 {
     width: number;

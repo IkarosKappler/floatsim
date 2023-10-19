@@ -107,7 +107,8 @@ export class SceneContainer implements ISceneContainer {
       maxShipUpAngle: Math.PI * 0.25, // 45 degree
       minShipUpAngle: -Math.PI * 0.25, // -45 degree
       cameraFov: 30,
-      fogDensity: 0.0021
+      fogDensity: 0.0021,
+      isBatteryDamaged: true
     };
 
     // Initialize a new THREE renderer (you are also allowed

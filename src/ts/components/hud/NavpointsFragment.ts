@@ -65,9 +65,12 @@ export class NavpointsFragment implements RenderableComponent {
       // const lineFromCenter = new Line(
       //   this.screenBounds.getCenter(),
       //   new Vertex(vector.x, vector.y) // TODO: check if Vertex(THREE.Vector) is working
+      //   // new Vertex(vector.x - this.screenBounds.getCenter().x, vector.y),
       // );
       // const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
       // return {
+      //   isInCameraFrustum: true, // isInCameraFrustum,
+      //   seemsInsideView: true, // seemsInsideView,
       //   x: screenIntersection ? screenIntersection.x : 0,
       //   y: screenIntersection ? screenIntersection.y : 0
       // };
@@ -123,17 +126,34 @@ export class NavpointsFragment implements RenderableComponent {
       this.drawMarkerAt(vector2d, colorMarker, navpoint.type);
       this.drawLabelAt(vector2d.x, vector2d.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
     } else {
-      // const directionPoint = { x : vector.x, y : vector.y };
-      // // Navpoint is out of visible scope
-      // if( vector.x < this.currentFragmentBounds.min.x ) {
-      //   directionPoint.x =
-      // }
-      const directionPoint = {
-        x: Math.min(Math.max(vector2d.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
-        y: Math.min(Math.max(vector2d.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
-      };
-      this.drawMarkerAt(directionPoint, "red", navpoint.type);
-      this.drawLabelAt(directionPoint.x, directionPoint.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      if (vector2d.seemsInsideView) {
+        // const directionPoint = {
+        //   x: Math.min(Math.max(vector2d.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
+        //   y: Math.min(Math.max(vector2d.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
+        // };
+        // this.drawMarkerAt(directionPoint, "red", navpoint.type);
+        // this.drawLabelAt(directionPoint.x, directionPoint.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+        const lineFromCenter = new Line(
+          new Vertex(vector2d.x, vector2d.y), // TODO: check if Vertex(THREE.Vector) is working
+          this.screenBounds.getCenter()
+          // new Vertex(this.screenBounds.width - vector2d.x, this.screenBounds.height - vector2d.y)
+        );
+        const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
+        // screenIntersection.x = sceneContainer.rendererSize.width - screenIntersection.x;
+
+        // console.log("screenIntersection", screenIntersection);
+        this.drawMarkerAt(screenIntersection, "orange", navpoint.type);
+        this.drawLabelAt(screenIntersection.x, screenIntersection.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      } else {
+        const lineFromCenter = new Line(
+          new Vertex(vector2d.x, vector2d.y), // TODO: check if Vertex(THREE.Vector) is working
+          this.screenBounds.getCenter()
+          // new Vertex(this.screenBounds.width - vector2d.x, this.screenBounds.height - vector2d.y)
+        );
+        const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
+        this.drawMarkerAt(screenIntersection, "red", navpoint.type);
+        this.drawLabelAt(screenIntersection.x, screenIntersection.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      }
     }
     this.drawLabelAt(vector2d.x, vector2d.y + 12, ` (${difference < 0 ? "﹀" : "︿"} ${difference.toFixed(1)}m)`);
   }
@@ -223,9 +243,9 @@ export class NavpointsFragment implements RenderableComponent {
       width * (1.0 - 2 * safeAreaPct),
       height * (1.0 - 2 * safeAreaPct)
     );
-    this.screenBounds.min.x = 0;
-    this.screenBounds.min.y = 0;
-    this.screenBounds.max.x = this.hudComponent.hudCanvas.width;
-    this.screenBounds.max.y = this.hudComponent.hudCanvas.height;
+    this.screenBounds.min.x = width * safeAreaPct;
+    this.screenBounds.min.y = height * safeAreaPct;
+    this.screenBounds.max.x = width * (1.0 - 2 * safeAreaPct); // this.hudComponent.hudCanvas.width;
+    this.screenBounds.max.y = height * (1.0 - 2 * safeAreaPct); // this.hudComponent.hudCanvas.height;
   }
 }

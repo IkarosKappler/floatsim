@@ -85,7 +85,8 @@ var SceneContainer = /** @class */ (function () {
             maxShipUpAngle: Math.PI * 0.25,
             minShipUpAngle: -Math.PI * 0.25,
             cameraFov: 30,
-            fogDensity: 0.0021
+            fogDensity: 0.0021,
+            isBatteryDamaged: true
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).

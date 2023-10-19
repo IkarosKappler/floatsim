@@ -93,6 +93,7 @@ globalThis.addEventListener("load", () => {
       console.log(" fogDensity changed: " + JSON.stringify(ev.value));
       (sceneContainer.scene.fog as THREE.FogExp2).density = ev.value;
     });
+  pane.addInput(sceneContainer.tweakParams, "isBatteryDamaged");
   pane.expanded = false;
 
   const keyHandler = new KeyHandler({ element: document.body, trackAll: false });

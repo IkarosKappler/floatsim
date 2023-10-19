@@ -17,6 +17,7 @@ export declare class HudComponent implements RenderableComponent {
     private variometer;
     private navpoints;
     private horizon;
+    private systemStatus;
     constructor(width: number, height: number, primaryColor: THREE.Color, warningColor: THREE.Color);
     /**
      * @implement RenderableComponent.beforeRender
