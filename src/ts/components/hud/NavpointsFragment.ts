@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { HudComponent } from "./HudComponent";
-import { HUDData, ISceneContainer, NavPointType, Navpoint, RenderableComponent, Tuple, TweakParams } from "../interfaces";
+import { HUDData, ISceneContainer, NavPointType, Navpoint, RenderableComponent, Triple, Tuple, TweakParams } from "../interfaces";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
-import { Bounds, Line, Vertex } from "plotboilerplate";
+import { Bounds, Line, Vertex, XYCoords } from "plotboilerplate";
 
 export class NavpointsFragment implements RenderableComponent {
   private hudComponent: HudComponent;
@@ -16,7 +16,12 @@ export class NavpointsFragment implements RenderableComponent {
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
   }
 
-  private toScreenPosition(sceneContainer: ISceneContainer, obj: THREE.Object3D, camera: THREE.Camera) {
+  private toScreenPosition(
+    sceneContainer: ISceneContainer,
+    obj: THREE.Object3D,
+    navPointPosition: Triple<number>,
+    camera: THREE.Camera
+  ) {
     var vector = new THREE.Vector3();
 
     var widthHalf = 0.5 * sceneContainer.rendererSize.width;
@@ -51,6 +56,10 @@ export class NavpointsFragment implements RenderableComponent {
 
     // Your 3d point to check
     var pos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+    // var pos = new THREE.Vector3(navPointPosition.x, navPointPosition.y, navPointPosition.z);
+
+    // navPointPosition;
+
     const isInCameraFrustum = frustum.containsPoint(pos);
     if (seemsInsideView && !isInCameraFrustum) {
       // // if (!frustum.containsPoint(pos)) {
@@ -117,7 +126,7 @@ export class NavpointsFragment implements RenderableComponent {
     // vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
     // vector.z = 0;
 
-    const vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, sceneContainer.camera);
+    const vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, navpoint.position, sceneContainer.camera);
 
     const colorMarker = getColorStyle(this.hudComponent.primaryColor, 1.0);
     // if (this.currentFragmentBounds.contains(vector2d)) {

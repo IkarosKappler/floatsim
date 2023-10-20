@@ -13,6 +13,9 @@ export interface HUDData {
     shipRotation: DirectionalRotation;
     pressure: number;
     temperature: number;
+    isThermometerDamaged: boolean;
+    batteryCharge: number;
+    isBatteryDamaged: boolean;
 }
 export interface Tuple<T> {
     x: T;
@@ -48,7 +51,6 @@ export interface TweakParams {
     minShipUpAngle: number;
     cameraFov: number;
     fogDensity: number;
-    isBatteryDamaged: boolean;
 }
 export interface IDimension2 {
     width: number;

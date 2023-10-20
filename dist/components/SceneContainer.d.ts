@@ -9,7 +9,7 @@ import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonCont
 import { Stats } from "../Stats";
 import { PerlinTerrain } from "./environment/PerlinTerrain";
 import { HudComponent } from "./hud/HudComponent";
-import { ISceneContainer, Navpoint, SceneData, Size2Immutable, TweakParams } from "./interfaces";
+import { HUDData, ISceneContainer, Navpoint, SceneData, Size2Immutable, TweakParams } from "./interfaces";
 import { FogHandler } from "./environment/FogHandler";
 import { Params } from "../utils/Params";
 import { CockpitScene } from "./cockpit/CockpitScene";
@@ -27,6 +27,7 @@ export declare class SceneContainer implements ISceneContainer {
     readonly fogHandler: FogHandler;
     readonly sceneData: SceneData;
     readonly tweakParams: TweakParams;
+    readonly hudData: HUDData;
     readonly camera: THREE.PerspectiveCamera;
     readonly clock: THREE.Clock;
     readonly collidableMeshes: Array<THREE.Object3D>;
@@ -48,6 +49,7 @@ export declare class SceneContainer implements ISceneContainer {
     loadConcrete(terrain: PerlinTerrain): void;
     loadConcreteRing(terrain: PerlinTerrain): void;
     loadConcreteWalls(terrain: PerlinTerrain): void;
+    loadDockingStation(terrain: PerlinTerrain): void;
     loadFBXStruff(terrain: PerlinTerrain): void;
     addGroundBuoys(terrain: PerlinTerrain): void;
     addNavpoints(terrain: PerlinTerrain): void;

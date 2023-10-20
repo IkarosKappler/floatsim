@@ -1,3 +1,8 @@
+- 2023-10-20
+  - Adding nice icons for battery and thermometer.
+- 2023-10-19
+  - Adding plotboilerplate@1.21.0
+  - Tweaking hud positions calculation (seems still kinda wrong, though).
 - 2023-09-24
   - Adding proper modulalization for the typewriter effect.
   - Adding a MediaStorage to avoid multiple media request.

@@ -33,7 +33,7 @@ var NavpointsFragment = /** @class */ (function () {
         this.screenBounds = new plotboilerplate_1.Bounds(new plotboilerplate_1.Vertex(), new plotboilerplate_1.Vertex());
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
-    NavpointsFragment.prototype.toScreenPosition = function (sceneContainer, obj, camera) {
+    NavpointsFragment.prototype.toScreenPosition = function (sceneContainer, obj, navPointPosition, camera) {
         var vector = new THREE.Vector3();
         var widthHalf = 0.5 * sceneContainer.rendererSize.width;
         var heightHalf = 0.5 * sceneContainer.rendererSize.height;
@@ -60,6 +60,8 @@ var NavpointsFragment = /** @class */ (function () {
         frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
         // Your 3d point to check
         var pos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+        // var pos = new THREE.Vector3(navPointPosition.x, navPointPosition.y, navPointPosition.z);
+        // navPointPosition;
         var isInCameraFrustum = frustum.containsPoint(pos);
         if (seemsInsideView && !isInCameraFrustum) {
             // // if (!frustum.containsPoint(pos)) {
@@ -117,7 +119,7 @@ var NavpointsFragment = /** @class */ (function () {
         // vector.x = ((vector.x + 1) * sceneContainer.rendererSize.width) / 2;
         // vector.y = (-(vector.y - 1) * sceneContainer.rendererSize.height) / 2;
         // vector.z = 0;
-        var vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, sceneContainer.camera);
+        var vector2d = this.toScreenPosition(sceneContainer, navpoint.object3D, navpoint.position, sceneContainer.camera);
         var colorMarker = (0, Helpers_1.getColorStyle)(this.hudComponent.primaryColor, 1.0);
         // if (this.currentFragmentBounds.contains(vector2d)) {
         if (vector2d.seemsInsideView && vector2d.isInCameraFrustum) {

@@ -15,6 +15,7 @@ export class NavigationManager {
   }
 
   addNavpoint(navpoint: Navpoint) {
+    console.log("[NavigationManager] Adding nav point to route", navpoint.label);
     this.navPoints.push(navpoint);
   }
 
@@ -38,8 +39,11 @@ export class NavigationManager {
   private handleNavpoint(index: number, curPosition: THREE.Vector3) {
     const routePoint = this.navPoints[index];
     const distance = distance3(curPosition, routePoint.position);
+    // console.log("Checking nav point", this.navPoints[index].label, distance);
     if (distance <= routePoint.detectionDistance && !routePoint.userData.isCurrentlyInRange) {
       // Fire navpoint entered
+      // console.log("Nv point in range", this.navPoints[index].label);
+
       this.fireNavpointRangeEntered(routePoint);
     } else if (distance > routePoint.detectionDistance && routePoint.userData.isCurrentlyInRange) {
       this.fireNavpointRangeExited(routePoint);

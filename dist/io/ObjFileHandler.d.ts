@@ -6,11 +6,9 @@
  * @date    2023-04-10 (Happy Easter)
  */
 import * as THREE from "three";
-import { SceneContainer } from "../components/SceneContainer";
 import { Size3Immutable, TripleImmutable } from "../components/interfaces";
 export declare class ObjFileHandler {
-    private readonly sceneContainer;
-    constructor(sceneContainer: SceneContainer);
+    constructor();
     /**
      * Try to load a Wavefront object file from the specific path. The function
      * will also try to load the MTL materials (if defined in the file).

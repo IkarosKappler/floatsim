@@ -80,7 +80,6 @@ globalThis.addEventListener("load", () => {
       max: 90.0
     })
     .on("change", (ev: TweakPane.TpChangeEvent<number>) => {
-      console.log(" cameraFov changed: " + JSON.stringify(ev.value));
       sceneContainer.camera.fov = ev.value;
       sceneContainer.camera.updateProjectionMatrix();
     });
@@ -90,10 +89,18 @@ globalThis.addEventListener("load", () => {
       max: 0.015
     })
     .on("change", (ev: TweakPane.TpChangeEvent<number>) => {
-      console.log(" fogDensity changed: " + JSON.stringify(ev.value));
       (sceneContainer.scene.fog as THREE.FogExp2).density = ev.value;
     });
-  pane.addInput(sceneContainer.tweakParams, "isBatteryDamaged");
+  pane
+    .addInput(sceneContainer.hudData, "batteryCharge", {
+      min: 0.0,
+      max: 1.0
+    })
+    .on("change", (ev: TweakPane.TpChangeEvent<number>) => {
+      // console.log(" batteryCharge changed: " + JSON.stringify(ev.value));
+    });
+  pane.addInput(sceneContainer.hudData, "isBatteryDamaged");
+  pane.addInput(sceneContainer.hudData, "isThermometerDamaged");
   pane.expanded = false;
 
   const keyHandler = new KeyHandler({ element: document.body, trackAll: false });

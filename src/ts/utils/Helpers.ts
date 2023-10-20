@@ -151,6 +151,12 @@ export const applyObjectScale = (object: THREE.Group, targetSize: Size3Immutable
   // console.log("New scale", object.scale);
 };
 
+export const numToChar = (num: number): string => {
+  // TODO this only works for number from 0 ... 25
+  console.log(String.fromCharCode(96 + num + 1));
+  return String.fromCharCode(96 + num + 1);
+};
+
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */
@@ -215,10 +221,5 @@ export class Bounds2Immutable implements IBounds2Immutable {
 
   static fromMinMax(min: Tuple<number>, max: Tuple<number>) {
     return new Bounds2Immutable(min.x, min.y, max.x - min.x, max.y - min.y);
-  }
-
-  static numToChar(num: number) {
-    // TODO this only works for number from 0 ... 25
-    console.log(String.fromCharCode(96 + num + 1));
   }
 }

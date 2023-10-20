@@ -37,6 +37,8 @@ import { FbxFileHandler } from "../io/FbxFileHandler";
 import { GameLogicManager } from "../gamelogic/GameLogicManager";
 import { MessageBox } from "../dom/MessageBox";
 import { GameListeners } from "../utils/GameListeners";
+import { numToChar } from "../utils/Helpers";
+import { MediaStorage } from "../io/MediaStorage";
 
 export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
@@ -49,6 +51,7 @@ export class SceneContainer implements ISceneContainer {
   readonly fogHandler: FogHandler;
   readonly sceneData: SceneData;
   readonly tweakParams: TweakParams;
+  readonly hudData: HUDData;
 
   // Implement ISceneContainer
   readonly camera: THREE.PerspectiveCamera;
@@ -107,8 +110,7 @@ export class SceneContainer implements ISceneContainer {
       maxShipUpAngle: Math.PI * 0.25, // 45 degree
       minShipUpAngle: -Math.PI * 0.25, // -45 degree
       cameraFov: 30,
-      fogDensity: 0.0021,
-      isBatteryDamaged: true
+      fogDensity: 0.0021
     };
 
     // Initialize a new THREE renderer (you are also allowed
@@ -230,12 +232,15 @@ export class SceneContainer implements ISceneContainer {
     this.stats = new (Stats as any).Stats();
     document.querySelector("body").appendChild(this.stats.domElement);
 
-    const hudData: HUDData = {
+    this.hudData = {
       depth: this.camera.position.y,
       groundDepth: 0.0,
       shipRotation: { upAngle: 0.0 },
       pressure: 0.0,
-      temperature: 0.0
+      temperature: 0.0,
+      isThermometerDamaged: false,
+      batteryCharge: params.getNumber("batteryCharge", 0.75),
+      isBatteryDamaged: params.getBoolean("isBatteryDamaged", false)
     };
 
     const terrain = this.makeTerrain();
@@ -274,15 +279,16 @@ export class SceneContainer implements ISceneContainer {
 
         this.renderer.render(this.scene, this.camera);
 
-        this.cockpitScene.beforeRender(this, hudData, this.tweakParams);
-        this.hud.beforeRender(this, hudData, this.tweakParams);
+        this.cockpitScene.beforeRender(this, this.hudData, this.tweakParams);
+        this.hud.beforeRender(this, this.hudData, this.tweakParams);
 
         // Update HUD data
-        hudData.shipRotation.upAngle = this.getShipVerticalInclination();
-        hudData.depth = this.camera.position.y;
-        hudData.groundDepth = this.getGroundDepthAt(this.camera.position.x, this.camera.position.z, terrain) - hudData.depth;
-        hudData.pressure = hudData.depth < 0 ? 1.0 + -0.0981 * hudData.depth : 0.9998; // Fake some nice overair pressure
-        hudData.temperature = hudData.depth < 0 ? 4.0 - Math.exp(hudData.depth / 1000) : 32.0; // Degrees
+        this.hudData.shipRotation.upAngle = this.getShipVerticalInclination();
+        this.hudData.depth = this.camera.position.y;
+        this.hudData.groundDepth =
+          this.getGroundDepthAt(this.camera.position.x, this.camera.position.z, terrain) - this.hudData.depth;
+        this.hudData.pressure = this.hudData.depth < 0 ? 1.0 + -0.0981 * this.hudData.depth : 0.9998; // Fake some nice overair pressure
+        this.hudData.temperature = this.hudData.depth < 0 ? 4.0 - Math.exp(this.hudData.depth / 1000) : 32.0; // Degrees
 
         this.cockpitScene.renderFragment(this.renderer);
         this.hud.renderFragment(this.renderer);
@@ -315,6 +321,7 @@ export class SceneContainer implements ISceneContainer {
     this.addGroundBuoys(terrain);
     this.addNavpoints(terrain);
     this.addGeometer(terrain);
+    this.loadDockingStation(terrain);
 
     window.addEventListener("resize", () => {
       _self.onWindowResize();
@@ -473,7 +480,7 @@ export class SceneContainer implements ISceneContainer {
       });
     };
     // TODO: use MediaStorage here
-    new ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
+    new ObjFileHandler().loadObjFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
   }
 
   loadConcreteWalls(terrain: PerlinTerrain) {
@@ -498,6 +505,49 @@ export class SceneContainer implements ISceneContainer {
     };
     // TODO: use MediaStorage here
     new ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
+  }
+
+  loadDockingStation(terrain: PerlinTerrain) {
+    // At the same x-y position a the COLLADA object, just a bit above
+    const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
+    targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
+
+    // SphereGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
+    const baseSphereGeom = new THREE.SphereGeometry(30.0, 20, 20);
+    baseSphereGeom.clearGroups();
+    baseSphereGeom.addGroup(0, Infinity, 0);
+    baseSphereGeom.addGroup(0, Infinity, 1);
+    const baseSphereTexture = new THREE.TextureLoader().load("resources/img/textures/rusty-metal-plate-darker.jpg");
+    baseSphereTexture.wrapS = THREE.RepeatWrapping;
+    baseSphereTexture.wrapT = THREE.RepeatWrapping;
+    baseSphereTexture.repeat.set(2, 1);
+    const baseShpereWindowTexture = new THREE.TextureLoader().load("resources/img/textures/windowfront.png");
+    baseShpereWindowTexture.wrapS = THREE.RepeatWrapping;
+    baseShpereWindowTexture.wrapT = THREE.RepeatWrapping;
+    baseShpereWindowTexture.repeat.set(8, 4);
+    const baseSphereMat = new THREE.MeshBasicMaterial({
+      map: baseSphereTexture
+    });
+    const baseSphereWindowMat = new THREE.MeshBasicMaterial({
+      map: baseShpereWindowTexture,
+      transparent: true
+    });
+    const baseSphereMesh = new THREE.Mesh(baseSphereGeom, [baseSphereMat, baseSphereWindowMat]);
+    baseSphereMesh.position.set(targetPosition.x, targetPosition.y + 70, targetPosition.z);
+    this.scene.add(baseSphereMesh);
+
+    this.addNavpoint(
+      {
+        position: { x: baseSphereMesh.position.x - 15, y: baseSphereMesh.position.y, z: baseSphereMesh.position.z - 15 },
+        label: "Dock at Lagerta Habitat",
+        detectionDistance: 25.0 / 2,
+        isDisabled: false,
+        type: "nav",
+        userData: { isCurrentlyInRange: false },
+        object3D: baseSphereMesh
+      },
+      true
+    );
   }
 
   loadFBXStruff(terrain: PerlinTerrain) {
@@ -567,13 +617,15 @@ export class SceneContainer implements ISceneContainer {
     this.addBuoysAt([targetPositionA, targetPositionB])
       .then((buoys: Array<THREE.Object3D>) => {
         // console.log( String.fromCharCode(96 + index + 1) );
+        console.log("Buoys added, adding nav points:", buoys.length);
         for (var i = 0; i < buoys.length; i++) {
+          console.log("adding bouoy at", i, buoys[i]);
           this.addNavpoint(
             {
-              position: targetPositionA,
-              label: "Nav A",
+              position: buoys[i].position, // targetPositionA,
+              label: "Nav " + numToChar(i).toUpperCase(),
               detectionDistance: 25.0,
-              isDisabled: true,
+              isDisabled: i != 0,
               type: "nav",
               userData: { isCurrentlyInRange: false },
               object3D: buoys[i]
@@ -585,29 +637,6 @@ export class SceneContainer implements ISceneContainer {
       .catch((error: any) => {
         console.error("[SceneContainer] Failed to add buoys.", error);
       });
-
-    // this.addNavpoint(
-    //   {
-    //     position: targetPositionA,
-    //     label: "Nav A",
-    //     detectionDistance: 25.0,
-    //     isDisabled: true,
-    //     type: "nav",
-    //     userData: { isCurrentlyInRange: false }
-    //   },
-    //   true
-    // );
-    // this.addNavpoint(
-    //   {
-    //     position: targetPositionB,
-    //     label: "Nav B",
-    //     detectionDistance: 25.0,
-    //     isDisabled: true,
-    //     type: "nav",
-    //     userData: { isCurrentlyInRange: false }
-    //   },
-    //   true
-    // );
   }
 
   private addNavpoint(navpoint: Navpoint, addToRoute?: boolean) {
@@ -616,6 +645,7 @@ export class SceneContainer implements ISceneContainer {
     this.gameLogicManager.navigationManager.addNavpoint(navpoint);
     // And add to navpoint router?
     if (addToRoute) {
+      console.log("Adding nav point to route", navpoint.label);
       this.gameLogicManager.navpointRouter.addToRoute(navpoint);
     }
   }
@@ -628,53 +658,75 @@ export class SceneContainer implements ISceneContainer {
     const basePath = "resources/meshes/wavefront/buoy-blender/";
     const objFileName = "buoy-blender-v1.obj";
     const targetBounds = { width: 1.2, depth: 1.2, height: 1.5 };
-    const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
-      console.log("Buoy mesh loaded");
-      // NOOP
-      // Wait until the 'materialsLoaded' callback is triggered; then the
-      // object is fully loaded.
-    };
-    return new Promise<THREE.Object3D[]>((accept, reject) => {
-      const buoyMaterialsLoaded = (loadedObject: THREE.Object3D | null) => {
-        console.log("Buoy material loaded");
-        // loadedObject.rotateX(-Math.PI / 2.0);
-        console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
-        loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
-          if ((child as THREE.Mesh).isMesh) {
-            // TODO: check type
-            const childMesh = child as THREE.Mesh;
-            console.log("addBuoyAt", child);
-            if (Array.isArray(childMesh.material)) {
-              childMesh.material.forEach(mat => {
-                mat.side = THREE.BackSide;
-                mat.needsUpdate = true;
-              });
-            } else {
-              childMesh.material.side = THREE.BackSide;
-              childMesh.material.needsUpdate = true;
-            }
+    // return MediaStorage.getObjMesh(basePath, objFileName, targetBounds);
+    const _self = this;
+    return new Promise((accept, reject) => {
+      MediaStorage.getObjMesh(basePath, objFileName, targetBounds)
+        .then(loadedObject => {
+          console.log("HHHHHHHHHHHHHHHHHHH Loaded buoy mesh");
+          const buoys: Array<THREE.Object3D> = [];
+
+          for (var i = 0; i < targetPositions.length; i++) {
+            const buoyCopy = loadedObject.clone();
+            buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
+            _self.scene.add(buoyCopy);
+            buoys.push(buoyCopy);
           }
-          // Clone.
+          accept(buoys);
+        })
+        .catch(e => {
+          console.log("Error loading buoys", e);
+          reject(e);
         });
-        console.log("Creating buoy clones ...", targetPositions.length);
-        const buoys: Array<THREE.Object3D> = [];
-        for (var i = 1; i < targetPositions.length; i++) {
-          const buoyCopy = loadedObject.clone();
-          buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
-          this.scene.add(buoyCopy);
-          buoys.push(buoyCopy);
-        }
-        accept(buoys);
-      };
-      new ObjFileHandler(this).loadObjFile(
-        basePath,
-        objFileName,
-        { targetBounds, targetPosition: targetPositions[0] },
-        buoyObjectLoaded,
-        buoyMaterialsLoaded,
-        reject
-      );
     });
+
+    // const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
+    //   console.log("Buoy mesh loaded");
+    //   // NOOP
+    //   // Wait until the 'materialsLoaded' callback is triggered; then the
+    //   // object is fully loaded.
+    // };
+    // return new Promise<THREE.Object3D[]>((accept, reject) => {
+    //   const buoyMaterialsLoaded = (loadedObject: THREE.Object3D | null) => {
+    //     console.log("Buoy material loaded");
+    //     // loadedObject.rotateX(-Math.PI / 2.0);
+    //     console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
+    //     loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
+    //       if ((child as THREE.Mesh).isMesh) {
+    //         // TODO: check type
+    //         const childMesh = child as THREE.Mesh;
+    //         console.log("addBuoyAt", child);
+    //         if (Array.isArray(childMesh.material)) {
+    //           childMesh.material.forEach(mat => {
+    //             mat.side = THREE.BackSide;
+    //             mat.needsUpdate = true;
+    //           });
+    //         } else {
+    //           childMesh.material.side = THREE.BackSide;
+    //           childMesh.material.needsUpdate = true;
+    //         }
+    //       }
+    //       // Clone.
+    //     });
+    //     console.log("Creating buoy clones ...", targetPositions.length);
+    //     const buoys: Array<THREE.Object3D> = [];
+    //     for (var i = 0; i < targetPositions.length; i++) {
+    //       const buoyCopy = loadedObject.clone();
+    //       buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
+    //       this.scene.add(buoyCopy);
+    //       buoys.push(buoyCopy);
+    //     }
+    //     accept(buoys);
+    //   };
+    //   new ObjFileHandler(this).loadObjFile(
+    //     basePath,
+    //     objFileName,
+    //     { targetBounds, targetPosition: targetPositions[0] },
+    //     buoyObjectLoaded,
+    //     buoyMaterialsLoaded,
+    //     reject
+    //   );
+    // });
   }
 
   private addGeometer(terrain: PerlinTerrain) {

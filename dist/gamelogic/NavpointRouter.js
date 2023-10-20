@@ -17,6 +17,7 @@ var NavpointRouter = /** @class */ (function () {
     };
     // BEGIN NavigationEventListener
     NavpointRouter.prototype.onNavpointEntered = function (navpoint) {
+        console.log("Navpoint entered", navpoint);
         var routePoint = this.routePoints[this.activeNavpointIndex];
         if (navpoint === routePoint) {
             this.routePoints[this.activeNavpointIndex].isDisabled = true;

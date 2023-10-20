@@ -26,6 +26,7 @@ export class NavpointRouter implements NavigationEventListener {
 
   // BEGIN NavigationEventListener
   onNavpointEntered(navpoint: Navpoint) {
+    console.log("Navpoint entered", navpoint);
     const routePoint = this.routePoints[this.activeNavpointIndex];
     if (navpoint === routePoint) {
       this.routePoints[this.activeNavpointIndex].isDisabled = true;

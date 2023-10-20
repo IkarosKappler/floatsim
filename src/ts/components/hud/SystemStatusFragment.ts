@@ -1,31 +1,55 @@
 import * as THREE from "three";
 import { HudComponent } from "./HudComponent";
-import { HUDData, ISceneContainer, Navpoint, RenderableComponent, Tuple, TweakParams } from "../interfaces";
+import { HUDData, ISceneContainer, RenderableComponent, TweakParams } from "../interfaces";
 import { Bounds2Immutable, getColorStyle } from "../../utils/Helpers";
 
 export class SystemStatusFragment implements RenderableComponent {
   private hudComponent: HudComponent;
   private currentFragmentBounds: Bounds2Immutable;
 
-  // TODO: put these two icons inside an array
-  private depthMeterTexture: HTMLImageElement;
-  private thermometerrTexture: HTMLImageElement;
-  private static ASSET_PATH: string = "resources/img/icons/battery-error.png";
-  private static ASSET_SIZE = new Bounds2Immutable({ x: 0, y: 0, width: 620, height: 620 });
-  //   private static ASSETS_LEFT_SCALE_BOUNDS = Bounds2Immutable.fromMinMax({ x: 150, y: 192 }, { x: 252, y: 1156 });
-  //   private static ASSETS_RIGHT_SCALE_BOUNDS = Bounds2Immutable.fromMinMax({ x: 386, y: 94 }, { x: 480, y: 1248 });
-  private static ASSET_RATIO = SystemStatusFragment.ASSET_SIZE.width / SystemStatusFragment.ASSET_SIZE.height;
+  private static ASSET_PATHS_BATTERY_CHARGES: string[] = [
+    "resources/img/icons/battery/battery-0-0pct.png",
+    "resources/img/icons/battery/battery-12-5pct.png",
+    "resources/img/icons/battery/battery-25-0pct.png",
+    "resources/img/icons/battery/battery-37-5pct.png",
+    "resources/img/icons/battery/battery-50-0pct.png",
+    "resources/img/icons/battery/battery-62-5pct.png",
+    "resources/img/icons/battery/battery-75-0pct.png",
+    "resources/img/icons/battery/battery-87-5pct.png",
+    "resources/img/icons/battery/battery-100-0pct.png"
+  ];
 
-  private static ASSET_PATH_THERMOMETER = "resources/img/icons/thermometer-base.png";
-  private static ASSET_SIZE_THERMOMETER = new Bounds2Immutable({ x: 0, y: 0, width: 189, height: 189 });
-  private static ASSET_RATIO_THERMOMETER =
-    SystemStatusFragment.ASSET_SIZE_THERMOMETER.width / SystemStatusFragment.ASSET_SIZE_THERMOMETER.height;
+  private static ASSET_PATHS_THERMOMETER_STATES: string[] = [
+    "resources/img/icons/thermometer/thermometer-0pct.png",
+    "resources/img/icons/thermometer/thermometer-20pct.png",
+    "resources/img/icons/thermometer/thermometer-40pct.png",
+    "resources/img/icons/thermometer/thermometer-60pct.png",
+    "resources/img/icons/thermometer/thermometer-80pct.png",
+    "resources/img/icons/thermometer/thermometer-100pct.png"
+  ];
+
+  // TODO: put these two icons inside an array
+  private batteryChargesTextures: HTMLImageElement[];
+  private batteryErrorTexture: HTMLImageElement;
+  private thermometerStateTextures: HTMLImageElement[];
+  private thermometerErrorTexture: HTMLImageElement;
+  private static ASSET_PATH_BATTERY_ERROR: string = "resources/img/icons/battery/battery-error.png";
+  private static ASSET_SIZE_BATTERY = new Bounds2Immutable({ x: 0, y: 0, width: 620, height: 620 });
+  private static ASSET_RATIO = SystemStatusFragment.ASSET_SIZE_BATTERY.width / SystemStatusFragment.ASSET_SIZE_BATTERY.height;
+  private static ASSET_PATH_THERMOMETER_ERROR = "resources/img/icons/thermometer/thermometer-error.png";
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
+    const imageLoader = new THREE.ImageLoader();
 
-    this.depthMeterTexture = new THREE.ImageLoader().load(SystemStatusFragment.ASSET_PATH);
-    this.thermometerrTexture = new THREE.ImageLoader().load(SystemStatusFragment.ASSET_PATH_THERMOMETER);
+    this.batteryChargesTextures = SystemStatusFragment.ASSET_PATHS_BATTERY_CHARGES.map((texturePath: string) => {
+      return imageLoader.load(texturePath);
+    });
+    this.batteryErrorTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_BATTERY_ERROR);
+    this.thermometerStateTextures = SystemStatusFragment.ASSET_PATHS_THERMOMETER_STATES.map((texturePath: string) => {
+      return imageLoader.load(texturePath);
+    });
+    this.thermometerErrorTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR);
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
   }
 
@@ -46,30 +70,49 @@ export class SystemStatusFragment implements RenderableComponent {
     }
 
     // TODO: buffer color style string in class variable (is rarely changed)
-
-    // console.log("_sceneContainer.clock.getElapsedTime()", _sceneContainer.clock.getElapsedTime());
-    const isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
-
-    const center = this.currentFragmentBounds.getCenter();
-    this.hudComponent.hudBitmap.stroke();
+    const iconWidth = this.currentFragmentBounds.height * SystemStatusFragment.ASSET_RATIO;
 
     // Draw battery texture with primary color (source-atop)
-    const batteryIconWidth = this.currentFragmentBounds.height * SystemStatusFragment.ASSET_RATIO;
-    if (tweakParams.isBatteryDamaged && isBlinkingVisible) {
-      this.drawIcon(this.depthMeterTexture, batteryIconWidth, this.currentFragmentBounds.min.y, "red");
+    if (data.isBatteryDamaged) {
+      const isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
+      if (isBlinkingVisible) {
+        this.drawIcon(this.batteryErrorTexture, iconWidth, 0, "red");
+      }
+    } else {
+      // Show normal battery charge indicator
+      // There are nine battery charge textures in steps of 12.5%
+      const batteryChargeIndex = Math.max(
+        0,
+        Math.min(Math.round((data.batteryCharge * 1000) / 125), this.batteryChargesTextures.length - 1)
+      );
+      // console.log("batteryChargeIndex", batteryChargeIndex);
+      this.drawIcon(this.batteryChargesTextures[batteryChargeIndex], iconWidth, 0, undefined);
     }
 
     // Draw temperature texture with primary color (source-atop)
     // Draw image inside fragment height, keep ratio
-    // this.hudComponent.hudBitmap.fillStyle = "green";
-    const iconWidth = this.currentFragmentBounds.height * SystemStatusFragment.ASSET_RATIO_THERMOMETER;
-    const thermometerIconWidth = this.currentFragmentBounds.height * SystemStatusFragment.ASSET_RATIO_THERMOMETER;
-    this.drawIcon(this.thermometerrTexture, thermometerIconWidth, this.currentFragmentBounds.min.y + batteryIconWidth, "white");
+    if (data.isThermometerDamaged) {
+      this.drawIcon(this.thermometerErrorTexture, iconWidth, iconWidth, undefined);
+    } else {
+      // Note: temperature is in degrees Celsius
+      const thermometerStateIndex = Math.max(
+        0,
+        Math.min(Math.ceil(data.temperature / 20), this.thermometerStateTextures.length - 1)
+      );
+      // console.log("thermometerStateIndex", thermometerStateIndex);
+      this.drawIcon(this.thermometerStateTextures[thermometerStateIndex], iconWidth, iconWidth, undefined);
+      const degFahrenheit = data.temperature * (9 / 5) + 32.0;
+      const temperatureTextDeg: string = `${data.temperature.toFixed(1)}°C`;
+      const temperatureTextFahr: string = `${degFahrenheit.toFixed(1)}°F`;
+
+      this.drawText(temperatureTextDeg, iconWidth, -tweakParams.lineHeight, "white");
+      this.drawText(temperatureTextFahr, iconWidth, this.currentFragmentBounds.height + tweakParams.lineHeight, "white");
+    }
     this.hudComponent.hudBitmap.restore();
   }
 
-  private drawIcon(texture: HTMLImageElement, width: number, offsetX: number, color: string) {
-    this.hudComponent.hudBitmap.fillStyle = color;
+  private drawIcon(texture: HTMLImageElement, width: number, offsetX: number, color?: string) {
+    this.hudComponent.hudBitmap.save();
     this.hudComponent.hudBitmap.drawImage(
       texture,
       this.currentFragmentBounds.min.x + offsetX,
@@ -79,12 +122,25 @@ export class SystemStatusFragment implements RenderableComponent {
     );
 
     // Draw icon in the desired color
-    this.hudComponent.hudBitmap.globalCompositeOperation = "source-atop";
-    this.hudComponent.hudBitmap.fillRect(
+    if (color) {
+      this.hudComponent.hudBitmap.fillStyle = color;
+      this.hudComponent.hudBitmap.globalCompositeOperation = "source-atop";
+      this.hudComponent.hudBitmap.fillRect(
+        this.currentFragmentBounds.min.x + offsetX,
+        this.currentFragmentBounds.min.y,
+        width,
+        this.currentFragmentBounds.height
+      );
+    }
+    this.hudComponent.hudBitmap.restore();
+  }
+
+  private drawText(text: string, offsetX: number, yOffsetY: number, color: string) {
+    this.hudComponent.hudBitmap.fillStyle = color;
+    this.hudComponent.hudBitmap.fillText(
+      text,
       this.currentFragmentBounds.min.x + offsetX,
-      this.currentFragmentBounds.min.y,
-      width,
-      this.currentFragmentBounds.height
+      this.currentFragmentBounds.min.y + yOffsetY
     );
   }
 
@@ -110,8 +166,8 @@ export class SystemStatusFragment implements RenderableComponent {
       // Place at least 30 pixel from left border
       Math.max(30, width / 10),
       height / 10,
-      width / 5,
-      height / 10
+      width / 3,
+      height / 18
     );
   }
 }

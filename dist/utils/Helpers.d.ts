@@ -65,6 +65,7 @@ export declare const rotateVertZ: (vertex: THREE.Vector3, angle: number, center?
 export declare const rotateVertY: (vertex: THREE.Vector3, angle: number, center?: Triple<number> | undefined) => THREE.Vector3;
 export declare const distance3: (vertA: THREE.Vector3 | Triple<number>, vertB: THREE.Vector3 | Triple<number>) => number;
 export declare const applyObjectScale: (object: THREE.Group, targetSize: Size3Immutable) => void;
+export declare const numToChar: (num: number) => string;
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */
@@ -83,5 +84,4 @@ export declare class Bounds2Immutable implements IBounds2Immutable {
     scale(factor: number): Bounds2Immutable;
     move(amount: Tuple<number>): Bounds2Immutable;
     static fromMinMax(min: Tuple<number>, max: Tuple<number>): Bounds2Immutable;
-    static numToChar(num: number): void;
 }

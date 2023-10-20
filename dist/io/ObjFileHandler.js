@@ -12,8 +12,10 @@ var OBJLoader_1 = require("three/examples/jsm/loaders/OBJLoader");
 var MTLLoader_1 = require("three/examples/jsm/loaders/MTLLoader");
 var Helpers_1 = require("../utils/Helpers");
 var ObjFileHandler = /** @class */ (function () {
-    function ObjFileHandler(sceneContainer) {
-        this.sceneContainer = sceneContainer;
+    // private readonly sceneContainer: SceneContainer;
+    function ObjFileHandler() {
+        // sceneContainer: SceneContainer) {
+        // this.sceneContainer = sceneContainer;
     }
     /**
      * Try to load a Wavefront object file from the specific path. The function
@@ -37,7 +39,7 @@ var ObjFileHandler = /** @class */ (function () {
                 loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
             }
             console.log("Loaded OBJ file ", objFileName);
-            _this.sceneContainer.scene.add(loadedObject);
+            // this.sceneContainer.scene.add(loadedObject); // !!! REMOVED
             if (onObjectLoaded) {
                 onObjectLoaded(loadedObject);
             }

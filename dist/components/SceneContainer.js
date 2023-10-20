@@ -47,6 +47,8 @@ var FbxFileHandler_1 = require("../io/FbxFileHandler");
 var GameLogicManager_1 = require("../gamelogic/GameLogicManager");
 var MessageBox_1 = require("../dom/MessageBox");
 var GameListeners_1 = require("../utils/GameListeners");
+var Helpers_1 = require("../utils/Helpers");
+var MediaStorage_1 = require("../io/MediaStorage");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -85,8 +87,7 @@ var SceneContainer = /** @class */ (function () {
             maxShipUpAngle: Math.PI * 0.25,
             minShipUpAngle: -Math.PI * 0.25,
             cameraFov: 30,
-            fogDensity: 0.0021,
-            isBatteryDamaged: true
+            fogDensity: 0.0021
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
@@ -177,12 +178,15 @@ var SceneContainer = /** @class */ (function () {
         this.controls = firstPersonControls;
         this.stats = new Stats_1.Stats.Stats();
         document.querySelector("body").appendChild(this.stats.domElement);
-        var hudData = {
+        this.hudData = {
             depth: this.camera.position.y,
             groundDepth: 0.0,
             shipRotation: { upAngle: 0.0 },
             pressure: 0.0,
-            temperature: 0.0
+            temperature: 0.0,
+            isThermometerDamaged: false,
+            batteryCharge: params.getNumber("batteryCharge", 0.75),
+            isBatteryDamaged: params.getBoolean("isBatteryDamaged", false)
         };
         var terrain = this.makeTerrain();
         this.terrainSegments.push(terrain);
@@ -212,14 +216,15 @@ var SceneContainer = /** @class */ (function () {
                     updateables[i].update(elapsedTime, deltaTime);
                 }
                 _this.renderer.render(_this.scene, _this.camera);
-                _this.cockpitScene.beforeRender(_this, hudData, _this.tweakParams);
-                _this.hud.beforeRender(_this, hudData, _this.tweakParams);
+                _this.cockpitScene.beforeRender(_this, _this.hudData, _this.tweakParams);
+                _this.hud.beforeRender(_this, _this.hudData, _this.tweakParams);
                 // Update HUD data
-                hudData.shipRotation.upAngle = _this.getShipVerticalInclination();
-                hudData.depth = _this.camera.position.y;
-                hudData.groundDepth = _this.getGroundDepthAt(_this.camera.position.x, _this.camera.position.z, terrain) - hudData.depth;
-                hudData.pressure = hudData.depth < 0 ? 1.0 + -0.0981 * hudData.depth : 0.9998; // Fake some nice overair pressure
-                hudData.temperature = hudData.depth < 0 ? 4.0 - Math.exp(hudData.depth / 1000) : 32.0; // Degrees
+                _this.hudData.shipRotation.upAngle = _this.getShipVerticalInclination();
+                _this.hudData.depth = _this.camera.position.y;
+                _this.hudData.groundDepth =
+                    _this.getGroundDepthAt(_this.camera.position.x, _this.camera.position.z, terrain) - _this.hudData.depth;
+                _this.hudData.pressure = _this.hudData.depth < 0 ? 1.0 + -0.0981 * _this.hudData.depth : 0.9998; // Fake some nice overair pressure
+                _this.hudData.temperature = _this.hudData.depth < 0 ? 4.0 - Math.exp(_this.hudData.depth / 1000) : 32.0; // Degrees
                 _this.cockpitScene.renderFragment(_this.renderer);
                 _this.hud.renderFragment(_this.renderer);
                 terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
@@ -244,6 +249,7 @@ var SceneContainer = /** @class */ (function () {
         this.addGroundBuoys(terrain);
         this.addNavpoints(terrain);
         this.addGeometer(terrain);
+        this.loadDockingStation(terrain);
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });
@@ -376,7 +382,7 @@ var SceneContainer = /** @class */ (function () {
             });
         };
         // TODO: use MediaStorage here
-        new ObjFileHandler_1.ObjFileHandler(this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
+        new ObjFileHandler_1.ObjFileHandler().loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
     };
     SceneContainer.prototype.loadConcreteWalls = function (terrain) {
         var _this = this;
@@ -401,6 +407,43 @@ var SceneContainer = /** @class */ (function () {
         };
         // TODO: use MediaStorage here
         new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
+    };
+    SceneContainer.prototype.loadDockingStation = function (terrain) {
+        // At the same x-y position a the COLLADA object, just a bit above
+        var targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
+        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
+        // SphereGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
+        var baseSphereGeom = new THREE.SphereGeometry(30.0, 20, 20);
+        baseSphereGeom.clearGroups();
+        baseSphereGeom.addGroup(0, Infinity, 0);
+        baseSphereGeom.addGroup(0, Infinity, 1);
+        var baseSphereTexture = new THREE.TextureLoader().load("resources/img/textures/rusty-metal-plate-darker.jpg");
+        baseSphereTexture.wrapS = THREE.RepeatWrapping;
+        baseSphereTexture.wrapT = THREE.RepeatWrapping;
+        baseSphereTexture.repeat.set(2, 1);
+        var baseShpereWindowTexture = new THREE.TextureLoader().load("resources/img/textures/windowfront.png");
+        baseShpereWindowTexture.wrapS = THREE.RepeatWrapping;
+        baseShpereWindowTexture.wrapT = THREE.RepeatWrapping;
+        baseShpereWindowTexture.repeat.set(8, 4);
+        var baseSphereMat = new THREE.MeshBasicMaterial({
+            map: baseSphereTexture
+        });
+        var baseSphereWindowMat = new THREE.MeshBasicMaterial({
+            map: baseShpereWindowTexture,
+            transparent: true
+        });
+        var baseSphereMesh = new THREE.Mesh(baseSphereGeom, [baseSphereMat, baseSphereWindowMat]);
+        baseSphereMesh.position.set(targetPosition.x, targetPosition.y + 70, targetPosition.z);
+        this.scene.add(baseSphereMesh);
+        this.addNavpoint({
+            position: { x: baseSphereMesh.position.x - 15, y: baseSphereMesh.position.y, z: baseSphereMesh.position.z - 15 },
+            label: "Dock at Lagerta Habitat",
+            detectionDistance: 25.0 / 2,
+            isDisabled: false,
+            type: "nav",
+            userData: { isCurrentlyInRange: false },
+            object3D: baseSphereMesh
+        }, true);
     };
     SceneContainer.prototype.loadFBXStruff = function (terrain) {
         var _this = this;
@@ -454,12 +497,14 @@ var SceneContainer = /** @class */ (function () {
         this.addBuoysAt([targetPositionA, targetPositionB])
             .then(function (buoys) {
             // console.log( String.fromCharCode(96 + index + 1) );
+            console.log("Buoys added, adding nav points:", buoys.length);
             for (var i = 0; i < buoys.length; i++) {
+                console.log("adding bouoy at", i, buoys[i]);
                 _this.addNavpoint({
-                    position: targetPositionA,
-                    label: "Nav A",
+                    position: buoys[i].position,
+                    label: "Nav " + (0, Helpers_1.numToChar)(i).toUpperCase(),
                     detectionDistance: 25.0,
-                    isDisabled: true,
+                    isDisabled: i != 0,
                     type: "nav",
                     userData: { isCurrentlyInRange: false },
                     object3D: buoys[i]
@@ -469,28 +514,6 @@ var SceneContainer = /** @class */ (function () {
             .catch(function (error) {
             console.error("[SceneContainer] Failed to add buoys.", error);
         });
-        // this.addNavpoint(
-        //   {
-        //     position: targetPositionA,
-        //     label: "Nav A",
-        //     detectionDistance: 25.0,
-        //     isDisabled: true,
-        //     type: "nav",
-        //     userData: { isCurrentlyInRange: false }
-        //   },
-        //   true
-        // );
-        // this.addNavpoint(
-        //   {
-        //     position: targetPositionB,
-        //     label: "Nav B",
-        //     detectionDistance: 25.0,
-        //     isDisabled: true,
-        //     type: "nav",
-        //     userData: { isCurrentlyInRange: false }
-        //   },
-        //   true
-        // );
     };
     SceneContainer.prototype.addNavpoint = function (navpoint, addToRoute) {
         // Add to visible nav points
@@ -498,11 +521,11 @@ var SceneContainer = /** @class */ (function () {
         this.gameLogicManager.navigationManager.addNavpoint(navpoint);
         // And add to navpoint router?
         if (addToRoute) {
+            console.log("Adding nav point to route", navpoint.label);
             this.gameLogicManager.navpointRouter.addToRoute(navpoint);
         }
     };
     SceneContainer.prototype.addBuoysAt = function (targetPositions) {
-        var _this = this;
         // if (targetPositions.length === 0) {
         //   return;
         // }
@@ -510,47 +533,73 @@ var SceneContainer = /** @class */ (function () {
         var basePath = "resources/meshes/wavefront/buoy-blender/";
         var objFileName = "buoy-blender-v1.obj";
         var targetBounds = { width: 1.2, depth: 1.2, height: 1.5 };
-        var buoyObjectLoaded = function (_loadedObject) {
-            console.log("Buoy mesh loaded");
-            // NOOP
-            // Wait until the 'materialsLoaded' callback is triggered; then the
-            // object is fully loaded.
-        };
+        // return MediaStorage.getObjMesh(basePath, objFileName, targetBounds);
+        var _self = this;
         return new Promise(function (accept, reject) {
-            var buoyMaterialsLoaded = function (loadedObject) {
-                console.log("Buoy material loaded");
-                // loadedObject.rotateX(-Math.PI / 2.0);
-                console.log("[Buoy material loaded] ", loadedObject);
-                loadedObject.traverse(function (child) {
-                    if (child.isMesh) {
-                        // TODO: check type
-                        var childMesh = child;
-                        console.log("addBuoyAt", child);
-                        if (Array.isArray(childMesh.material)) {
-                            childMesh.material.forEach(function (mat) {
-                                mat.side = THREE.BackSide;
-                                mat.needsUpdate = true;
-                            });
-                        }
-                        else {
-                            childMesh.material.side = THREE.BackSide;
-                            childMesh.material.needsUpdate = true;
-                        }
-                    }
-                    // Clone.
-                });
-                console.log("Creating buoy clones ...", targetPositions.length);
+            MediaStorage_1.MediaStorage.getObjMesh(basePath, objFileName, targetBounds)
+                .then(function (loadedObject) {
+                console.log("HHHHHHHHHHHHHHHHHHH Loaded buoy mesh");
                 var buoys = [];
-                for (var i = 1; i < targetPositions.length; i++) {
+                for (var i = 0; i < targetPositions.length; i++) {
                     var buoyCopy = loadedObject.clone();
                     buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
-                    _this.scene.add(buoyCopy);
+                    _self.scene.add(buoyCopy);
                     buoys.push(buoyCopy);
                 }
                 accept(buoys);
-            };
-            new ObjFileHandler_1.ObjFileHandler(_this).loadObjFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPositions[0] }, buoyObjectLoaded, buoyMaterialsLoaded, reject);
+            })
+                .catch(function (e) {
+                console.log("Error loading buoys", e);
+                reject(e);
+            });
         });
+        // const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
+        //   console.log("Buoy mesh loaded");
+        //   // NOOP
+        //   // Wait until the 'materialsLoaded' callback is triggered; then the
+        //   // object is fully loaded.
+        // };
+        // return new Promise<THREE.Object3D[]>((accept, reject) => {
+        //   const buoyMaterialsLoaded = (loadedObject: THREE.Object3D | null) => {
+        //     console.log("Buoy material loaded");
+        //     // loadedObject.rotateX(-Math.PI / 2.0);
+        //     console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
+        //     loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
+        //       if ((child as THREE.Mesh).isMesh) {
+        //         // TODO: check type
+        //         const childMesh = child as THREE.Mesh;
+        //         console.log("addBuoyAt", child);
+        //         if (Array.isArray(childMesh.material)) {
+        //           childMesh.material.forEach(mat => {
+        //             mat.side = THREE.BackSide;
+        //             mat.needsUpdate = true;
+        //           });
+        //         } else {
+        //           childMesh.material.side = THREE.BackSide;
+        //           childMesh.material.needsUpdate = true;
+        //         }
+        //       }
+        //       // Clone.
+        //     });
+        //     console.log("Creating buoy clones ...", targetPositions.length);
+        //     const buoys: Array<THREE.Object3D> = [];
+        //     for (var i = 0; i < targetPositions.length; i++) {
+        //       const buoyCopy = loadedObject.clone();
+        //       buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
+        //       this.scene.add(buoyCopy);
+        //       buoys.push(buoyCopy);
+        //     }
+        //     accept(buoys);
+        //   };
+        //   new ObjFileHandler(this).loadObjFile(
+        //     basePath,
+        //     objFileName,
+        //     { targetBounds, targetPosition: targetPositions[0] },
+        //     buoyObjectLoaded,
+        //     buoyMaterialsLoaded,
+        //     reject
+        //   );
+        // });
     };
     SceneContainer.prototype.addGeometer = function (terrain) {
         var geometerCoords = { x: -80.0, z: -40.0 };

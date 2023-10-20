@@ -29,7 +29,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Bounds2Immutable = exports.applyObjectScale = exports.distance3 = exports.rotateVertY = exports.rotateVertZ = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
+exports.Bounds2Immutable = exports.numToChar = exports.applyObjectScale = exports.distance3 = exports.rotateVertY = exports.rotateVertZ = exports.svg2texture = exports.bounds2size = exports.CustomRandom = exports.getColorStyle = void 0;
 var THREE = __importStar(require("three"));
 /**
  * Get the CSS colors string with adjustable alpha value.
@@ -171,6 +171,12 @@ var applyObjectScale = function (object, targetSize) {
     // console.log("New scale", object.scale);
 };
 exports.applyObjectScale = applyObjectScale;
+var numToChar = function (num) {
+    // TODO this only works for number from 0 ... 25
+    console.log(String.fromCharCode(96 + num + 1));
+    return String.fromCharCode(96 + num + 1);
+};
+exports.numToChar = numToChar;
 /**
  * A simple immutable bounds class with helper functions for relative positioning.
  */
@@ -219,10 +225,6 @@ var Bounds2Immutable = /** @class */ (function () {
     };
     Bounds2Immutable.fromMinMax = function (min, max) {
         return new Bounds2Immutable(min.x, min.y, max.x - min.x, max.y - min.y);
-    };
-    Bounds2Immutable.numToChar = function (num) {
-        // TODO this only works for number from 0 ... 25
-        console.log(String.fromCharCode(96 + num + 1));
     };
     return Bounds2Immutable;
 }());

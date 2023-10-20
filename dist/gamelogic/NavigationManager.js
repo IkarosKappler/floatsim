@@ -9,6 +9,7 @@ var NavigationManager = /** @class */ (function () {
         this.listeners = [];
     }
     NavigationManager.prototype.addNavpoint = function (navpoint) {
+        console.log("[NavigationManager] Adding nav point to route", navpoint.label);
         this.navPoints.push(navpoint);
     };
     NavigationManager.prototype.addNavigationEventListener = function (listener) {
@@ -29,8 +30,10 @@ var NavigationManager = /** @class */ (function () {
     NavigationManager.prototype.handleNavpoint = function (index, curPosition) {
         var routePoint = this.navPoints[index];
         var distance = (0, Helpers_1.distance3)(curPosition, routePoint.position);
+        // console.log("Checking nav point", this.navPoints[index].label, distance);
         if (distance <= routePoint.detectionDistance && !routePoint.userData.isCurrentlyInRange) {
             // Fire navpoint entered
+            // console.log("Nv point in range", this.navPoints[index].label);
             this.fireNavpointRangeEntered(routePoint);
         }
         else if (distance > routePoint.detectionDistance && routePoint.userData.isCurrentlyInRange) {

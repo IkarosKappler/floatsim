@@ -14,10 +14,11 @@ import { Size3Immutable, TripleImmutable } from "../components/interfaces";
 import { applyObjectScale } from "../utils/Helpers";
 
 export class ObjFileHandler {
-  private readonly sceneContainer: SceneContainer;
+  // private readonly sceneContainer: SceneContainer;
 
-  constructor(sceneContainer: SceneContainer) {
-    this.sceneContainer = sceneContainer;
+  constructor() {
+    // sceneContainer: SceneContainer) {
+    // this.sceneContainer = sceneContainer;
   }
 
   /**
@@ -49,7 +50,7 @@ export class ObjFileHandler {
         loadedObject.position.set(options.targetPosition.x, options.targetPosition.y, options.targetPosition.z);
       }
       console.log("Loaded OBJ file ", objFileName);
-      this.sceneContainer.scene.add(loadedObject);
+      // this.sceneContainer.scene.add(loadedObject); // !!! REMOVED
       if (onObjectLoaded) {
         onObjectLoaded(loadedObject);
       }
