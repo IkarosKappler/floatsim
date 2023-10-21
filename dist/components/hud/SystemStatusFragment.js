@@ -38,6 +38,7 @@ var SystemStatusFragment = /** @class */ (function () {
             return imageLoader.load(texturePath);
         });
         this.thermometerErrorTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR);
+        this.dockingIconTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_DOCKING_ICON);
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
     /**
@@ -53,6 +54,17 @@ var SystemStatusFragment = /** @class */ (function () {
         // TODO: buffer color style string in class variable (is rarely changed)
         var iconWidth = this.currentFragmentBounds.height * SystemStatusFragment.ASSET_RATIO;
         // Draw battery texture with primary color (source-atop)
+        this.drawBatteryIcon(_sceneContainer, data, iconWidth);
+        // Draw temperature texture with primary color (source-atop)
+        // Draw image inside fragment height, keep ratio
+        this.drawThemometerIcon(_sceneContainer, data, iconWidth, tweakParams);
+        if (data.isDockingPossible) {
+            this.drawDockingIndicator(iconWidth, tweakParams);
+        }
+        this.hudComponent.hudBitmap.restore();
+    };
+    SystemStatusFragment.prototype.drawBatteryIcon = function (_sceneContainer, data, iconWidth) {
+        // Draw battery texture with primary color (source-atop)
         if (data.isBatteryDamaged) {
             var isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
             if (isBlinkingVisible) {
@@ -66,6 +78,8 @@ var SystemStatusFragment = /** @class */ (function () {
             // console.log("batteryChargeIndex", batteryChargeIndex);
             this.drawIcon(this.batteryChargesTextures[batteryChargeIndex], iconWidth, 0, undefined);
         }
+    };
+    SystemStatusFragment.prototype.drawThemometerIcon = function (_sceneContainer, data, iconWidth, tweakParams) {
         // Draw temperature texture with primary color (source-atop)
         // Draw image inside fragment height, keep ratio
         if (data.isThermometerDamaged) {
@@ -83,6 +97,9 @@ var SystemStatusFragment = /** @class */ (function () {
             this.drawText(temperatureTextFahr, iconWidth, this.currentFragmentBounds.height + tweakParams.lineHeight, "white");
         }
         this.hudComponent.hudBitmap.restore();
+    };
+    SystemStatusFragment.prototype.drawDockingIndicator = function (iconWidth, tweakParams) {
+        this.drawIcon(this.dockingIconTexture, iconWidth, 2 * iconWidth, undefined);
     };
     SystemStatusFragment.prototype.drawIcon = function (texture, width, offsetX, color) {
         this.hudComponent.hudBitmap.save();
@@ -143,6 +160,7 @@ var SystemStatusFragment = /** @class */ (function () {
     SystemStatusFragment.ASSET_SIZE_BATTERY = new Helpers_1.Bounds2Immutable({ x: 0, y: 0, width: 620, height: 620 });
     SystemStatusFragment.ASSET_RATIO = SystemStatusFragment.ASSET_SIZE_BATTERY.width / SystemStatusFragment.ASSET_SIZE_BATTERY.height;
     SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR = "resources/img/icons/thermometer/thermometer-error.png";
+    SystemStatusFragment.ASSET_PATH_DOCKING_ICON = "resources/img/icons/docking/docking-base.png";
     return SystemStatusFragment;
 }());
 exports.SystemStatusFragment = SystemStatusFragment;

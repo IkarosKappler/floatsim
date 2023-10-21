@@ -4,7 +4,7 @@
     height: 100%;
 }
 
-.jsx-textcuscene-ui {
+.jsx-textcuscene-ui, .jsx-stationroom-ui {
     width: 100%;
     height: 100%;
     background-color: black;
@@ -60,6 +60,39 @@
     background-repeat: no-repeat;
     background-size: contain;
 }
+
+.jsx-stationroom-ui .jsx-roomimage-wrapper {
+    width: 100%;
+    height: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 25%;
+}
+
+.jsx-stationroom-ui .jsx-stationroom-title {
+    padding-top: 5%;
+}
+
+.hide-and-minify, .hide-and-minify * {
+    visibility: hidden;
+    height: 0px !important;
+    overflow: hidden;
+}
+
+/* .visibility-hidden {
+    visibility: hidden;
+} */
+
+.d-none {
+    display: none;
+}
+
+
 
 .blinking {
     animation: blink-animation 1s steps(5, start) infinite;

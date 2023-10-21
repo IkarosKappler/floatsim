@@ -114,6 +114,7 @@ globalThis.addEventListener("load", function () {
     });
     pane.addInput(sceneContainer.hudData, "isBatteryDamaged");
     pane.addInput(sceneContainer.hudData, "isThermometerDamaged");
+    pane.addInput(sceneContainer.hudData, "isDockingPossible");
     pane.expanded = false;
     var keyHandler = new KeyHandler_1.KeyHandler({ element: document.body, trackAll: false });
     keyHandler
@@ -129,10 +130,29 @@ globalThis.addEventListener("load", function () {
         .down("p", function (e) {
         console.log("[main] Pausing/unpausing game");
         sceneContainer.togglePause();
+    })
+        .down("n", function (e) {
+        console.log("[main] Toggle next nav point");
+        sceneContainer.gameLogicManager.navpointRouter.toggleNextRoutePoint();
+    })
+        .down("k", function (e) {
+        console.log("[main] Trying to dock");
+        if (sceneContainer.hudData.isDockingPossible) {
+            sceneContainer.messageBox.showMessage("Initializing docking sequence ...");
+            sceneContainer.initializDockingSequence();
+        }
+        else {
+            sceneContainer.messageBox.showMessage("Docking is currently not possible.");
+        }
     });
     sceneContainer.gameListeners.gameRunningListeners.add(function (isGameRunning, isGamePaused) {
         console.log("[main] Game paused?", isGamePaused);
     });
-    sceneContainer.initializGame();
+    sceneContainer.initializGame().then(function () {
+        if (params.getBoolean("isDocked", false)) {
+            console.log("Docking as requested by params.");
+            sceneContainer.initializDockingSequence();
+        }
+    });
 });
 //# sourceMappingURL=main.js.map

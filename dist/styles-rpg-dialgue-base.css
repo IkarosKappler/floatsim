@@ -1,0 +1,25 @@
+body {
+    background: #a8a8a8;
+}
+
+.rpg-output {}
+.rpg-output-question {}
+.rpg-output-question.rpg-npcname { font-style: italic;}
+.rpg-output-options {}
+
+  
+#b-goto-github {
+    position: absolute;
+    bottom: 10px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background-color: transparent;
+    background-size: cover;
+    cursor: pointer;
+
+    right: 15px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    background-image: url('img/icon-github-512x512.png');
+}

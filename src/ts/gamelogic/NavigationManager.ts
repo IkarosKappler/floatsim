@@ -7,6 +7,7 @@ export class NavigationManager {
   private sceneContainer: SceneContainer;
   private navPoints: Array<Navpoint>;
   private listeners: Array<NavigationEventListener>;
+  private currentPointInRange: Navpoint | null = null;
 
   constructor(sceneContainer: SceneContainer) {
     this.sceneContainer = sceneContainer;
@@ -42,7 +43,7 @@ export class NavigationManager {
     // console.log("Checking nav point", this.navPoints[index].label, distance);
     if (distance <= routePoint.detectionDistance && !routePoint.userData.isCurrentlyInRange) {
       // Fire navpoint entered
-      // console.log("Nv point in range", this.navPoints[index].label);
+      // console.log("Nav point in range", this.navPoints[index].label);
 
       this.fireNavpointRangeEntered(routePoint);
     } else if (distance > routePoint.detectionDistance && routePoint.userData.isCurrentlyInRange) {
@@ -51,12 +52,25 @@ export class NavigationManager {
   }
 
   private fireNavpointRangeEntered(navpoint: Navpoint) {
+    if (this.currentPointInRange !== navpoint && navpoint && navpoint.onEnter) {
+      navpoint.onEnter(navpoint);
+    }
+    this.currentPointInRange = navpoint;
+    navpoint.userData.isCurrentlyInRange = true;
+
     for (var i in this.listeners) {
       this.listeners[i].onNavpointEntered(navpoint);
     }
   }
 
   private fireNavpointRangeExited(navpoint: Navpoint) {
+    console.log("fireNavpointRangeExited", navpoint);
+    if (navpoint === this.currentPointInRange && navpoint.onLeave) {
+      navpoint.onLeave(navpoint);
+    }
+    this.currentPointInRange = null;
+    navpoint.userData.isCurrentlyInRange = false;
+
     for (var i in this.listeners) {
       this.listeners[i].onNavpointExited(navpoint);
     }

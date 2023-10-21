@@ -1,0 +1,73 @@
+/* @font-face {
+    font-family: 'unifontregular';
+    src: url('fonts/unifont-webfont.woff2') format('woff2'),
+         url('fonts/unifont-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+} */
+
+body {
+    background-color: #003776;
+    background-image: url('img/bgtile2.png');
+    /* font-family: unifontregular; */
+    font-size: 16pt;
+    font-weight: 900;
+}
+
+
+.rpg-output {
+    margin: 35px;
+    padding: 20px;
+    width: calc( 100% - 70px );
+    box-sizing: border-box;
+    border: 1px solid rgb(6, 81, 6);
+    border-radius: 6px;
+    background-color: rgba(0,0,0,0.5);
+}
+.rpg-output-question {
+    color:aqua;
+}
+.rpg-output-question .rpg-npcname { 
+    font-style: italic;
+    color:rgb(0, 150, 150);
+}
+.rpg-output-options, .rpg-output-options a {
+    color:blueviolet;
+}
+.rpg-output-options a:hover {
+    color:darkmagenta;
+    background-color: #003776;
+}
+
+.room {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.npc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.npc-name {
+    background-color: rgba(0,0,0,0.5);
+}
+
+.npc.active div.npc-name {
+    color: green;
+}
+
+.npc.active {
+    cursor: pointer;
+}
+
+.pixelate {
+    image-rendering: pixelated;
+}
+
+.npc-32x64 {
+    width: 120px;
+    height : 240px;
+}

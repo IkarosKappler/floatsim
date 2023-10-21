@@ -33,10 +33,12 @@ export class SystemStatusFragment implements RenderableComponent {
   private batteryErrorTexture: HTMLImageElement;
   private thermometerStateTextures: HTMLImageElement[];
   private thermometerErrorTexture: HTMLImageElement;
+  private dockingIconTexture: HTMLImageElement;
   private static ASSET_PATH_BATTERY_ERROR: string = "resources/img/icons/battery/battery-error.png";
   private static ASSET_SIZE_BATTERY = new Bounds2Immutable({ x: 0, y: 0, width: 620, height: 620 });
   private static ASSET_RATIO = SystemStatusFragment.ASSET_SIZE_BATTERY.width / SystemStatusFragment.ASSET_SIZE_BATTERY.height;
   private static ASSET_PATH_THERMOMETER_ERROR = "resources/img/icons/thermometer/thermometer-error.png";
+  private static ASSET_PATH_DOCKING_ICON: string = "resources/img/icons/docking/docking-base.png";
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
@@ -50,6 +52,7 @@ export class SystemStatusFragment implements RenderableComponent {
       return imageLoader.load(texturePath);
     });
     this.thermometerErrorTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR);
+    this.dockingIconTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_DOCKING_ICON);
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
   }
 
@@ -73,6 +76,20 @@ export class SystemStatusFragment implements RenderableComponent {
     const iconWidth = this.currentFragmentBounds.height * SystemStatusFragment.ASSET_RATIO;
 
     // Draw battery texture with primary color (source-atop)
+    this.drawBatteryIcon(_sceneContainer, data, iconWidth);
+
+    // Draw temperature texture with primary color (source-atop)
+    // Draw image inside fragment height, keep ratio
+    this.drawThemometerIcon(_sceneContainer, data, iconWidth, tweakParams);
+
+    if (data.isDockingPossible) {
+      this.drawDockingIndicator(iconWidth, tweakParams);
+    }
+    this.hudComponent.hudBitmap.restore();
+  }
+
+  private drawBatteryIcon(_sceneContainer: ISceneContainer, data: HUDData, iconWidth: number) {
+    // Draw battery texture with primary color (source-atop)
     if (data.isBatteryDamaged) {
       const isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
       if (isBlinkingVisible) {
@@ -88,7 +105,9 @@ export class SystemStatusFragment implements RenderableComponent {
       // console.log("batteryChargeIndex", batteryChargeIndex);
       this.drawIcon(this.batteryChargesTextures[batteryChargeIndex], iconWidth, 0, undefined);
     }
+  }
 
+  private drawThemometerIcon(_sceneContainer: ISceneContainer, data: HUDData, iconWidth: number, tweakParams: TweakParams) {
     // Draw temperature texture with primary color (source-atop)
     // Draw image inside fragment height, keep ratio
     if (data.isThermometerDamaged) {
@@ -109,6 +128,10 @@ export class SystemStatusFragment implements RenderableComponent {
       this.drawText(temperatureTextFahr, iconWidth, this.currentFragmentBounds.height + tweakParams.lineHeight, "white");
     }
     this.hudComponent.hudBitmap.restore();
+  }
+
+  drawDockingIndicator(iconWidth: number, tweakParams: TweakParams) {
+    this.drawIcon(this.dockingIconTexture, iconWidth, 2 * iconWidth, undefined);
   }
 
   private drawIcon(texture: HTMLImageElement, width: number, offsetX: number, color?: string) {

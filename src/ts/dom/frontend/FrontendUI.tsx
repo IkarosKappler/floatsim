@@ -9,11 +9,12 @@
  */
 
 import { useState } from "preact/hooks";
-import { IGlobalLibs } from "../../components/interfaces";
+import { IGlobalLibs, StationData } from "../../components/interfaces";
 import { SceneContainer } from "../../components/SceneContainer";
 import { JSXInternal } from "preact/src/jsx";
 import { ChapterIntro } from "./ChapterIntro";
 import { Params } from "../../utils/Params";
+import { StationRoom } from "./StationRoom";
 
 export interface IFrontendUIBaseProps {
   sceneContainer: SceneContainer;
@@ -35,6 +36,8 @@ const App = (props: IAppProps): JSXInternal.Element => {
   const [isGamePausedState, setGamePausedState] = useState<boolean>(false);
   const [isButtonDisabled, setButtonDisabled] = useState<boolean>(true && !skipChapterIntro);
   // const [isShowMap, setShowMap] = useState<boolean>(false);
+  const [isDockingInProgress, setDokingInProgress] = useState<boolean>(false);
+  const [currentStation, setCurrentStation] = useState<StationData | null>(null);
 
   // Enable button as soon as the game is ready.
   props.sceneContainer.gameListeners.gameReadyListenrs.add(() => {
@@ -49,12 +52,19 @@ const App = (props: IAppProps): JSXInternal.Element => {
     setGamePausedState(isGamePaused);
     setGameRunningState(isGameRunning);
     setGameStartedState(true);
-    if (isGamePaused) {
-      props.showOverlay();
+    props.showOverlay();
+  });
+
+  // DockedAtStationListener
+  // Enable button as soon as the game is ready.
+  props.sceneContainer.gameListeners.dockedAtStationListeners.add((station: StationData, dockingInProgress: boolean) => {
+    if (dockingInProgress) {
+      console.log("[App] Docking at station ....", station, dockingInProgress);
     } else {
-      // TODO: Render PAUSE symbol in overlay
-      props.hideOverlay();
+      console.log("[App] Docked at station.", station, dockingInProgress);
     }
+    setDokingInProgress(dockingInProgress);
+    setCurrentStation(station);
   });
 
   const handleChaperIntroTerminated = () => {
@@ -63,8 +73,6 @@ const App = (props: IAppProps): JSXInternal.Element => {
   };
 
   if (!isGameStartedState && !skipChapterIntro) {
-    // return <span>X</span>;
-    // return <Test testText="Test" globalLibs={props.globalLibs} sceneContainer={props.sceneContainer} />;
     return (
       <ChapterIntro
         globalLibs={props.globalLibs}
@@ -72,6 +80,18 @@ const App = (props: IAppProps): JSXInternal.Element => {
         onTerminated={handleChaperIntroTerminated}
         resourcePath="resources/chapters/00-north-sea/"
         sceneContainer={props.sceneContainer}
+      />
+    );
+  } else if (currentStation !== null) {
+    return (
+      <StationRoom
+        globalLibs={props.globalLibs}
+        isGameReady={isGameReady}
+        onTerminated={handleChaperIntroTerminated}
+        resourcePath="resources/chapters/00-north-sea/"
+        sceneContainer={props.sceneContainer}
+        station={currentStation}
+        isDockingInProgress={isDockingInProgress}
       />
     );
   } else {

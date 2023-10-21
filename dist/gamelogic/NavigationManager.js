@@ -4,6 +4,7 @@ exports.NavigationManager = void 0;
 var Helpers_1 = require("../utils/Helpers");
 var NavigationManager = /** @class */ (function () {
     function NavigationManager(sceneContainer) {
+        this.currentPointInRange = null;
         this.sceneContainer = sceneContainer;
         this.navPoints = [];
         this.listeners = [];
@@ -33,7 +34,7 @@ var NavigationManager = /** @class */ (function () {
         // console.log("Checking nav point", this.navPoints[index].label, distance);
         if (distance <= routePoint.detectionDistance && !routePoint.userData.isCurrentlyInRange) {
             // Fire navpoint entered
-            // console.log("Nv point in range", this.navPoints[index].label);
+            // console.log("Nav point in range", this.navPoints[index].label);
             this.fireNavpointRangeEntered(routePoint);
         }
         else if (distance > routePoint.detectionDistance && routePoint.userData.isCurrentlyInRange) {
@@ -41,11 +42,22 @@ var NavigationManager = /** @class */ (function () {
         }
     };
     NavigationManager.prototype.fireNavpointRangeEntered = function (navpoint) {
+        if (this.currentPointInRange !== navpoint && navpoint && navpoint.onEnter) {
+            navpoint.onEnter(navpoint);
+        }
+        this.currentPointInRange = navpoint;
+        navpoint.userData.isCurrentlyInRange = true;
         for (var i in this.listeners) {
             this.listeners[i].onNavpointEntered(navpoint);
         }
     };
     NavigationManager.prototype.fireNavpointRangeExited = function (navpoint) {
+        console.log("fireNavpointRangeExited", navpoint);
+        if (navpoint === this.currentPointInRange && navpoint.onLeave) {
+            navpoint.onLeave(navpoint);
+        }
+        this.currentPointInRange = null;
+        navpoint.userData.isCurrentlyInRange = false;
         for (var i in this.listeners) {
             this.listeners[i].onNavpointExited(navpoint);
         }

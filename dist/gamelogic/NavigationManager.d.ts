@@ -4,6 +4,7 @@ export declare class NavigationManager {
     private sceneContainer;
     private navPoints;
     private listeners;
+    private currentPointInRange;
     constructor(sceneContainer: SceneContainer);
     addNavpoint(navpoint: Navpoint): void;
     addNavigationEventListener(listener: NavigationEventListener): boolean;

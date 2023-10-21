@@ -10,15 +10,20 @@ export declare class SystemStatusFragment implements RenderableComponent {
     private batteryErrorTexture;
     private thermometerStateTextures;
     private thermometerErrorTexture;
+    private dockingIconTexture;
     private static ASSET_PATH_BATTERY_ERROR;
     private static ASSET_SIZE_BATTERY;
     private static ASSET_RATIO;
     private static ASSET_PATH_THERMOMETER_ERROR;
+    private static ASSET_PATH_DOCKING_ICON;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender
      */
     beforeRender(_sceneContainer: ISceneContainer, data: HUDData, tweakParams: TweakParams): void;
+    private drawBatteryIcon;
+    private drawThemometerIcon;
+    drawDockingIndicator(iconWidth: number, tweakParams: TweakParams): void;
     private drawIcon;
     private drawText;
     /**

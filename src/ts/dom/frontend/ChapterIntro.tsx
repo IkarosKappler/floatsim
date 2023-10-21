@@ -2,7 +2,7 @@
  * A component for rendering chapter intros.
  *
  * @author  Ikaros Kappler
- * @date    2033-09-23
+ * @date    2023-09-23
  * @version 1.0.0
  */
 

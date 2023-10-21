@@ -28,7 +28,10 @@ export class NavpointsFragment implements RenderableComponent {
     var heightHalf = 0.5 * sceneContainer.rendererSize.height;
 
     obj.updateMatrixWorld();
-    vector.setFromMatrixPosition(obj.matrixWorld);
+    // Use object's position?
+    // vector.setFromMatrixPosition(obj.matrixWorld);
+    // Or use navpoint position?
+    vector.set(navPointPosition.x, navPointPosition.y, navPointPosition.z);
     // vector.applyMatrix4(obj.matrixWorld);
     vector.project(camera);
 
@@ -135,34 +138,35 @@ export class NavpointsFragment implements RenderableComponent {
       this.drawMarkerAt(vector2d, colorMarker, navpoint.type);
       this.drawLabelAt(vector2d.x, vector2d.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
     } else {
-      if (vector2d.seemsInsideView) {
-        // const directionPoint = {
-        //   x: Math.min(Math.max(vector2d.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
-        //   y: Math.min(Math.max(vector2d.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
-        // };
-        // this.drawMarkerAt(directionPoint, "red", navpoint.type);
-        // this.drawLabelAt(directionPoint.x, directionPoint.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
-        const lineFromCenter = new Line(
-          new Vertex(vector2d.x, vector2d.y), // TODO: check if Vertex(THREE.Vector) is working
-          this.screenBounds.getCenter()
-          // new Vertex(this.screenBounds.width - vector2d.x, this.screenBounds.height - vector2d.y)
-        );
-        const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
-        // screenIntersection.x = sceneContainer.rendererSize.width - screenIntersection.x;
+      const directionPoint = {
+        x: Math.min(Math.max(vector2d.x, this.currentFragmentBounds.min.x), this.currentFragmentBounds.max.x),
+        y: Math.min(Math.max(vector2d.y, this.currentFragmentBounds.min.y), this.currentFragmentBounds.max.y)
+      };
+      this.drawMarkerAt(directionPoint, "red", navpoint.type);
+      this.drawLabelAt(directionPoint.x, directionPoint.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      // THIS CALCULATION IS NOT WORKING PROPERLY
+      // if (vector2d.seemsInsideView) {
+      //   const lineFromCenter = new Line(
+      //     new Vertex(vector2d.x, vector2d.y), // TODO: check if Vertex(THREE.Vector) is working
+      //     this.screenBounds.getCenter()
+      //     // new Vertex(this.screenBounds.width - vector2d.x, this.screenBounds.height - vector2d.y)
+      //   );
+      //   const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
+      //   // screenIntersection.x = sceneContainer.rendererSize.width - screenIntersection.x;
 
-        // console.log("screenIntersection", screenIntersection);
-        this.drawMarkerAt(screenIntersection, "orange", navpoint.type);
-        this.drawLabelAt(screenIntersection.x, screenIntersection.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
-      } else {
-        const lineFromCenter = new Line(
-          new Vertex(vector2d.x, vector2d.y), // TODO: check if Vertex(THREE.Vector) is working
-          this.screenBounds.getCenter()
-          // new Vertex(this.screenBounds.width - vector2d.x, this.screenBounds.height - vector2d.y)
-        );
-        const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
-        this.drawMarkerAt(screenIntersection, "red", navpoint.type);
-        this.drawLabelAt(screenIntersection.x, screenIntersection.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
-      }
+      //   // console.log("screenIntersection", screenIntersection);
+      //   this.drawMarkerAt(screenIntersection, "orange", navpoint.type);
+      //   this.drawLabelAt(screenIntersection.x, screenIntersection.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      // } else {
+      //   const lineFromCenter = new Line(
+      //     new Vertex(vector2d.x, vector2d.y), // TODO: check if Vertex(THREE.Vector) is working
+      //     this.screenBounds.getCenter()
+      //     // new Vertex(this.screenBounds.width - vector2d.x, this.screenBounds.height - vector2d.y)
+      //   );
+      //   const screenIntersection = this.screenBounds.toPolygon().closestLineIntersection(lineFromCenter, false);
+      //   this.drawMarkerAt(screenIntersection, "red", navpoint.type);
+      //   this.drawLabelAt(screenIntersection.x, screenIntersection.y, `${navpoint.label} (${distance.toFixed(1)}m)`);
+      // }
     }
     this.drawLabelAt(vector2d.x, vector2d.y + 12, ` (${difference < 0 ? "﹀" : "︿"} ${difference.toFixed(1)}m)`);
   }

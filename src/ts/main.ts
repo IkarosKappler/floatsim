@@ -101,6 +101,8 @@ globalThis.addEventListener("load", () => {
     });
   pane.addInput(sceneContainer.hudData, "isBatteryDamaged");
   pane.addInput(sceneContainer.hudData, "isThermometerDamaged");
+  pane.addInput(sceneContainer.hudData, "isDockingPossible");
+
   pane.expanded = false;
 
   const keyHandler = new KeyHandler({ element: document.body, trackAll: false });
@@ -116,11 +118,29 @@ globalThis.addEventListener("load", () => {
     .down("p", (e: KeyboardEvent) => {
       console.log("[main] Pausing/unpausing game");
       sceneContainer.togglePause();
+    })
+    .down("n", (e: KeyboardEvent) => {
+      console.log("[main] Toggle next nav point");
+      sceneContainer.gameLogicManager.navpointRouter.toggleNextRoutePoint();
+    })
+    .down("k", (e: KeyboardEvent) => {
+      console.log("[main] Trying to dock");
+      if (sceneContainer.hudData.isDockingPossible) {
+        sceneContainer.messageBox.showMessage(`Initializing docking sequence ...`);
+        sceneContainer.initializDockingSequence();
+      } else {
+        sceneContainer.messageBox.showMessage(`Docking is currently not possible.`);
+      }
     });
 
   sceneContainer.gameListeners.gameRunningListeners.add((isGameRunning: boolean, isGamePaused: boolean) => {
     console.log("[main] Game paused?", isGamePaused);
   });
 
-  sceneContainer.initializGame();
+  sceneContainer.initializGame().then(() => {
+    if (params.getBoolean("isDocked", false)) {
+      console.log("Docking as requested by params.");
+      sceneContainer.initializDockingSequence();
+    }
+  });
 });

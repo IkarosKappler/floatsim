@@ -20,6 +20,7 @@ import {
   SceneData,
   Size2Immutable,
   Size3Immutable,
+  StationData,
   TweakParams,
   UpdateableComponent
 } from "./interfaces";
@@ -39,6 +40,7 @@ import { MessageBox } from "../dom/MessageBox";
 import { GameListeners } from "../utils/GameListeners";
 import { numToChar } from "../utils/Helpers";
 import { MediaStorage } from "../io/MediaStorage";
+import { Chapter00 } from "../gamelogic/chapters/Chatper00";
 
 export class SceneContainer implements ISceneContainer {
   readonly scene: THREE.Scene;
@@ -240,7 +242,8 @@ export class SceneContainer implements ISceneContainer {
       temperature: 0.0,
       isThermometerDamaged: false,
       batteryCharge: params.getNumber("batteryCharge", 0.75),
-      isBatteryDamaged: params.getBoolean("isBatteryDamaged", false)
+      isBatteryDamaged: params.getBoolean("isBatteryDamaged", false),
+      isDockingPossible: false
     };
 
     const terrain = this.makeTerrain();
@@ -319,22 +322,21 @@ export class SceneContainer implements ISceneContainer {
 
     this.loadConcrete(terrain);
     this.addGroundBuoys(terrain);
-    this.addNavpoints(terrain);
+    this.addNavpoints(terrain).finally(() => {
+      // this.loadDockingStation(terrain);
+      new Chapter00(this, terrain);
+    });
     this.addGeometer(terrain);
-    this.loadDockingStation(terrain);
 
     window.addEventListener("resize", () => {
       _self.onWindowResize();
     });
     // Enable and disable mouse controls when mouse leaves/re-enters the screen.
     this.renderer.domElement.addEventListener("mouseleave", () => {
-      // console.log("leave");
       _self.controls.enabled = false;
     });
     this.renderer.domElement.addEventListener("mouseenter", () => {
-      // console.log("enter");
       _self.controls.enabled = true;
-      // console.log(_self.controls);
     });
 
     // Call the rendering function. This will cause and infinite recursion (we want
@@ -351,16 +353,17 @@ export class SceneContainer implements ISceneContainer {
       // Only after the "Start" button was hit (user interaction) audio can play.
       this.initializeAudio()
     ];
-    this.initializationPromise = Promise.all(waitingFor); /* .then(() => {
-      // this.isGameRunning = true;
-      // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
-      this.gameListeners.fireGameReadyChanged();
-    }); */
+    this.initializationPromise = Promise.all(waitingFor);
   } // END constructor
 
-  initializGame() {
-    this.initializationPromise.then(() => {
-      this.gameListeners.fireGameReadyChanged();
+  initializGame(): Promise<void> {
+    return new Promise<void>((accept, reject) => {
+      this.initializationPromise
+        .then(() => {
+          this.gameListeners.fireGameReadyChanged();
+          accept();
+        })
+        .catch(reject);
     });
   }
 
@@ -376,19 +379,39 @@ export class SceneContainer implements ISceneContainer {
     this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
 
     if (gameInitiallyStarting) {
-      _self.tweakParams.cutsceneShutterValue = 0.0;
-      var shutterValue = 0; // 0..100
-      const timer = globalThis.setInterval(() => {
-        shutterValue += 2;
-        // TODO: clamp
-        _self.tweakParams.cutsceneShutterValue = Math.min(1.0, shutterValue / 100.0);
-        // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
-        if (shutterValue >= 100) {
-          _self.tweakParams.cutsceneShutterValue = 1.0;
-          globalThis.clearInterval(timer);
-        }
-      }, 50);
+      // _self.tweakParams.cutsceneShutterValue = 0.0;
+      // var shutterValue = 0; // 0..100
+      // const timer = globalThis.setInterval(() => {
+      //   shutterValue += 2;
+      //   // TODO: clamp
+      //   _self.tweakParams.cutsceneShutterValue = Math.min(1.0, shutterValue / 100.0);
+      //   // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
+      //   if (shutterValue >= 100) {
+      //     _self.tweakParams.cutsceneShutterValue = 1.0;
+      //     globalThis.clearInterval(timer);
+      //   }
+      // }, 50);
+      this.startShutterSequence(0, 2, 50);
     }
+  }
+
+  private startShutterSequence(startValue: number, stepSize: number, stepDelayMS: number): Promise<void> {
+    return new Promise<void>((accept, _reject) => {
+      const _self = this;
+      _self.tweakParams.cutsceneShutterValue = startValue; // 0.0;
+      var shutterValue = startValue; // 0; // 0..100
+      const timer = globalThis.setInterval(() => {
+        shutterValue += stepSize; // 2;
+        // TODO: clamp
+        _self.tweakParams.cutsceneShutterValue = Math.max(0.0, Math.min(1.0, shutterValue / 100.0));
+        // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
+        if (shutterValue >= 100 || shutterValue < 0) {
+          _self.tweakParams.cutsceneShutterValue = Math.max(0.0, Math.min(1.0, shutterValue / 100.0)); // 1.0;
+          globalThis.clearInterval(timer);
+          accept();
+        }
+      }, stepDelayMS); // 50);
+    });
   }
 
   togglePause() {
@@ -396,6 +419,24 @@ export class SceneContainer implements ISceneContainer {
     this.isGamePaused = !this.isGameRunning;
     this.controls.enabled = !this.isGamePaused;
     this.gameListeners.fireGameRunningChanged(this.isGameRunning, this.isGamePaused);
+  }
+
+  setChapterEnded() {
+    this.isGameRunning = !this.isGameRunning;
+    this.isGamePaused = false;
+    this.controls.enabled = false;
+    this.gameListeners.fireGameRunningChanged(this.isGameRunning, this.isGamePaused);
+  }
+
+  initializDockingSequence() {
+    // Release controls ...
+    const station: StationData = { id: "anning-anchorage", name: "Anning Anchorage" };
+    this.setChapterEnded();
+    this.gameListeners.fireDockedAtStation(station, true); // Docking in in progress (docking not complete)
+    this.startShutterSequence(100, -2, 50).then(() => {
+      console.log("Open dialog");
+      this.gameListeners.fireDockedAtStation(station, false); // Not in progress (docking complete)
+    });
   }
 
   makeTerrain(): PerlinTerrain {
@@ -470,6 +511,7 @@ export class SceneContainer implements ISceneContainer {
       this.addVisibleBoundingBox(loadedObject);
       this.collidableMeshes.push(loadedObject);
       this.addNavpoint({
+        id: "gameasset-concretering",
         position: loadedObject.position,
         label: "OBJ Object",
         detectionDistance: 0.0,
@@ -494,6 +536,7 @@ export class SceneContainer implements ISceneContainer {
       this.addVisibleBoundingBox(loadedObject);
       this.collidableMeshes.push(loadedObject);
       this.addNavpoint({
+        id: "gameasset-concretewalls-dae",
         position: loadedObject.position,
         label: "Collada Object",
         detectionDistance: 0.0,
@@ -505,49 +548,6 @@ export class SceneContainer implements ISceneContainer {
     };
     // TODO: use MediaStorage here
     new ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds, targetPosition }, callback);
-  }
-
-  loadDockingStation(terrain: PerlinTerrain) {
-    // At the same x-y position a the COLLADA object, just a bit above
-    const targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
-    targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
-
-    // SphereGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
-    const baseSphereGeom = new THREE.SphereGeometry(30.0, 20, 20);
-    baseSphereGeom.clearGroups();
-    baseSphereGeom.addGroup(0, Infinity, 0);
-    baseSphereGeom.addGroup(0, Infinity, 1);
-    const baseSphereTexture = new THREE.TextureLoader().load("resources/img/textures/rusty-metal-plate-darker.jpg");
-    baseSphereTexture.wrapS = THREE.RepeatWrapping;
-    baseSphereTexture.wrapT = THREE.RepeatWrapping;
-    baseSphereTexture.repeat.set(2, 1);
-    const baseShpereWindowTexture = new THREE.TextureLoader().load("resources/img/textures/windowfront.png");
-    baseShpereWindowTexture.wrapS = THREE.RepeatWrapping;
-    baseShpereWindowTexture.wrapT = THREE.RepeatWrapping;
-    baseShpereWindowTexture.repeat.set(8, 4);
-    const baseSphereMat = new THREE.MeshBasicMaterial({
-      map: baseSphereTexture
-    });
-    const baseSphereWindowMat = new THREE.MeshBasicMaterial({
-      map: baseShpereWindowTexture,
-      transparent: true
-    });
-    const baseSphereMesh = new THREE.Mesh(baseSphereGeom, [baseSphereMat, baseSphereWindowMat]);
-    baseSphereMesh.position.set(targetPosition.x, targetPosition.y + 70, targetPosition.z);
-    this.scene.add(baseSphereMesh);
-
-    this.addNavpoint(
-      {
-        position: { x: baseSphereMesh.position.x - 15, y: baseSphereMesh.position.y, z: baseSphereMesh.position.z - 15 },
-        label: "Dock at Lagerta Habitat",
-        detectionDistance: 25.0 / 2,
-        isDisabled: false,
-        type: "nav",
-        userData: { isCurrentlyInRange: false },
-        object3D: baseSphereMesh
-      },
-      true
-    );
   }
 
   loadFBXStruff(terrain: PerlinTerrain) {
@@ -562,6 +562,7 @@ export class SceneContainer implements ISceneContainer {
       this.addVisibleBoundingBox(loadedObject);
       this.collidableMeshes.push(loadedObject);
       this.addNavpoint({
+        id: "gameasset-concretewalls-fbx",
         position: loadedObject.position,
         label: "FBX Object",
         detectionDistance: 0.0,
@@ -607,39 +608,46 @@ export class SceneContainer implements ISceneContainer {
     }
   }
 
-  addNavpoints(terrain: PerlinTerrain) {
+  addNavpoints(terrain: PerlinTerrain): Promise<void> {
     const targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
     targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
 
     const targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
     targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
 
-    this.addBuoysAt([targetPositionA, targetPositionB])
-      .then((buoys: Array<THREE.Object3D>) => {
-        // console.log( String.fromCharCode(96 + index + 1) );
-        console.log("Buoys added, adding nav points:", buoys.length);
-        for (var i = 0; i < buoys.length; i++) {
-          console.log("adding bouoy at", i, buoys[i]);
-          this.addNavpoint(
-            {
-              position: buoys[i].position, // targetPositionA,
-              label: "Nav " + numToChar(i).toUpperCase(),
-              detectionDistance: 25.0,
-              isDisabled: i != 0,
-              type: "nav",
-              userData: { isCurrentlyInRange: false },
-              object3D: buoys[i]
-            },
-            true
-          );
-        }
-      })
-      .catch((error: any) => {
-        console.error("[SceneContainer] Failed to add buoys.", error);
-      });
+    return new Promise<void>((accept, reject) => {
+      this.addBuoysAt([targetPositionA, targetPositionB])
+        .then((buoys: Array<THREE.Object3D>) => {
+          // console.log( String.fromCharCode(96 + index + 1) );
+          console.log("Buoys added, adding nav points:", buoys.length);
+          for (var i = 0; i < buoys.length; i++) {
+            console.log("adding bouoy at", i, buoys[i]);
+            const nameCharacter = numToChar(i);
+            this.addNavpoint(
+              {
+                id: "navpoint-" + nameCharacter,
+                position: buoys[i].position, // targetPositionA,
+                label: "Nav " + nameCharacter.toUpperCase(),
+                detectionDistance: 25.0,
+                isDisabled: i != 0,
+                type: "nav",
+                userData: { isCurrentlyInRange: false },
+                object3D: buoys[i]
+              },
+              true
+            );
+          }
+          accept();
+        })
+        .catch((error: any) => {
+          console.error("[SceneContainer] Failed to add buoys.", error);
+          reject();
+        });
+    });
   }
 
-  private addNavpoint(navpoint: Navpoint, addToRoute?: boolean) {
+  addNavpoint(navpoint: Navpoint, addToRoute?: boolean) {
+    console.log("addNavpoint", navpoint.label, " Add to route", addToRoute);
     // Add to visible nav points
     this.navpoints.push(navpoint);
     this.gameLogicManager.navigationManager.addNavpoint(navpoint);
@@ -651,9 +659,6 @@ export class SceneContainer implements ISceneContainer {
   }
 
   private addBuoysAt(targetPositions: THREE.Vector3[]): Promise<THREE.Object3D[]> {
-    // if (targetPositions.length === 0) {
-    //   return;
-    // }
     // Also load visual nav buoys
     const basePath = "resources/meshes/wavefront/buoy-blender/";
     const objFileName = "buoy-blender-v1.obj";
@@ -663,7 +668,7 @@ export class SceneContainer implements ISceneContainer {
     return new Promise((accept, reject) => {
       MediaStorage.getObjMesh(basePath, objFileName, targetBounds)
         .then(loadedObject => {
-          console.log("HHHHHHHHHHHHHHHHHHH Loaded buoy mesh");
+          console.log("Loaded buoy mesh");
           const buoys: Array<THREE.Object3D> = [];
 
           for (var i = 0; i < targetPositions.length; i++) {
@@ -679,54 +684,31 @@ export class SceneContainer implements ISceneContainer {
           reject(e);
         });
     });
+  }
 
-    // const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
-    //   console.log("Buoy mesh loaded");
-    //   // NOOP
-    //   // Wait until the 'materialsLoaded' callback is triggered; then the
-    //   // object is fully loaded.
-    // };
-    // return new Promise<THREE.Object3D[]>((accept, reject) => {
-    //   const buoyMaterialsLoaded = (loadedObject: THREE.Object3D | null) => {
-    //     console.log("Buoy material loaded");
-    //     // loadedObject.rotateX(-Math.PI / 2.0);
-    //     console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
-    //     loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
-    //       if ((child as THREE.Mesh).isMesh) {
-    //         // TODO: check type
-    //         const childMesh = child as THREE.Mesh;
-    //         console.log("addBuoyAt", child);
-    //         if (Array.isArray(childMesh.material)) {
-    //           childMesh.material.forEach(mat => {
-    //             mat.side = THREE.BackSide;
-    //             mat.needsUpdate = true;
-    //           });
-    //         } else {
-    //           childMesh.material.side = THREE.BackSide;
-    //           childMesh.material.needsUpdate = true;
-    //         }
-    //       }
-    //       // Clone.
-    //     });
-    //     console.log("Creating buoy clones ...", targetPositions.length);
-    //     const buoys: Array<THREE.Object3D> = [];
-    //     for (var i = 0; i < targetPositions.length; i++) {
-    //       const buoyCopy = loadedObject.clone();
-    //       buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
-    //       this.scene.add(buoyCopy);
-    //       buoys.push(buoyCopy);
-    //     }
-    //     accept(buoys);
-    //   };
-    //   new ObjFileHandler(this).loadObjFile(
-    //     basePath,
-    //     objFileName,
-    //     { targetBounds, targetPosition: targetPositions[0] },
-    //     buoyObjectLoaded,
-    //     buoyMaterialsLoaded,
-    //     reject
-    //   );
-    // });
+  addBuoyAt(targetPosition: THREE.Vector3): Promise<THREE.Object3D> {
+    // Load visual nav buoy
+    const basePath = "resources/meshes/wavefront/buoy-blender/";
+    const objFileName = "buoy-blender-v1.obj";
+    const targetBounds = { width: 1.2, depth: 1.2, height: 1.5 };
+    // return MediaStorage.getObjMesh(basePath, objFileName, targetBounds);
+    const _self = this;
+    return new Promise<THREE.Object3D>((accept, reject) => {
+      MediaStorage.getObjMesh(basePath, objFileName, targetBounds)
+        .then(loadedObject => {
+          console.log("Loaded buoy mesh");
+          const buoys: Array<THREE.Object3D> = [];
+          const buoyCopy = loadedObject.clone();
+          buoyCopy.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+          _self.scene.add(buoyCopy);
+          buoys.push(buoyCopy);
+          accept(buoyCopy);
+        })
+        .catch(e => {
+          console.log("Error loading buoys", e);
+          reject(e);
+        });
+    });
   }
 
   private addGeometer(terrain: PerlinTerrain) {

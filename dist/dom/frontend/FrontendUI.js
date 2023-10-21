@@ -24,6 +24,7 @@ var jsx_runtime_1 = require("preact/jsx-runtime");
  */
 var hooks_1 = require("preact/hooks");
 var ChapterIntro_1 = require("./ChapterIntro");
+var StationRoom_1 = require("./StationRoom");
 var App = function (props) {
     var skipChapterIntro = props.params.getBoolean("skipChapterIntro", false);
     var _a = (0, hooks_1.useState)(false), isGameReady = _a[0], setGameReady = _a[1];
@@ -32,6 +33,8 @@ var App = function (props) {
     var _d = (0, hooks_1.useState)(false), isGamePausedState = _d[0], setGamePausedState = _d[1];
     var _e = (0, hooks_1.useState)(true && !skipChapterIntro), isButtonDisabled = _e[0], setButtonDisabled = _e[1];
     // const [isShowMap, setShowMap] = useState<boolean>(false);
+    var _f = (0, hooks_1.useState)(false), isDockingInProgress = _f[0], setDokingInProgress = _f[1];
+    var _g = (0, hooks_1.useState)(null), currentStation = _g[0], setCurrentStation = _g[1];
     // Enable button as soon as the game is ready.
     props.sceneContainer.gameListeners.gameReadyListenrs.add(function () {
         console.log("[App] Enabling start button.");
@@ -44,22 +47,29 @@ var App = function (props) {
         setGamePausedState(isGamePaused);
         setGameRunningState(isGameRunning);
         setGameStartedState(true);
-        if (isGamePaused) {
-            props.showOverlay();
+        props.showOverlay();
+    });
+    // DockedAtStationListener
+    // Enable button as soon as the game is ready.
+    props.sceneContainer.gameListeners.dockedAtStationListeners.add(function (station, dockingInProgress) {
+        if (dockingInProgress) {
+            console.log("[App] Docking at station ....", station, dockingInProgress);
         }
         else {
-            // TODO: Render PAUSE symbol in overlay
-            props.hideOverlay();
+            console.log("[App] Docked at station.", station, dockingInProgress);
         }
+        setDokingInProgress(dockingInProgress);
+        setCurrentStation(station);
     });
     var handleChaperIntroTerminated = function () {
         props.sceneContainer.startGame();
         props.hideOverlay();
     };
     if (!isGameStartedState && !skipChapterIntro) {
-        // return <span>X</span>;
-        // return <Test testText="Test" globalLibs={props.globalLibs} sceneContainer={props.sceneContainer} />;
         return ((0, jsx_runtime_1.jsx)(ChapterIntro_1.ChapterIntro, { globalLibs: props.globalLibs, isGameReady: isGameReady, onTerminated: handleChaperIntroTerminated, resourcePath: "resources/chapters/00-north-sea/", sceneContainer: props.sceneContainer }));
+    }
+    else if (currentStation !== null) {
+        return ((0, jsx_runtime_1.jsx)(StationRoom_1.StationRoom, { globalLibs: props.globalLibs, isGameReady: isGameReady, onTerminated: handleChaperIntroTerminated, resourcePath: "resources/chapters/00-north-sea/", sceneContainer: props.sceneContainer, station: currentStation, isDockingInProgress: isDockingInProgress }));
     }
     else {
         return ((0, jsx_runtime_1.jsx)("button", __assign({ id: "button-start", disabled: isButtonDisabled, onClick: function () {

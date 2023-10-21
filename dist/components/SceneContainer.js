@@ -49,6 +49,7 @@ var MessageBox_1 = require("../dom/MessageBox");
 var GameListeners_1 = require("../utils/GameListeners");
 var Helpers_1 = require("../utils/Helpers");
 var MediaStorage_1 = require("../io/MediaStorage");
+var Chatper00_1 = require("../gamelogic/chapters/Chatper00");
 var SceneContainer = /** @class */ (function () {
     function SceneContainer(params) {
         var _this = this;
@@ -186,7 +187,8 @@ var SceneContainer = /** @class */ (function () {
             temperature: 0.0,
             isThermometerDamaged: false,
             batteryCharge: params.getNumber("batteryCharge", 0.75),
-            isBatteryDamaged: params.getBoolean("isBatteryDamaged", false)
+            isBatteryDamaged: params.getBoolean("isBatteryDamaged", false),
+            isDockingPossible: false
         };
         var terrain = this.makeTerrain();
         this.terrainSegments.push(terrain);
@@ -247,21 +249,20 @@ var SceneContainer = /** @class */ (function () {
         this.messageBox = new MessageBox_1.MessageBox();
         this.loadConcrete(terrain);
         this.addGroundBuoys(terrain);
-        this.addNavpoints(terrain);
+        this.addNavpoints(terrain).finally(function () {
+            // this.loadDockingStation(terrain);
+            new Chatper00_1.Chapter00(_this, terrain);
+        });
         this.addGeometer(terrain);
-        this.loadDockingStation(terrain);
         window.addEventListener("resize", function () {
             _self.onWindowResize();
         });
         // Enable and disable mouse controls when mouse leaves/re-enters the screen.
         this.renderer.domElement.addEventListener("mouseleave", function () {
-            // console.log("leave");
             _self.controls.enabled = false;
         });
         this.renderer.domElement.addEventListener("mouseenter", function () {
-            // console.log("enter");
             _self.controls.enabled = true;
-            // console.log(_self.controls);
         });
         // Call the rendering function. This will cause and infinite recursion (we want
         // that here, because the animation shall run forever).
@@ -274,16 +275,17 @@ var SceneContainer = /** @class */ (function () {
             // Only after the "Start" button was hit (user interaction) audio can play.
             this.initializeAudio()
         ];
-        this.initializationPromise = Promise.all(waitingFor); /* .then(() => {
-          // this.isGameRunning = true;
-          // this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
-          this.gameListeners.fireGameReadyChanged();
-        }); */
+        this.initializationPromise = Promise.all(waitingFor);
     } // END constructor
     SceneContainer.prototype.initializGame = function () {
         var _this = this;
-        this.initializationPromise.then(function () {
-            _this.gameListeners.fireGameReadyChanged();
+        return new Promise(function (accept, reject) {
+            _this.initializationPromise
+                .then(function () {
+                _this.gameListeners.fireGameReadyChanged();
+                accept();
+            })
+                .catch(reject);
         });
     };
     SceneContainer.prototype.startGame = function () {
@@ -297,25 +299,62 @@ var SceneContainer = /** @class */ (function () {
         this.audioPlayer.play();
         this.messageBox.showMessage("Game started.\nGo to Nav A.\nFor help press H.");
         if (gameInitiallyStarting) {
-            _self.tweakParams.cutsceneShutterValue = 0.0;
-            var shutterValue = 0; // 0..100
-            var timer_1 = globalThis.setInterval(function () {
-                shutterValue += 2;
-                // TODO: clamp
-                _self.tweakParams.cutsceneShutterValue = Math.min(1.0, shutterValue / 100.0);
-                // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
-                if (shutterValue >= 100) {
-                    _self.tweakParams.cutsceneShutterValue = 1.0;
-                    globalThis.clearInterval(timer_1);
-                }
-            }, 50);
+            // _self.tweakParams.cutsceneShutterValue = 0.0;
+            // var shutterValue = 0; // 0..100
+            // const timer = globalThis.setInterval(() => {
+            //   shutterValue += 2;
+            //   // TODO: clamp
+            //   _self.tweakParams.cutsceneShutterValue = Math.min(1.0, shutterValue / 100.0);
+            //   // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
+            //   if (shutterValue >= 100) {
+            //     _self.tweakParams.cutsceneShutterValue = 1.0;
+            //     globalThis.clearInterval(timer);
+            //   }
+            // }, 50);
+            this.startShutterSequence(0, 2, 50);
         }
+    };
+    SceneContainer.prototype.startShutterSequence = function (startValue, stepSize, stepDelayMS) {
+        var _this = this;
+        return new Promise(function (accept, _reject) {
+            var _self = _this;
+            _self.tweakParams.cutsceneShutterValue = startValue; // 0.0;
+            var shutterValue = startValue; // 0; // 0..100
+            var timer = globalThis.setInterval(function () {
+                shutterValue += stepSize; // 2;
+                // TODO: clamp
+                _self.tweakParams.cutsceneShutterValue = Math.max(0.0, Math.min(1.0, shutterValue / 100.0));
+                // console.log("twaekpane", _self.tweakParams.cutsceneShutterValue, Math.min(1.0, shutterValue / 100.0));
+                if (shutterValue >= 100 || shutterValue < 0) {
+                    _self.tweakParams.cutsceneShutterValue = Math.max(0.0, Math.min(1.0, shutterValue / 100.0)); // 1.0;
+                    globalThis.clearInterval(timer);
+                    accept();
+                }
+            }, stepDelayMS); // 50);
+        });
     };
     SceneContainer.prototype.togglePause = function () {
         this.isGameRunning = !this.isGameRunning;
         this.isGamePaused = !this.isGameRunning;
         this.controls.enabled = !this.isGamePaused;
         this.gameListeners.fireGameRunningChanged(this.isGameRunning, this.isGamePaused);
+    };
+    SceneContainer.prototype.setChapterEnded = function () {
+        this.isGameRunning = !this.isGameRunning;
+        this.isGamePaused = false;
+        this.controls.enabled = false;
+        this.gameListeners.fireGameRunningChanged(this.isGameRunning, this.isGamePaused);
+    };
+    SceneContainer.prototype.initializDockingSequence = function () {
+        var _this = this;
+        // Release controls ...
+        var station = { id: "anning-anchorage", name: "Anning Anchorage" };
+        this.setChapterEnded();
+        this.gameListeners.fireDockedAtStation(station, true); // Docking in in progress (docking not complete)
+        this.startShutterSequence(100, -2, 50).then(function () {
+            console.log("Open dialog");
+            _this.gameListeners.fireDockedAtStation(station, false); // Not in progress (docking complete)
+        });
     };
     SceneContainer.prototype.makeTerrain = function () {
         //--- MAKE TERRAIN ---
@@ -372,6 +411,7 @@ var SceneContainer = /** @class */ (function () {
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
             _this.addNavpoint({
+                id: "gameasset-concretering",
                 position: loadedObject.position,
                 label: "OBJ Object",
                 detectionDistance: 0.0,
@@ -396,6 +436,7 @@ var SceneContainer = /** @class */ (function () {
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
             _this.addNavpoint({
+                id: "gameasset-concretewalls-dae",
                 position: loadedObject.position,
                 label: "Collada Object",
                 detectionDistance: 0.0,
@@ -407,43 +448,6 @@ var SceneContainer = /** @class */ (function () {
         };
         // TODO: use MediaStorage here
         new ColladaFileHandler_1.ColladaFileHandler(this).loadColladaFile(basePath, objFileName, { targetBounds: targetBounds, targetPosition: targetPosition }, callback);
-    };
-    SceneContainer.prototype.loadDockingStation = function (terrain) {
-        // At the same x-y position a the COLLADA object, just a bit above
-        var targetPosition = { x: -130.0, y: 0.0, z: -135.0 };
-        targetPosition.y = this.getGroundDepthAt(targetPosition.x, targetPosition.z, terrain);
-        // SphereGeometry(radius : Float, widthSegments : Integer, heightSegments : Integer, phiStart : Float, phiLength : Float, thetaStart : Float, thetaLength : Float)
-        var baseSphereGeom = new THREE.SphereGeometry(30.0, 20, 20);
-        baseSphereGeom.clearGroups();
-        baseSphereGeom.addGroup(0, Infinity, 0);
-        baseSphereGeom.addGroup(0, Infinity, 1);
-        var baseSphereTexture = new THREE.TextureLoader().load("resources/img/textures/rusty-metal-plate-darker.jpg");
-        baseSphereTexture.wrapS = THREE.RepeatWrapping;
-        baseSphereTexture.wrapT = THREE.RepeatWrapping;
-        baseSphereTexture.repeat.set(2, 1);
-        var baseShpereWindowTexture = new THREE.TextureLoader().load("resources/img/textures/windowfront.png");
-        baseShpereWindowTexture.wrapS = THREE.RepeatWrapping;
-        baseShpereWindowTexture.wrapT = THREE.RepeatWrapping;
-        baseShpereWindowTexture.repeat.set(8, 4);
-        var baseSphereMat = new THREE.MeshBasicMaterial({
-            map: baseSphereTexture
-        });
-        var baseSphereWindowMat = new THREE.MeshBasicMaterial({
-            map: baseShpereWindowTexture,
-            transparent: true
-        });
-        var baseSphereMesh = new THREE.Mesh(baseSphereGeom, [baseSphereMat, baseSphereWindowMat]);
-        baseSphereMesh.position.set(targetPosition.x, targetPosition.y + 70, targetPosition.z);
-        this.scene.add(baseSphereMesh);
-        this.addNavpoint({
-            position: { x: baseSphereMesh.position.x - 15, y: baseSphereMesh.position.y, z: baseSphereMesh.position.z - 15 },
-            label: "Dock at Lagerta Habitat",
-            detectionDistance: 25.0 / 2,
-            isDisabled: false,
-            type: "nav",
-            userData: { isCurrentlyInRange: false },
-            object3D: baseSphereMesh
-        }, true);
     };
     SceneContainer.prototype.loadFBXStruff = function (terrain) {
         var _this = this;
@@ -458,6 +462,7 @@ var SceneContainer = /** @class */ (function () {
             _this.addVisibleBoundingBox(loadedObject);
             _this.collidableMeshes.push(loadedObject);
             _this.addNavpoint({
+                id: "gameasset-concretewalls-fbx",
                 position: loadedObject.position,
                 label: "FBX Object",
                 detectionDistance: 0.0,
@@ -494,28 +499,35 @@ var SceneContainer = /** @class */ (function () {
         targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
         var targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
         targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
-        this.addBuoysAt([targetPositionA, targetPositionB])
-            .then(function (buoys) {
-            // console.log( String.fromCharCode(96 + index + 1) );
-            console.log("Buoys added, adding nav points:", buoys.length);
-            for (var i = 0; i < buoys.length; i++) {
-                console.log("adding bouoy at", i, buoys[i]);
-                _this.addNavpoint({
-                    position: buoys[i].position,
-                    label: "Nav " + (0, Helpers_1.numToChar)(i).toUpperCase(),
-                    detectionDistance: 25.0,
-                    isDisabled: i != 0,
-                    type: "nav",
-                    userData: { isCurrentlyInRange: false },
-                    object3D: buoys[i]
-                }, true);
-            }
-        })
-            .catch(function (error) {
-            console.error("[SceneContainer] Failed to add buoys.", error);
+        return new Promise(function (accept, reject) {
+            _this.addBuoysAt([targetPositionA, targetPositionB])
+                .then(function (buoys) {
+                // console.log( String.fromCharCode(96 + index + 1) );
+                console.log("Buoys added, adding nav points:", buoys.length);
+                for (var i = 0; i < buoys.length; i++) {
+                    console.log("adding bouoy at", i, buoys[i]);
+                    var nameCharacter = (0, Helpers_1.numToChar)(i);
+                    _this.addNavpoint({
+                        id: "navpoint-" + nameCharacter,
+                        position: buoys[i].position,
+                        label: "Nav " + nameCharacter.toUpperCase(),
+                        detectionDistance: 25.0,
+                        isDisabled: i != 0,
+                        type: "nav",
+                        userData: { isCurrentlyInRange: false },
+                        object3D: buoys[i]
+                    }, true);
+                }
+                accept();
+            })
+                .catch(function (error) {
+                console.error("[SceneContainer] Failed to add buoys.", error);
+                reject();
+            });
         });
     };
     SceneContainer.prototype.addNavpoint = function (navpoint, addToRoute) {
+        console.log("addNavpoint", navpoint.label, " Add to route", addToRoute);
         // Add to visible nav points
         this.navpoints.push(navpoint);
         this.gameLogicManager.navigationManager.addNavpoint(navpoint);
@@ -526,9 +538,6 @@ var SceneContainer = /** @class */ (function () {
         }
     };
     SceneContainer.prototype.addBuoysAt = function (targetPositions) {
-        // if (targetPositions.length === 0) {
-        //   return;
-        // }
         // Also load visual nav buoys
         var basePath = "resources/meshes/wavefront/buoy-blender/";
         var objFileName = "buoy-blender-v1.obj";
@@ -538,7 +547,7 @@ var SceneContainer = /** @class */ (function () {
         return new Promise(function (accept, reject) {
             MediaStorage_1.MediaStorage.getObjMesh(basePath, objFileName, targetBounds)
                 .then(function (loadedObject) {
-                console.log("HHHHHHHHHHHHHHHHHHH Loaded buoy mesh");
+                console.log("Loaded buoy mesh");
                 var buoys = [];
                 for (var i = 0; i < targetPositions.length; i++) {
                     var buoyCopy = loadedObject.clone();
@@ -553,53 +562,30 @@ var SceneContainer = /** @class */ (function () {
                 reject(e);
             });
         });
-        // const buoyObjectLoaded = (_loadedObject: THREE.Object3D) => {
-        //   console.log("Buoy mesh loaded");
-        //   // NOOP
-        //   // Wait until the 'materialsLoaded' callback is triggered; then the
-        //   // object is fully loaded.
-        // };
-        // return new Promise<THREE.Object3D[]>((accept, reject) => {
-        //   const buoyMaterialsLoaded = (loadedObject: THREE.Object3D | null) => {
-        //     console.log("Buoy material loaded");
-        //     // loadedObject.rotateX(-Math.PI / 2.0);
-        //     console.log("[Buoy material loaded] ", loadedObject as THREE.Mesh);
-        //     loadedObject.traverse((child: THREE.Object3D<THREE.Event>) => {
-        //       if ((child as THREE.Mesh).isMesh) {
-        //         // TODO: check type
-        //         const childMesh = child as THREE.Mesh;
-        //         console.log("addBuoyAt", child);
-        //         if (Array.isArray(childMesh.material)) {
-        //           childMesh.material.forEach(mat => {
-        //             mat.side = THREE.BackSide;
-        //             mat.needsUpdate = true;
-        //           });
-        //         } else {
-        //           childMesh.material.side = THREE.BackSide;
-        //           childMesh.material.needsUpdate = true;
-        //         }
-        //       }
-        //       // Clone.
-        //     });
-        //     console.log("Creating buoy clones ...", targetPositions.length);
-        //     const buoys: Array<THREE.Object3D> = [];
-        //     for (var i = 0; i < targetPositions.length; i++) {
-        //       const buoyCopy = loadedObject.clone();
-        //       buoyCopy.position.set(targetPositions[i].x, targetPositions[i].y, targetPositions[i].z);
-        //       this.scene.add(buoyCopy);
-        //       buoys.push(buoyCopy);
-        //     }
-        //     accept(buoys);
-        //   };
-        //   new ObjFileHandler(this).loadObjFile(
-        //     basePath,
-        //     objFileName,
-        //     { targetBounds, targetPosition: targetPositions[0] },
-        //     buoyObjectLoaded,
-        //     buoyMaterialsLoaded,
-        //     reject
-        //   );
-        // });
+    };
+    SceneContainer.prototype.addBuoyAt = function (targetPosition) {
+        // Load visual nav buoy
+        var basePath = "resources/meshes/wavefront/buoy-blender/";
+        var objFileName = "buoy-blender-v1.obj";
+        var targetBounds = { width: 1.2, depth: 1.2, height: 1.5 };
+        // return MediaStorage.getObjMesh(basePath, objFileName, targetBounds);
+        var _self = this;
+        return new Promise(function (accept, reject) {
+            MediaStorage_1.MediaStorage.getObjMesh(basePath, objFileName, targetBounds)
+                .then(function (loadedObject) {
+                console.log("Loaded buoy mesh");
+                var buoys = [];
+                var buoyCopy = loadedObject.clone();
+                buoyCopy.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+                _self.scene.add(buoyCopy);
+                buoys.push(buoyCopy);
+                accept(buoyCopy);
+            })
+                .catch(function (e) {
+                console.log("Error loading buoys", e);
+                reject(e);
+            });
+        });
     };
     SceneContainer.prototype.addGeometer = function (terrain) {
         var geometerCoords = { x: -80.0, z: -40.0 };

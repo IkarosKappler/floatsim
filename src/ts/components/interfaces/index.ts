@@ -20,6 +20,7 @@ export interface HUDData {
   isThermometerDamaged: boolean;
   batteryCharge: number;
   isBatteryDamaged: boolean;
+  isDockingPossible: boolean;
 }
 
 export interface Tuple<T> {
@@ -138,6 +139,7 @@ export interface TextureData {
 export type NavPointType = "default" | "nav";
 
 export interface Navpoint {
+  id: string;
   position: Triple<number>;
   label: string;
   detectionDistance: number;
@@ -145,6 +147,8 @@ export interface Navpoint {
   type: NavPointType;
   userData: { isCurrentlyInRange: boolean };
   object3D: THREE.Object3D; // Required to properly render the 2D position
+  onEnter?: (navPoint: Navpoint) => void;
+  onLeave?: (navPoint: Navpoint) => void;
 }
 
 export interface ISceneContainer {
@@ -174,6 +178,13 @@ export interface NavigationEventListener {
 export type GameRunningListener = (isRunning: boolean, isPaused: boolean) => void;
 
 export type GameReadyListener = () => void;
+
+export type DockedAtStationListener = (station: StationData, dockingInProgress: boolean) => void;
+
+export interface StationData {
+  id: string;
+  name: string;
+}
 
 export interface IGlobalLibs {
   axios: typeof axios;
