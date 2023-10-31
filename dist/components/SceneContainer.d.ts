@@ -40,7 +40,7 @@ export declare class SceneContainer implements ISceneContainer {
     private isGameRunning;
     private isGamePaused;
     private initializationPromise;
-    cube: THREE.Mesh;
+    private targetPositionA;
     constructor(params: Params);
     initializGame(): Promise<void>;
     startGame(): void;

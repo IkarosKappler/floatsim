@@ -102,7 +102,8 @@ globalThis.addEventListener("load", () => {
   pane.addInput(sceneContainer.hudData, "isBatteryDamaged");
   pane.addInput(sceneContainer.hudData, "isThermometerDamaged");
   pane.addInput(sceneContainer.hudData, "isDockingPossible");
-
+  pane.addInput(sceneContainer.hudData, "isRadiationDanger");
+  pane.addInput(sceneContainer.hudData, "isCorrosionDanger");
   pane.expanded = false;
 
   const keyHandler = new KeyHandler({ element: document.body, trackAll: false });

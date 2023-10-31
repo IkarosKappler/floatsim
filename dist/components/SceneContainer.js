@@ -51,10 +51,13 @@ var Helpers_1 = require("../utils/Helpers");
 var MediaStorage_1 = require("../io/MediaStorage");
 var Chatper00_1 = require("../gamelogic/chapters/Chatper00");
 var SceneContainer = /** @class */ (function () {
+    // Example cube
+    // cube: THREE.Mesh;
     function SceneContainer(params) {
         var _this = this;
         this.isGameRunning = false;
         this.isGamePaused = false;
+        this.targetPositionA = null;
         this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         this.collidableMeshes = [];
@@ -88,7 +91,7 @@ var SceneContainer = /** @class */ (function () {
             maxShipUpAngle: Math.PI * 0.25,
             minShipUpAngle: -Math.PI * 0.25,
             cameraFov: 30,
-            fogDensity: 0.0021
+            fogDensity: 0.005
         };
         // Initialize a new THREE renderer (you are also allowed
         // to pass an existing canvas for rendering).
@@ -106,7 +109,8 @@ var SceneContainer = /** @class */ (function () {
         this.camera = new THREE.PerspectiveCamera(this.tweakParams.cameraFov, window.innerWidth / window.innerHeight, 1, 10000);
         this.fogHandler = new FogHandler_1.FogHandler(this);
         this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
-        this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
+        fogDensity: 0.006;
+        this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), this.tweakParams.fogDensity); // 0.0021);
         // ... and append it to the DOM
         document.body.appendChild(this.renderer.domElement);
         // Create a geometry conaining the logical 3D information (here: a cube)
@@ -114,10 +118,11 @@ var SceneContainer = /** @class */ (function () {
         // Pick a material, something like MeshBasicMaterial, PhongMaterial,
         var cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
         // Create the cube from the geometry and the material ...
-        this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
+        // this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        // this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
+        var initialLookatPosition = new THREE.Vector3(12, 12 + this.sceneData.initialDepth, 12);
         // ... and add it to your scene.
-        this.scene.add(this.cube);
+        // this.scene.add(this.cube);
         // Add some light
         var pointLight = new THREE.PointLight(0xffffff);
         // var pointLight = new THREE.AmbientLight(0xffffff);
@@ -141,21 +146,25 @@ var SceneContainer = /** @class */ (function () {
         directionalLight.shadow.mapSize.y = 1024 * 2;
         this.scene.add(directionalLight);
         // Add grid helper
-        var gridHelper = new THREE.GridHelper(90, 9, 0xff0000, 0xe8e8e8);
-        gridHelper.position.y += this.sceneData.initialDepth;
-        this.scene.add(gridHelper);
+        // var gridHelper = new THREE.GridHelper(90, 9, 0xff0000, 0xe8e8e8);
+        // gridHelper.position.y += this.sceneData.initialDepth;
+        // this.scene.add(gridHelper);
         // Add an axes helper
-        var ah = new THREE.AxesHelper(50);
-        ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
-        ah.position.y += this.sceneData.initialDepth;
-        this.scene.add(ah);
+        // var ah = new THREE.AxesHelper(50);
+        // ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
+        // ah.position.y += this.sceneData.initialDepth;
+        // this.scene.add(ah);
+        var terrain = this.makeTerrain();
+        this.terrainSegments.push(terrain);
         // Set the camera position
-        this.camera.position.set(75, 75 + this.sceneData.initialDepth, 75);
+        this.camera.position.set(275, 75 + this.sceneData.initialDepth, 275);
         // And look at the cube again
-        this.camera.lookAt(this.cube.position);
+        // this.camera.lookAt(this.cube.position);
+        // this.camera.lookAt(initialLookatPosition;
+        this.targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
+        this.targetPositionA.y = this.getGroundDepthAt(this.targetPositionA.x, this.targetPositionA.z, terrain) + 25.0;
+        this.camera.lookAt(this.targetPositionA);
         // Add cockpit
-        // this.cockpit = new CockpitPlane();
-        // this.camera.add(this.cockpit.mesh);
         this.cockpitScene = new CockpitScene_1.CockpitScene(this, this.renderer.domElement.width, this.renderer.domElement.height);
         var hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
         var hudWarningColor = new THREE.Color(params.getString("hudWarningColor", "#c88800"));
@@ -188,10 +197,10 @@ var SceneContainer = /** @class */ (function () {
             isThermometerDamaged: false,
             batteryCharge: params.getNumber("batteryCharge", 0.75),
             isBatteryDamaged: params.getBoolean("isBatteryDamaged", false),
-            isDockingPossible: false
+            isDockingPossible: false,
+            isRadiationDanger: params.getBoolean("isRadiationDanger", false),
+            isCorrosionDanger: params.getBoolean("isCorrosionDanger", false)
         };
-        var terrain = this.makeTerrain();
-        this.terrainSegments.push(terrain);
         // TODO: terrain.bounds is always at (0,0,0), the initialDepth is ignored!
         console.log("Terrain Bounds", terrain.bounds);
         var updateables = [];
@@ -232,8 +241,8 @@ var SceneContainer = /** @class */ (function () {
                 terrain.causticShaderMaterial.update(elapsedTime, _this.scene.fog.color);
                 if (_this.isGameRunning) {
                     // Let's animate the cube: a rotation.
-                    _this.cube.rotation.x += 0.05;
-                    _this.cube.rotation.y += 0.04;
+                    // this.cube.rotation.x += 0.05;
+                    // this.cube.rotation.y += 0.04;
                     // Check each second.
                     if (elapsedTime - discreteDetectionTime > 1) {
                         _self.gameLogicManager.update(elapsedTime, discreteDetectionTime);
@@ -248,7 +257,9 @@ var SceneContainer = /** @class */ (function () {
         this.gameLogicManager = new GameLogicManager_1.GameLogicManager(this);
         this.messageBox = new MessageBox_1.MessageBox();
         this.loadConcrete(terrain);
-        this.addGroundBuoys(terrain);
+        if (params.getBoolean("addGroundBuoys", false)) {
+            this.addGroundBuoys(terrain);
+        }
         this.addNavpoints(terrain).finally(function () {
             // this.loadDockingStation(terrain);
             new Chatper00_1.Chapter00(_this, terrain);
@@ -494,13 +505,13 @@ var SceneContainer = /** @class */ (function () {
         }
     };
     SceneContainer.prototype.addNavpoints = function (terrain) {
+        // const targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
+        // targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
         var _this = this;
-        var targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
-        targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
         var targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
         targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
         return new Promise(function (accept, reject) {
-            _this.addBuoysAt([targetPositionA, targetPositionB])
+            _this.addBuoysAt([_this.targetPositionA, targetPositionB])
                 .then(function (buoys) {
                 // console.log( String.fromCharCode(96 + index + 1) );
                 console.log("Buoys added, adding nav points:", buoys.length);

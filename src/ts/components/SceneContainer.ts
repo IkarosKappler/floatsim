@@ -73,8 +73,10 @@ export class SceneContainer implements ISceneContainer {
 
   private initializationPromise: Promise<void[]>;
 
+  private targetPositionA: THREE.Vector3 | null = null;
+
   // Example cube
-  cube: THREE.Mesh;
+  // cube: THREE.Mesh;
 
   constructor(params: Params) {
     this.clock = new THREE.Clock();
@@ -112,7 +114,7 @@ export class SceneContainer implements ISceneContainer {
       maxShipUpAngle: Math.PI * 0.25, // 45 degree
       minShipUpAngle: -Math.PI * 0.25, // -45 degree
       cameraFov: 30,
-      fogDensity: 0.0021
+      fogDensity: 0.005
     };
 
     // Initialize a new THREE renderer (you are also allowed
@@ -133,7 +135,8 @@ export class SceneContainer implements ISceneContainer {
 
     this.fogHandler = new FogHandler(this);
     this.scene.background = new THREE.Color(this.fogHandler.fogNormalColor);
-    this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), 0.0021);
+    fogDensity: 0.006;
+    this.scene.fog = new THREE.FogExp2(this.fogHandler.fogNormalColor.getHex(), this.tweakParams.fogDensity); // 0.0021);
 
     // ... and append it to the DOM
     document.body.appendChild(this.renderer.domElement);
@@ -145,11 +148,12 @@ export class SceneContainer implements ISceneContainer {
     var cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
     // Create the cube from the geometry and the material ...
-    this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
+    // this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    // this.cube.position.set(12, 12 + this.sceneData.initialDepth, 12);
+    const initialLookatPosition = new THREE.Vector3(12, 12 + this.sceneData.initialDepth, 12);
 
     // ... and add it to your scene.
-    this.scene.add(this.cube);
+    // this.scene.add(this.cube);
 
     // Add some light
     var pointLight = new THREE.PointLight(0xffffff);
@@ -178,25 +182,29 @@ export class SceneContainer implements ISceneContainer {
     this.scene.add(directionalLight);
 
     // Add grid helper
-    var gridHelper = new THREE.GridHelper(90, 9, 0xff0000, 0xe8e8e8);
-    gridHelper.position.y += this.sceneData.initialDepth;
-    this.scene.add(gridHelper);
+    // var gridHelper = new THREE.GridHelper(90, 9, 0xff0000, 0xe8e8e8);
+    // gridHelper.position.y += this.sceneData.initialDepth;
+    // this.scene.add(gridHelper);
 
     // Add an axes helper
-    var ah = new THREE.AxesHelper(50);
-    ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
-    ah.position.y += this.sceneData.initialDepth;
-    this.scene.add(ah);
+    // var ah = new THREE.AxesHelper(50);
+    // ah.position.y -= 0.1; // The axis helper should not intefere with the grid helper
+    // ah.position.y += this.sceneData.initialDepth;
+    // this.scene.add(ah);
+
+    const terrain = this.makeTerrain();
+    this.terrainSegments.push(terrain);
 
     // Set the camera position
-    this.camera.position.set(75, 75 + this.sceneData.initialDepth, 75);
+    this.camera.position.set(275, 75 + this.sceneData.initialDepth, 275);
     // And look at the cube again
-    this.camera.lookAt(this.cube.position);
+    // this.camera.lookAt(this.cube.position);
+    // this.camera.lookAt(initialLookatPosition;
+    this.targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
+    this.targetPositionA.y = this.getGroundDepthAt(this.targetPositionA.x, this.targetPositionA.z, terrain) + 25.0;
+    this.camera.lookAt(this.targetPositionA);
 
     // Add cockpit
-    // this.cockpit = new CockpitPlane();
-    // this.camera.add(this.cockpit.mesh);
-
     this.cockpitScene = new CockpitScene(this, this.renderer.domElement.width, this.renderer.domElement.height);
 
     const hudPrimaryColor = new THREE.Color(params.getString("hudColor", "#00c868"));
@@ -243,11 +251,10 @@ export class SceneContainer implements ISceneContainer {
       isThermometerDamaged: false,
       batteryCharge: params.getNumber("batteryCharge", 0.75),
       isBatteryDamaged: params.getBoolean("isBatteryDamaged", false),
-      isDockingPossible: false
+      isDockingPossible: false,
+      isRadiationDanger: params.getBoolean("isRadiationDanger", false),
+      isCorrosionDanger: params.getBoolean("isCorrosionDanger", false)
     };
-
-    const terrain = this.makeTerrain();
-    this.terrainSegments.push(terrain);
 
     // TODO: terrain.bounds is always at (0,0,0), the initialDepth is ignored!
     console.log("Terrain Bounds", terrain.bounds);
@@ -300,8 +307,8 @@ export class SceneContainer implements ISceneContainer {
 
         if (this.isGameRunning) {
           // Let's animate the cube: a rotation.
-          this.cube.rotation.x += 0.05;
-          this.cube.rotation.y += 0.04;
+          // this.cube.rotation.x += 0.05;
+          // this.cube.rotation.y += 0.04;
 
           // Check each second.
           if (elapsedTime - discreteDetectionTime > 1) {
@@ -321,7 +328,9 @@ export class SceneContainer implements ISceneContainer {
     this.messageBox = new MessageBox();
 
     this.loadConcrete(terrain);
-    this.addGroundBuoys(terrain);
+    if (params.getBoolean("addGroundBuoys", false)) {
+      this.addGroundBuoys(terrain);
+    }
     this.addNavpoints(terrain).finally(() => {
       // this.loadDockingStation(terrain);
       new Chapter00(this, terrain);
@@ -609,14 +618,14 @@ export class SceneContainer implements ISceneContainer {
   }
 
   addNavpoints(terrain: PerlinTerrain): Promise<void> {
-    const targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
-    targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
+    // const targetPositionA = new THREE.Vector3(terrain.worldSize.width / 2.0 - 160.0, 0.0, terrain.worldSize.depth / 2.0 - 20.0);
+    // targetPositionA.y = this.getGroundDepthAt(targetPositionA.x, targetPositionA.z, terrain) + 25.0;
 
     const targetPositionB = new THREE.Vector3(terrain.worldSize.width / 2.0 - 20.0, 0.0, terrain.worldSize.depth / 2.0 - 160.0);
     targetPositionB.y = this.getGroundDepthAt(targetPositionB.x, targetPositionB.z, terrain) + 25.0;
 
     return new Promise<void>((accept, reject) => {
-      this.addBuoysAt([targetPositionA, targetPositionB])
+      this.addBuoysAt([this.targetPositionA, targetPositionB])
         .then((buoys: Array<THREE.Object3D>) => {
           // console.log( String.fromCharCode(96 + index + 1) );
           console.log("Buoys added, adding nav points:", buoys.length);

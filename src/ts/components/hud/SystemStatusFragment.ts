@@ -34,11 +34,16 @@ export class SystemStatusFragment implements RenderableComponent {
   private thermometerStateTextures: HTMLImageElement[];
   private thermometerErrorTexture: HTMLImageElement;
   private dockingIconTexture: HTMLImageElement;
+  private radiationTexture: HTMLImageElement;
+  private corrosionTexture: HTMLImageElement;
+
   private static ASSET_PATH_BATTERY_ERROR: string = "resources/img/icons/battery/battery-error.png";
   private static ASSET_SIZE_BATTERY = new Bounds2Immutable({ x: 0, y: 0, width: 620, height: 620 });
   private static ASSET_RATIO = SystemStatusFragment.ASSET_SIZE_BATTERY.width / SystemStatusFragment.ASSET_SIZE_BATTERY.height;
   private static ASSET_PATH_THERMOMETER_ERROR = "resources/img/icons/thermometer/thermometer-error.png";
   private static ASSET_PATH_DOCKING_ICON: string = "resources/img/icons/docking/docking-base.png";
+  private static ASSET_PATH_RADIATION = "resources/img/icons/radiation/radiation-base.png";
+  private static ASSET_PATH_CORROSIVE = "resources/img/icons/corrosive/corrosive-base.png";
 
   constructor(hudComponent: HudComponent) {
     this.hudComponent = hudComponent;
@@ -51,8 +56,18 @@ export class SystemStatusFragment implements RenderableComponent {
     this.thermometerStateTextures = SystemStatusFragment.ASSET_PATHS_THERMOMETER_STATES.map((texturePath: string) => {
       return imageLoader.load(texturePath);
     });
-    this.thermometerErrorTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR);
-    this.dockingIconTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_DOCKING_ICON);
+    imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR, (loadedImage: HTMLImageElement) => {
+      this.thermometerErrorTexture = loadedImage;
+    });
+    imageLoader.load(SystemStatusFragment.ASSET_PATH_DOCKING_ICON, (loadedImage: HTMLImageElement) => {
+      this.dockingIconTexture = loadedImage;
+    });
+    imageLoader.load(SystemStatusFragment.ASSET_PATH_RADIATION, (loadedImage: HTMLImageElement) => {
+      this.radiationTexture = loadedImage;
+    });
+    imageLoader.load(SystemStatusFragment.ASSET_PATH_CORROSIVE, (loadedImage: HTMLImageElement) => {
+      this.corrosionTexture = loadedImage;
+    });
     this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
   }
 
@@ -85,6 +100,10 @@ export class SystemStatusFragment implements RenderableComponent {
     if (data.isDockingPossible) {
       this.drawDockingIndicator(iconWidth, tweakParams);
     }
+
+    this.drawRadiationIcon(_sceneContainer, data, iconWidth, tweakParams);
+    this.drawCorrosionIcon(_sceneContainer, data, iconWidth, tweakParams);
+
     this.hudComponent.hudBitmap.restore();
   }
 
@@ -134,7 +153,35 @@ export class SystemStatusFragment implements RenderableComponent {
     this.drawIcon(this.dockingIconTexture, iconWidth, 2 * iconWidth, undefined);
   }
 
+  private drawRadiationIcon(_sceneContainer: ISceneContainer, data: HUDData, iconWidth: number, tweakParams: TweakParams) {
+    // Draw temperature texture with primary color (source-atop)
+    // Draw image inside fragment height, keep ratio
+    if (data.isRadiationDanger) {
+      const isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
+      if (isBlinkingVisible) {
+        this.drawIcon(this.radiationTexture, iconWidth, iconWidth * 3, undefined);
+      }
+    }
+    this.hudComponent.hudBitmap.restore();
+  }
+
+  private drawCorrosionIcon(_sceneContainer: ISceneContainer, data: HUDData, iconWidth: number, tweakParams: TweakParams) {
+    // Draw temperature texture with primary color (source-atop)
+    // Draw image inside fragment height, keep ratio
+    if (data.isCorrosionDanger) {
+      const isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
+      if (isBlinkingVisible) {
+        this.drawIcon(this.corrosionTexture, iconWidth, iconWidth * 4, undefined);
+      }
+    }
+    this.hudComponent.hudBitmap.restore();
+  }
+
   private drawIcon(texture: HTMLImageElement, width: number, offsetX: number, color?: string) {
+    if (texture == null || !texture.complete) {
+      console.warn("[SystemStatusFragment] Cannot draw icon. It's not loaded yet.");
+      return;
+    }
     this.hudComponent.hudBitmap.save();
     this.hudComponent.hudBitmap.drawImage(
       texture,

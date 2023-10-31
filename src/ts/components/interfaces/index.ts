@@ -21,6 +21,8 @@ export interface HUDData {
   batteryCharge: number;
   isBatteryDamaged: boolean;
   isDockingPossible: boolean;
+  isRadiationDanger: boolean;
+  isCorrosionDanger: boolean;
 }
 
 export interface Tuple<T> {

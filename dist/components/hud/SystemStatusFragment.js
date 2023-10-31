@@ -28,6 +28,7 @@ var THREE = __importStar(require("three"));
 var Helpers_1 = require("../../utils/Helpers");
 var SystemStatusFragment = /** @class */ (function () {
     function SystemStatusFragment(hudComponent) {
+        var _this = this;
         this.hudComponent = hudComponent;
         var imageLoader = new THREE.ImageLoader();
         this.batteryChargesTextures = SystemStatusFragment.ASSET_PATHS_BATTERY_CHARGES.map(function (texturePath) {
@@ -37,8 +38,18 @@ var SystemStatusFragment = /** @class */ (function () {
         this.thermometerStateTextures = SystemStatusFragment.ASSET_PATHS_THERMOMETER_STATES.map(function (texturePath) {
             return imageLoader.load(texturePath);
         });
-        this.thermometerErrorTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR);
-        this.dockingIconTexture = imageLoader.load(SystemStatusFragment.ASSET_PATH_DOCKING_ICON);
+        imageLoader.load(SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR, function (loadedImage) {
+            _this.thermometerErrorTexture = loadedImage;
+        });
+        imageLoader.load(SystemStatusFragment.ASSET_PATH_DOCKING_ICON, function (loadedImage) {
+            _this.dockingIconTexture = loadedImage;
+        });
+        imageLoader.load(SystemStatusFragment.ASSET_PATH_RADIATION, function (loadedImage) {
+            _this.radiationTexture = loadedImage;
+        });
+        imageLoader.load(SystemStatusFragment.ASSET_PATH_CORROSIVE, function (loadedImage) {
+            _this.corrosionTexture = loadedImage;
+        });
         this.updateSize(this.hudComponent.hudCanvas.width, this.hudComponent.hudCanvas.height);
     }
     /**
@@ -61,6 +72,8 @@ var SystemStatusFragment = /** @class */ (function () {
         if (data.isDockingPossible) {
             this.drawDockingIndicator(iconWidth, tweakParams);
         }
+        this.drawRadiationIcon(_sceneContainer, data, iconWidth, tweakParams);
+        this.drawCorrosionIcon(_sceneContainer, data, iconWidth, tweakParams);
         this.hudComponent.hudBitmap.restore();
     };
     SystemStatusFragment.prototype.drawBatteryIcon = function (_sceneContainer, data, iconWidth) {
@@ -101,7 +114,33 @@ var SystemStatusFragment = /** @class */ (function () {
     SystemStatusFragment.prototype.drawDockingIndicator = function (iconWidth, tweakParams) {
         this.drawIcon(this.dockingIconTexture, iconWidth, 2 * iconWidth, undefined);
     };
+    SystemStatusFragment.prototype.drawRadiationIcon = function (_sceneContainer, data, iconWidth, tweakParams) {
+        // Draw temperature texture with primary color (source-atop)
+        // Draw image inside fragment height, keep ratio
+        if (data.isRadiationDanger) {
+            var isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
+            if (isBlinkingVisible) {
+                this.drawIcon(this.radiationTexture, iconWidth, iconWidth * 3, undefined);
+            }
+        }
+        this.hudComponent.hudBitmap.restore();
+    };
+    SystemStatusFragment.prototype.drawCorrosionIcon = function (_sceneContainer, data, iconWidth, tweakParams) {
+        // Draw temperature texture with primary color (source-atop)
+        // Draw image inside fragment height, keep ratio
+        if (data.isCorrosionDanger) {
+            var isBlinkingVisible = Math.round(_sceneContainer.clock.getElapsedTime() / 2.0) % 2 === 0;
+            if (isBlinkingVisible) {
+                this.drawIcon(this.corrosionTexture, iconWidth, iconWidth * 4, undefined);
+            }
+        }
+        this.hudComponent.hudBitmap.restore();
+    };
     SystemStatusFragment.prototype.drawIcon = function (texture, width, offsetX, color) {
+        if (texture == null || !texture.complete) {
+            console.warn("[SystemStatusFragment] Cannot draw icon. It's not loaded yet.");
+            return;
+        }
         this.hudComponent.hudBitmap.save();
         this.hudComponent.hudBitmap.drawImage(texture, this.currentFragmentBounds.min.x + offsetX, this.currentFragmentBounds.min.y, width, this.currentFragmentBounds.height);
         // Draw icon in the desired color
@@ -161,6 +200,8 @@ var SystemStatusFragment = /** @class */ (function () {
     SystemStatusFragment.ASSET_RATIO = SystemStatusFragment.ASSET_SIZE_BATTERY.width / SystemStatusFragment.ASSET_SIZE_BATTERY.height;
     SystemStatusFragment.ASSET_PATH_THERMOMETER_ERROR = "resources/img/icons/thermometer/thermometer-error.png";
     SystemStatusFragment.ASSET_PATH_DOCKING_ICON = "resources/img/icons/docking/docking-base.png";
+    SystemStatusFragment.ASSET_PATH_RADIATION = "resources/img/icons/radiation/radiation-base.png";
+    SystemStatusFragment.ASSET_PATH_CORROSIVE = "resources/img/icons/corrosive/corrosive-base.png";
     return SystemStatusFragment;
 }());
 exports.SystemStatusFragment = SystemStatusFragment;

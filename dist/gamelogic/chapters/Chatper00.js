@@ -34,7 +34,7 @@ var Chapter00 = /** @class */ (function () {
         baseSphereTexture.wrapS = three_1.default.RepeatWrapping;
         baseSphereTexture.wrapT = three_1.default.RepeatWrapping;
         baseSphereTexture.repeat.set(2, 1);
-        var baseShpereWindowTexture = new three_1.default.TextureLoader().load("resources/img/textures/windowfront.png");
+        var baseShpereWindowTexture = new three_1.default.TextureLoader().load("resources/img/textures/windowfront-blurred.png");
         baseShpereWindowTexture.wrapS = three_1.default.RepeatWrapping;
         baseShpereWindowTexture.wrapT = three_1.default.RepeatWrapping;
         baseShpereWindowTexture.repeat.set(8, 4);
@@ -48,6 +48,32 @@ var Chapter00 = /** @class */ (function () {
         var baseSphereMesh = new three_1.default.Mesh(baseSphereGeom, [baseSphereMat, baseSphereWindowMat]);
         baseSphereMesh.position.set(this.anningPosition.x, this.anningPosition.y, this.anningPosition.z);
         this.sceneContainer.scene.add(baseSphereMesh);
+        // this.sceneContainer.renderer.outputEncoding = THREE.sRGBEncoding;
+        // this.sceneContainer.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        // // ...
+        // const target = new THREE.WebGLRenderTarget(
+        //   this.sceneContainer.renderer.domElement.width,
+        //   this.sceneContainer.renderer.domElement.height,
+        //   {
+        //     type: THREE.HalfFloatType,
+        //     format: THREE.RGBAFormat,
+        //     encoding: THREE.sRGBEncoding
+        //   }
+        // );
+        // target.samples = 8;
+        // const composer = new EffectComposer(renderer, target);
+        // composer.addPass(new RenderPass(scene, camera));
+        // // Threshold is 1, nothing will glow by default
+        // composer.addPass(new UnrealBloomPass(undefined, 1, 1, 1));
+        // This mesh will glow
+        // const mesh = new THREE.Mesh(
+        //   geometry,
+        //   new THREE.MeshStandardMaterial({
+        //     toneMapped: false,
+        //     emissive: "red",
+        //     emissiveIntensity: 10
+        //   })
+        // );
         this.sceneContainer.addNavpoint({
             id: "anning-anchorage",
             position: { x: baseSphereMesh.position.x + 80, y: baseSphereMesh.position.y - 30, z: baseSphereMesh.position.z + 80 },

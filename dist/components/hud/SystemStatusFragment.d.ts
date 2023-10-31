@@ -11,11 +11,15 @@ export declare class SystemStatusFragment implements RenderableComponent {
     private thermometerStateTextures;
     private thermometerErrorTexture;
     private dockingIconTexture;
+    private radiationTexture;
+    private corrosionTexture;
     private static ASSET_PATH_BATTERY_ERROR;
     private static ASSET_SIZE_BATTERY;
     private static ASSET_RATIO;
     private static ASSET_PATH_THERMOMETER_ERROR;
     private static ASSET_PATH_DOCKING_ICON;
+    private static ASSET_PATH_RADIATION;
+    private static ASSET_PATH_CORROSIVE;
     constructor(hudComponent: HudComponent);
     /**
      * @implement RenderableComponent.befoRerender
@@ -24,6 +28,8 @@ export declare class SystemStatusFragment implements RenderableComponent {
     private drawBatteryIcon;
     private drawThemometerIcon;
     drawDockingIndicator(iconWidth: number, tweakParams: TweakParams): void;
+    private drawRadiationIcon;
+    private drawCorrosionIcon;
     private drawIcon;
     private drawText;
     /**

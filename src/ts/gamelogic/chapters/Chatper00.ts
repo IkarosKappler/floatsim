@@ -38,7 +38,7 @@ export class Chapter00 {
     baseSphereTexture.wrapS = THREE.RepeatWrapping;
     baseSphereTexture.wrapT = THREE.RepeatWrapping;
     baseSphereTexture.repeat.set(2, 1);
-    const baseShpereWindowTexture = new THREE.TextureLoader().load("resources/img/textures/windowfront.png");
+    const baseShpereWindowTexture = new THREE.TextureLoader().load("resources/img/textures/windowfront-blurred.png");
     baseShpereWindowTexture.wrapS = THREE.RepeatWrapping;
     baseShpereWindowTexture.wrapT = THREE.RepeatWrapping;
     baseShpereWindowTexture.repeat.set(8, 4);
@@ -52,6 +52,34 @@ export class Chapter00 {
     const baseSphereMesh = new THREE.Mesh(baseSphereGeom, [baseSphereMat, baseSphereWindowMat]);
     baseSphereMesh.position.set(this.anningPosition.x, this.anningPosition.y, this.anningPosition.z);
     this.sceneContainer.scene.add(baseSphereMesh);
+
+    // this.sceneContainer.renderer.outputEncoding = THREE.sRGBEncoding;
+    // this.sceneContainer.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // // ...
+    // const target = new THREE.WebGLRenderTarget(
+    //   this.sceneContainer.renderer.domElement.width,
+    //   this.sceneContainer.renderer.domElement.height,
+    //   {
+    //     type: THREE.HalfFloatType,
+    //     format: THREE.RGBAFormat,
+    //     encoding: THREE.sRGBEncoding
+    //   }
+    // );
+    // target.samples = 8;
+    // const composer = new EffectComposer(renderer, target);
+    // composer.addPass(new RenderPass(scene, camera));
+    // // Threshold is 1, nothing will glow by default
+    // composer.addPass(new UnrealBloomPass(undefined, 1, 1, 1));
+
+    // This mesh will glow
+    // const mesh = new THREE.Mesh(
+    //   geometry,
+    //   new THREE.MeshStandardMaterial({
+    //     toneMapped: false,
+    //     emissive: "red",
+    //     emissiveIntensity: 10
+    //   })
+    // );
 
     this.sceneContainer.addNavpoint(
       {
